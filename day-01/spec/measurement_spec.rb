@@ -1,7 +1,8 @@
 require "./depth_scanner"
 
 RSpec.describe 'Depth Measurement' do
-  subject { DepthScanner.new(data) }
+  subject { DepthScanner.new(data, strategy: strategy) }
+  let(:strategy) { SimpleDepthScanner.new }
 
   context 'with no data' do
     let(:data) { [] }
@@ -9,7 +10,6 @@ RSpec.describe 'Depth Measurement' do
     it "reports the correct number of depth increases" do
       expect(subject.increases).to eq(0)
     end
-
   end
 
   context 'with the sample data' do
@@ -30,6 +30,14 @@ RSpec.describe 'Depth Measurement' do
 
     it "reports the correct number of depth increases" do
       expect(subject.increases).to eq(7)
+    end
+
+    context 'with a sliding_window scanner' do
+      let(:strategy) { SlidingWindowScanner.new(3) }
+
+      it "reports the correct number of depth increases" do
+        expect(subject.increases).to eq(5)
+      end
     end
   end
 
