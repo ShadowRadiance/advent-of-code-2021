@@ -30,10 +30,12 @@ RSpec.describe 'Submarine' do
     }
 
     it "reports the correct location" do
+      # expect(subject.x_pos).to eq(15)
       expect(subject.x_pos).to eq(15)
     end
     it "reports the correct depth" do
-      expect(subject.depth).to eq(10)
+      # expect(subject.depth).to eq(10)
+      expect(subject.depth).to eq(60)
     end
   end
 end
