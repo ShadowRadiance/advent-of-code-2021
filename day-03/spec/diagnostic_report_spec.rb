@@ -11,8 +11,17 @@ RSpec.describe 'Diagnostic Report' do
     it "reports the correct gamma rate" do
       expect(subject.gamma_rate).to eq(0)
     end
+
     it "reports the correct epsilon rate" do
       expect(subject.epsilon_rate).to eq(0)
+    end
+
+    it "reports the correct oxygen generator rating" do
+      expect(subject.oxygen_generator_rating).to eq(0)
+    end
+
+    it "reports the correct co2 scrubber rating" do
+      expect(subject.co2_scrubber_rating).to eq(0)
     end
   end
 
@@ -37,8 +46,17 @@ RSpec.describe 'Diagnostic Report' do
     it "reports the correct gamma rate" do
       expect(subject.gamma_rate).to eq(22)
     end
+
     it "reports the correct epsilon rate" do
       expect(subject.epsilon_rate).to eq(9)
+    end
+
+    it "reports the correct oxygen generator rating" do
+      expect(subject.oxygen_generator_rating).to eq(23)
+    end
+
+    it "reports the correct co2 scrubber rating" do
+      expect(subject.co2_scrubber_rating).to eq(10)
     end
   end
 end
