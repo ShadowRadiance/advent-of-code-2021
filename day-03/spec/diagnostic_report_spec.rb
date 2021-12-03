@@ -6,7 +6,7 @@ RSpec.describe 'Diagnostic Report' do
   end
 
   context 'with no data' do
-    let(:data) { "" }
+    let(:data) { [] }
 
     it "reports the correct gamma rate" do
       expect(subject.gamma_rate).to eq(0)

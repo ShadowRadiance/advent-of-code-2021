@@ -2,84 +2,61 @@ class DiagnosticReport
   attr_reader :data
   def initialize(data)
     @data = data
+    @word_length = data&.first&.split(//)&.length || 0
   end
 
   def gamma_rate
-    return 0 if counts.empty?
-    counts.map { |count| count.common.to_s }.join.to_i(2)
+    rate_map(:most_common)
   end
   
   def epsilon_rate
-    return 0 if counts.empty?
-    counts.map { |count| count.uncommon.to_s }.join.to_i(2)
+    rate_map(:least_common)
   end
 
   def oxygen_generator_rating
-    return 0 if counts.empty?
-    
-    filter(:common, 1)
+    filter(:most_common, 1)
   end
 
   def co2_scrubber_rating
-    return 0 if counts.empty?
-
-    filter(:uncommon, 0)
+    filter(:least_common, 0)
   end
 
   private
 
-  Count = Struct.new(:zeros, :ones, keyword_init: true) do
-    def equal?
-      zeros == ones
-    end
-    def common
-      zeros > ones ? 0 : 1
-    end
-    def uncommon
-      zeros < ones ? 0 : 1
-    end
+  def rate_map(method)
+    Array.new(@word_length,0)
+      .map.with_index { |_, index| send(method, index) }
+      .join
+      .to_i(2)
   end
 
   def filter(method, default)
-    filtered = data.dup
-    filtered_counts = counts
+    working_set = data.dup
 
-    data.first.length.times do |index|  
-      target = if filtered_counts[index].equal? 
-                 default 
-               else
-                 filtered_counts[index].public_send(method)
-               end.to_s
-      filtered = filtered.filter { |row| row[index] == target }
-      break if filtered.size == 1
-      filtered_counts = determine_counts(filtered)
+    @word_length.times do |index|
+      target = (send(method, index, working_set) || default).to_s
+      working_set = working_set.filter { |bin| bin[index] == target }
+      break if working_set.size == 1 
     end
-    filtered.first.to_i(2)
+    working_set.first&.to_i(2) || 0
   end
 
-  def counts
-    return [] if data.empty?
+  def most_common(index, array = nil)
+    array ||= data
+    ones = count_ones(index, array)
+    zeros = array.length - ones
 
-    @counts ||= determine_counts(data)
+    return nil if ones == zeros
+    ones > zeros ? 1 : 0
   end
 
-  def determine_counts(arr)
-    # arr
-    # ["010", "111", ...]
+  def least_common(index, array = nil)
+    mc = most_common(index, array)
+    return nil if mc.nil?
+    1 - mc
+  end
 
-    list_of_digit_arrays = arr.map { |row| row.split(//).map(&:to_i) }
-    # [ [0,1,0], [1,1,1], ... ]
-    
-    numbers_of_ones = list_of_digit_arrays.reduce { |sums, digits| sums.zip(digits).map(&:sum) }
-    # [ 15, 26, 12, ... ]
-    
-    total_rows = arr.length
-    # 50
-
-    numbers_of_zeros = numbers_of_ones.map { |ones| total_rows - ones }
-    # [ 35, 24, 38, ... ]
-
-    numbers_of_zeros.zip(numbers_of_ones).map { |zeros, ones| Count.new(zeros: zeros, ones: ones) }
-    # [ Count(zeros: 35, ones: 15), Count(zeros: 24, ones: 26), ... ]
+  def count_ones(index, array)
+    array.count { |bin| bin[index]=="1" }
   end
 end
