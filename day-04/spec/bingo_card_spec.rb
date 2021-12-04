@@ -48,6 +48,7 @@ RSpec.describe 'Bingo Card' do
           [ 2,  0, 12,  3,  7],
         ])
       end
+
       it "can separate the columns" do
         expect(subject.columns).to eq([
           [14, 10, 18, 22,  2], 
@@ -79,6 +80,29 @@ RSpec.describe 'Bingo Card' do
                                             22, 11, 13,  6,  5, 
                                              2,  0, 12,  3,    ])
       end
+    end
+
+    context "after calling enough numbers for a bingo column" do
+      before do
+        [4,7,19,20,5].each { |number| subject.mark(number)}
+      end
+
+      it "has a bingo" do
+        expect(subject.bingo?).to be(true)
+      end
+  
+      it "shows the marked numbers as marked" do
+        expect(subject.marked).to eq(Set[4,7,19,20,5])
+      end
+
+      it "shows the unmarked numbers as unmarked" do
+        expect(subject.unmarked).to eq(Set[ 14, 21, 17, 24,
+                                            10, 16, 15,  9,
+                                            18,  8, 23, 26,
+                                            22, 11, 13,  6,
+                                             2,  0, 12,  3, ])
+    end
+
     end
 
     context "after calling enough numbers for a bingo line" do

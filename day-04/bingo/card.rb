@@ -13,13 +13,14 @@ module Bingo
 
     def mark(number)
       if data.include? number
-        @marked << number
-        @unmarked.delete(number)
+        marked << number
+        unmarked.delete(number)
       end
     end
 
     def bingo?
-      lines.any? { |line| (line - marked.to_a).empty? }
+      lines.any? { |line| (line - marked.to_a).empty? } ||
+        columns.any? { |col| (col - marked.to_a).empty? }
     end
 
     def lines
@@ -34,6 +35,18 @@ module Bingo
       lines.map { |line| 
         line.map { |number| 
           number.to_s.rjust(2) 
+        }.join(" ") 
+      }.join("\n")
+    end
+
+    def to_s_marked
+      lines.map { |line| 
+        line.map { |number| 
+          if @marked.include? number
+            "--"
+          else
+            number.to_s.rjust(2) 
+          end
         }.join(" ") 
       }.join("\n")
     end

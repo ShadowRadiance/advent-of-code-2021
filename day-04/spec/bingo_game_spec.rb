@@ -47,7 +47,10 @@ RSpec.describe "Bingo Game" do
 
     describe "after twelve numbers" do
       before do
-        12.times { subject.call_a_number }
+        12.times { 
+          subject.call_a_number
+          subject.determine_winner
+        }
       end
 
       it "has a winner" do
@@ -59,7 +62,7 @@ RSpec.describe "Bingo Game" do
       end
     end
 
-    describe "running the whole game" do
+    describe "running the game until bingo" do
       before do
         subject.play
       end
@@ -73,10 +76,27 @@ RSpec.describe "Bingo Game" do
       end
 
       it "took twelve turns" do
-        expect(subject.turns).to be(12)
+        expect(subject.turns).to eq(12)
       end
     end
 
+    describe "running the game ranking all boards" do
+      before do
+        subject.play_all_cards
+      end
+
+      it "ranks all the boards" do
+        expect(subject.ranked_cards).not_to be_empty
+      end
+
+      it "has a losing score of 1924" do
+        expect(subject.ranked_cards.last[:score]).to eq(1924)
+      end
+
+      it "took fifteen turns" do
+        expect(subject.turns).to eq(15)
+      end
+    end
   end
 
 end

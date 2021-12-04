@@ -7,10 +7,10 @@ class App
   end
 
   def run
-    @game.play
-    puts "Winning Score: #{@game.winning_score}"
-    puts "Winning Card:"
-    puts @game.winner
+    @game.play_all_cards
+    puts "Losing Score: #{@game.ranked_cards.last[:score]}"
+    puts "Losing Card:"
+    puts @game.ranked_cards.last
   end
 
   def load_data_from_input
