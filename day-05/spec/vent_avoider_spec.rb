@@ -20,6 +20,7 @@ RSpec.describe Vent::Avoider do
   }
 
   it "counts the overlapping grid locations" do
-    expect(subject.overlapping_points.size).to eq(5)
+    # expect(subject.overlapping_points.size).to eq(5)
+    expect(subject.overlapping_points.size).to eq(12)
   end
 end

@@ -21,7 +21,7 @@ module Vent
       width = largest_x + 1
       height = largest_y + 1
       @grid = Array.new(height * width, 0).tap do |grid|
-        @data.select { |line| line.horizontal? || line.vertical? }
+        @data
           .flat_map { |line| line.points }
           .each { |point| grid[point.y * width + point.x ] += 1 }
         # show_grid(grid, height, width)

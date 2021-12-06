@@ -15,8 +15,14 @@ module Vent
       elsif horizontal?
         min, max = [start_point.x, end_point.x].minmax
         (min..max).map { |x_val| Point.new(x_val, start_point.y) }
-      else
-        raise NotImplementedError
+      else # pure diagonal
+        x_distance = end_point.x - start_point.x # can be negative
+        x_sign = x_distance.positive? ? 1 : -1
+        y_distance = end_point.y - start_point.y # can be negative
+        y_sign = y_distance.positive? ? 1 : -1
+        (0..x_distance.abs).map do |index|
+          Point.new(start_point.x + index * x_sign , start_point.y + index * y_sign)
+        end
       end
     end
 
