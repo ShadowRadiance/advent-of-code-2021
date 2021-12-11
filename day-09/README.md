@@ -6,13 +6,11 @@ If you can model how the smoke flows through the caves, you might be able to avo
 
 Smoke flows to the lowest point of the area it's in. For example, consider the following heightmap:
 
-```
-2199943210
+2`1`9994321`0`  
 3987894921
-9856789892
+98`5`6789892  
 8767896789
-9899965678
-```
+989996`5`678
 
 Each number corresponds to the height of a particular location, where 9 is the highest and 0 is the lowest a location can be.
 
