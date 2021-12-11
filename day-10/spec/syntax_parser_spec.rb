@@ -29,7 +29,19 @@ RSpec.describe "SyntaxParser" do
     ])
   end
   
-  it "calculates the correct score" do
+  it "calculates the correct error score" do
     expect(subject.total_syntax_error_score).to eq(26397)
+  end
+
+  it "calculates the correct autocompletes" do
+    expect(subject.autocompletions).to eq(["}}]])})]", ")}>]})", "}}>}>))))", "]]}}]}]}>", "])}>"])
+  end
+
+  it "calculates the correct autocomplete scores" do
+    expect(subject.autocomplete_scores).to eq([288957, 5566, 1480781, 995444, 294])
+  end
+
+  it "calculates the correct autocomplete score" do
+    expect(subject.autocomplete_score).to eq(288957)
   end
 end
