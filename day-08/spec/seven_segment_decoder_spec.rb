@@ -26,6 +26,22 @@ RSpec.describe "Seven Segment Decoder" do
   
       expect([1,4,7,8].map { |i| subject.count_all(i) }.sum).to eq(26)
     end
+
+    it "decodes all the digits" do
+      subject.decode
+      expect(subject.decoded_integers).to eq([
+        8394,
+        9781,
+        1197,
+        9361,
+        4873,
+        8418,
+        4548,
+        1625,
+        8717,
+        4315,
+      ])
+    end
   end
 
 end
