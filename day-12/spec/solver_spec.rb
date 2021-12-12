@@ -1,9 +1,11 @@
 require "./cave/solver"
 
 RSpec.describe Cave::Solver do
-  let(:solver) { Cave::Solver.new(map) }
+  let(:solver) { Cave::Solver.new(map, repeats: repeats) }
   let(:map) { Cave::Map.new(input)}
   let(:input) { Cave::Input.new(data) }
+  let(:repeats) { 0 }
+
 
   context "with 3 node example" do
     let(:data) {
@@ -12,8 +14,10 @@ RSpec.describe Cave::Solver do
         A-end
       DATA
     }
-    it "is expected to find 1 paths" do
-      expect(solver.count_paths).to eq(1)
+    context "no small repeats" do
+      it "is expected to find 1 paths" do
+        expect(solver.count_paths).to eq(1)
+      end
     end
   end
 
@@ -26,8 +30,10 @@ RSpec.describe Cave::Solver do
         A-end
       DATA
     }
-    it "is expected to find 2 paths" do
-      expect(solver.count_paths).to eq(2)
+    context "no small repeats" do
+      it "is expected to find 2 paths" do
+        expect(solver.count_paths).to eq(2)
+      end
     end
   end
 
@@ -43,8 +49,17 @@ RSpec.describe Cave::Solver do
         b-end
       DATA
     }
-    it "is expected to find 10 paths" do
-      expect(solver.count_paths).to eq(10)
+    context "no small repeats" do
+      it "is expected to find 10 paths" do
+        expect(solver.count_paths).to eq(10)
+      end
+    end
+
+    context "one small repeat" do
+      let(:repeats) { 1 }
+      it "is expected to find 36 paths" do
+        expect(solver.count_paths).to eq(36)
+      end
     end
   end
 
@@ -63,8 +78,17 @@ RSpec.describe Cave::Solver do
         kj-dc
       DATA
     }
-    it "is expected to find 19 paths" do
-      expect(solver.count_paths).to eq(19)
+    context "no small repeats" do
+      it "is expected to find 19 paths" do
+        expect(solver.count_paths).to eq(19)
+      end
+    end
+
+    context "one small repeat" do
+      let(:repeats) { 1 }
+      it "is expected to find 103 paths" do
+        expect(solver.count_paths).to eq(103)
+      end
     end
   end
 
@@ -91,9 +115,17 @@ RSpec.describe Cave::Solver do
         start-RW
       DATA
     }
-    it "is expected to find 226 paths" do
-      expect(solver.count_paths).to eq(226)
+    context "no small repeats" do
+      it "is expected to find 226 paths" do
+        expect(solver.count_paths).to eq(226)
+      end
+    end
+
+    context "one small repeat" do
+      let(:repeats) { 1 }
+      it "is expected to find 3509 paths" do
+        expect(solver.count_paths).to eq(3509)
+      end
     end
   end
-
 end
