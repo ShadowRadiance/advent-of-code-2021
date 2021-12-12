@@ -11,14 +11,27 @@ class Game
     @flattened = @board.flatten
     setup_neighbors
     @total_flashes = 0
+    @last_flashes = 0
     # output_board
+  end
+
+  def size
+    width * height
+  end
+
+  def width
+    @board.first.length
+  end
+
+  def height
+    @board.length
   end
 
   def step
     # puts "STEP!"
     power_up                   #   .tap { output_board }
     cascade                    #   .tap { output_board }
-    count_flashes              #   .tap { puts @total_flashes }
+    count_flashes # .tap { puts @total_flashes }
     reset                      #   .tap { output_board }
   end
 
@@ -32,6 +45,10 @@ class Game
         octopus.energy_level
       end
     end
+  end
+
+  def last_flashes
+    @last_flashes
   end
 
   def setup_neighbors
@@ -86,9 +103,7 @@ class Game
   end
 
   def count_flashes
-    flashes = @flattened.map do |octopus|
-      octopus.has_flashed? ? 1 : 0
-    end.sum
-    @total_flashes += flashes
+    @last_flashes = @flattened.count { |octopus| octopus.has_flashed? }
+    @total_flashes += @last_flashes
   end
 end

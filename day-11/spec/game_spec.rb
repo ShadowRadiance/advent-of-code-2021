@@ -118,5 +118,13 @@ RSpec.describe Game do
         ])
       end
     end
+
+    context "after 195 steps" do
+      let(:steps) { 195 }
+      it "has the correct board state" do
+        expect(subject.energy_board.flatten).to all(eq(0))
+        expect(subject.last_flashes).to eq(subject.size)
+      end
+    end
   end
 end
