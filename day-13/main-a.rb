@@ -8,9 +8,10 @@ class App
   end
 
   def run
-    @origami.process_one(@parser.instructions[0])
-    puts @origami.display
-    puts @origami.display.count("#")
+    # @origami.process_one(@parser.instructions[0])
+    @origami.process_all(@parser.instructions)
+    puts @origami.display(" ", "X")
+    # puts @origami.display.count("#")
   end
 
   def load_data_from_input

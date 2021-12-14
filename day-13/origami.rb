@@ -17,8 +17,8 @@ class Origami
     instructions.each { |i| process_one(i) }
   end
 
-  def display
-    chars = %w[ . # | - ]
+  def display(space = ".", dot = "#")
+    chars = [space, dot]
     @grid.flatten.map { |v| chars[v] }.each_slice(@width).map(&:join).join("\n")
   end
 
