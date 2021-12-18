@@ -6,6 +6,7 @@ begin
   bitstream = BitStream.from_hexstring(hex)
   packet = PacketProcessor.from(bitstream)
   puts packet.version_sum
+  puts packet.value
 rescue => err
   puts err.message
   puts "#{hex}: ERROR}"

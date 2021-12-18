@@ -18,5 +18,3 @@ class Packet
     bitstream.pop(count)
   end
 end
-
-
