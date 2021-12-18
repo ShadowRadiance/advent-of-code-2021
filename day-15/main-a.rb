@@ -1,12 +1,17 @@
+require "./cave"
+require "./cave_navigator"
+
 class App
   def initialize
+    @cave_navigator = CaveNavigator.new(Cave.new(load_data_from_input, x: 5))
   end
 
   def run
+    puts @cave_navigator.shortest_route
   end
 
   def load_data_from_input
-    lines = File.readlines("./data/input.txt", chomp: true)
+    File.read("./data/input.txt")
   end
 end
 
