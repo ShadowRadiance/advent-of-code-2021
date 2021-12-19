@@ -178,12 +178,12 @@ The magnitude of this final sum is `4140`.
 
 **Add up all of the snailfish numbers from the homework assignment in the order they appear. What is the magnitude of the final sum?**
 
-To begin, [get your puzzle input](https://adventofcode.com/2021/day/17/input).
+To begin, [get your puzzle input](https://adventofcode.com/2021/day/18/input).
 
-Post the answer to https://adventofcode.com/2021/day/17
+Post the answer to https://adventofcode.com/2021/day/18
 
 ## Part Two
 
 ---
 
-Post the answer to https://adventofcode.com/2021/day/17
+Post the answer to https://adventofcode.com/2021/day/18
