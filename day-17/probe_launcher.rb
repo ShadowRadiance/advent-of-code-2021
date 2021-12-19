@@ -28,18 +28,30 @@ class ProbeLauncher
     x_vel_range = Range.new(x_vel_edges.first, x_vel_edges.last + fudge)
     y_vel_range = 1..-target_y_range.begin-1
 
-    puts "will take #{x_vel_range.size * y_vel_range.size} shots…"
+    # puts "will take #{x_vel_range.size * y_vel_range.size} shots…"
     x_vel_range.each do |x_vel|
       y_vel_range.each do |y_vel|
         shoot(x_vel, y_vel)
       end
     end
-    puts "took #{shots_taken} shots of which #{shots_on_target.size} were on target"
-    puts shots_on_target.map { |shot| "#{shot[:initial_velocity]}->#{shot[:final_location]}" }.join("\n")
+    # puts "took #{shots_taken} shots of which #{shots_on_target.size} were on target"
+    # puts shots_on_target.map { |shot| "#{shot[:initial_velocity]}->#{shot[:final_location]}" }.join("\n")
+  end
+
+  def determine_all_possible_shots
+    dx_range = Range.new(
+      triangles.first { |_upto, sum| target_x_range.cover?(sum) }.first,
+      target_x_range.end
+    )
+    dy_range = Range.new(
+      target_y_range.begin,
+      -target_y_range.begin-1
+    )
+    dx_range.each { |x_vel| dy_range.each { |y_vel| shoot(x_vel, y_vel) } }
   end
 
   def triangles
-    (1..100).map do |upto|
+    @triangles ||= (1..100).map do |upto|
       [upto, (upto*(upto+1))/2 ]
     end.to_h
   end
@@ -48,7 +60,7 @@ class ProbeLauncher
     probe = Probe.new(x_vel, y_vel)
     initial_velocity = probe.velocity
     hit, height, final_location = run_ticks_until_probe_hits_or_cannot(probe)
-    puts "Shot (#{x_vel}, #{y_vel}) #{hit ? "hit" : "missed"} at (#{final_location})"
+    # puts "Shot (#{x_vel}, #{y_vel}) #{hit ? "hit" : "missed"} at (#{final_location})"
     if hit
       @shots_on_target << {
         initial_velocity: initial_velocity,
