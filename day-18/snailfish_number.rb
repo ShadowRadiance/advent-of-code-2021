@@ -39,7 +39,7 @@ class SnailfishNumber
   end
 
   def normalize
-    puts to_s
+    # puts to_s
     loop do
       break unless explode || split
     end
@@ -59,7 +59,7 @@ class SnailfishNumber
     return false if explodanode.nil?
 
     explodanode.explode!
-    puts to_s
+    # puts to_s
 
     true
   end
@@ -71,7 +71,7 @@ class SnailfishNumber
     return false if splittanode.nil?
 
     splittanode.split!
-    puts to_s
+    # puts to_s
     true
   end
 
