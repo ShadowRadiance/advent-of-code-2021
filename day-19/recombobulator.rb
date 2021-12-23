@@ -39,11 +39,11 @@ class Recombobulator
   # scanner -> true/false
   def match_scanner(scanner)
     (0..23).each do |index|
-      puts "CHECKING SCANNER #{scanner.identifier} orientation #{index}"
+      # puts "CHECKING SCANNER #{scanner.identifier} orientation #{index}"
       beacons = scanner.beacons_in_orientation(index)
       transform = match_beacons(beacons)
       if transform
-        puts "FOUND A MATCH with orientation #{index} - SCANNER IS AT #{transform}"
+        # puts "FOUND A MATCH with orientation #{index} - SCANNER IS AT #{transform}"
         scanner.location = transform
         scanner.orientation = index
         return true
