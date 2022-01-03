@@ -16,67 +16,151 @@ RSpec.describe ImageEnhancer do
     ]
   }
 
-  context "after 0 enhancements" do
-    it "has the correct number of lights" do
-      expect(image.count_lit).to eq(10)
-    end
-
-    it "can display the enhanced image" do
-      expect(image.to_s).to eq(
-        <<~IMAGE.chomp
-        #..#.
-        #....
-        ##..#
-        ..#..
-        ..###
-        IMAGE
-      )
-    end
-  end
-
-  context "after 1 enhancement" do
-    before { @result = subject.enhance(image) }
-
-    it "has the correct number of lights" do
-      expect(@result.count_lit).to eq(24)
-    end
-
-    it "can display the enhanced image" do
-      expect(@result.to_s).to eq(
-        <<~IMAGE.chomp
-        .##.##.
-        #..#.#.
-        ##.#..#
-        ####..#
-        .#..##.
-        ..##..#
-        ...#.#.
-        IMAGE
-      )
-    end
-  end
+  context "with a normal algorithm" do
+    context "after 0 enhancements" do
+      it "has the correct number of lights" do
+        expect(image.count_lit).to eq(10)
+      end
   
-  context "after 2 enhancements" do
-    before { @result = subject.enhance(subject.enhance(image)) }
-    
-    it "has the correct number of lights" do
-      expect(@result.count_lit).to eq(35)
+      it "can display the enhanced image" do
+        expect(image.to_s).to eq(
+          <<~IMAGE.chomp
+          #..#.
+          #....
+          ##..#
+          ..#..
+          ..###
+          IMAGE
+        )
+      end
+    end
+  
+    context "after 1 enhancement" do
+      before { @result = subject.enhance(image) }
+  
+      it "has the correct number of lights" do
+        expect(@result.count_lit).to eq(24)
+      end
+  
+      it "can display the enhanced image" do
+        expect(@result.to_s).to eq(
+          <<~IMAGE.chomp
+          .##.##.
+          #..#.#.
+          ##.#..#
+          ####..#
+          .#..##.
+          ..##..#
+          ...#.#.
+          IMAGE
+        )
+      end
     end
     
-    it "can display the enhanced image" do
-      expect(@result.to_s).to eq(
-        <<~IMAGE.chomp
-        .......#.
-        .#..#.#..
-        #.#...###
-        #...##.#.
-        #.....#.#
-        .#.#####.
-        ..#.#####
-        ...##.##.
-        ....###..
-        IMAGE
-      )
+    context "after 2 enhancements" do
+      before { @result = subject.enhance(subject.enhance(image)) }
+      
+      it "has the correct number of lights" do
+        expect(@result.count_lit).to eq(35)
+      end
+      
+      it "can display the enhanced image" do
+        expect(@result.to_s).to eq(
+          <<~IMAGE.chomp
+          .......#.
+          .#..#.#..
+          #.#...###
+          #...##.#.
+          #.....#.#
+          .#.#####.
+          ..#.#####
+          ...##.##.
+          ....###..
+          IMAGE
+        )
+      end
+  
+    end
+  end
+
+  context "with a background-flipping algorithm" do
+    let(:data) { 
+      [
+        "..#",
+        "#..",
+        ".#.",
+      ]
+    }
+    let(:algorithm) { "#.#.#..#####.#.#.#.###.##.....###.##.#..###.####..#####..#....#..#..##..###..######.###...####..#..#####..##..#.#####...##.#.#..#.##..#.#......#.###.######.###.####...#.##.##..#..#..#####.....#.#....###..#.##......#.....#..#..#..##..#...##.######.####.####.#.#...#.......#..#.#.#...####.##.#......#..#...##.#.##..#...##.#.##..###.#......#.#.......#.#.#.####.###.##...#.....####.#..#..#.##.#....##..#.####....##...##..#...#......#.#.......#.......##..####..#...#.#.#...##..#.#..###..#####........#..####......#..." }
+
+    context "after 0 enhancements" do
+      it "has the correct number of lights" do
+        expect(image.count_lit).to eq(3)
+      end
+
+      it "has the correct number of darks" do
+        expect(image.count_unlit).to eq(Float::INFINITY)
+      end
+  
+      it "can display the enhanced image" do
+        expect(image.to_s).to eq(
+          <<~IMAGE.chomp
+          ..#
+          #..
+          .#.
+          IMAGE
+        )
+      end
+    end
+  
+    context "after 1 enhancement" do
+      before { @result = subject.enhance(image) }
+  
+      it "has the correct number of lights" do
+        expect(@result.count_lit).to eq(Float::INFINITY)
+      end
+
+      it "has the correct number of darks" do
+        expect(@result.count_unlit).to eq(11)
+      end
+  
+      it "can display the enhanced image" do
+        expect(@result.to_s).to eq(
+          <<~IMAGE.chomp
+          ##.##
+          .#..#
+          ##...
+          .#.##
+          #.#.#
+          IMAGE
+        )
+      end
+    end
+    
+    context "after 2 enhancements" do
+      before { @result = subject.enhance(subject.enhance(image)) }
+      
+      it "has the correct number of lights" do
+        expect(@result.count_lit).to eq(15)
+      end
+      
+      it "has the correct number of darks" do
+        expect(@result.count_unlit).to eq(Float::INFINITY)
+      end
+
+      it "can display the enhanced image" do
+        expect(@result.to_s).to eq(
+          <<~IMAGE.chomp
+          ..#....
+          .#.##..
+          ##...##
+          .....##
+          ##...#.
+          .#...#.
+          IMAGE
+        )
+      end
+  
     end
 
   end

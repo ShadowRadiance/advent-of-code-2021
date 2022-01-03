@@ -5,7 +5,7 @@ require "./infinite_image"
 
 class App
   def run
-    input = File.readlines("./data/test_input.txt", chomp: true)
+    input = File.readlines("./data/input.txt", chomp: true)
     algorithm = input.shift
     input.shift
     enhancer = ImageEnhancer.new(algorithm)
