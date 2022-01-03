@@ -15,13 +15,13 @@ class App
     ## The Read data has 000000000 => 1 (infinite void turns on!)
     ##               and 111111111 => 0 (infinite void turns off but will have affected "center")
 
-    image_0 = InfiniteImage.new(input)
-    puts image_0
-    image_1 = enhancer.enhance(image_0)
-    puts image_1
-    image_2 = enhancer.enhance(image_1)
-    puts image_2
-    puts image_2.count_lit
+    image = InfiniteImage.new(input)
+    50.times {
+      puts image.count_lit
+      image = enhancer.enhance(image) 
+    }
+    puts image
+    puts image.count_lit
   end
 end
 

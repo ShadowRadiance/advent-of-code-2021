@@ -13,31 +13,45 @@ class InfiniteImage
   def initialize(data, background: ".")
     raise ArgumentError unless data.length > 0 && data.first.length > 0
 
+    @background = background
     
-    data = preparse(data, background)
+    data = preparse(data)
     @width = data.first&.length
     @height = data.length
     @min_x, @max_x = 0, @width - 1
     @min_y, @max_y = 0, @height - 1
     
     @data = data.join
-    @background = background
   end
 
-  def preparse(data, background)
+  def preparse(data)
     working = data.dup
 
     blank_row = background * working.first.length
     
     # throw away blank rows at the start and end
-    working.shift if working.first == blank_row
-    working.pop if working.last == blank_row
+
+    working.shift while working.first == blank_row
+    working.pop while working.last == blank_row
 
     # throw away blank cols at the start and end
-    working.map! { |str| str[1..] } if working.all? {|str| str[0] == background }
-    working.map! { |str| str[..-2] } if working.all? { |str| str[-1] == background }
+    scsmb = shortest_common_start_matching_background(working)
+    scfmb = shortest_common_final_matching_background(working)
+    working.map! { |str| str[scsmb..-scfmb-1] } unless scsmb.zero? && scfmb.zero?
 
     working
+  end
+
+  def non_background
+    @non_background ||= (background=="." ? "#" : ".")
+  end
+
+  def shortest_common_start_matching_background(arr)
+    arr.map { |str| str.index(non_background) }.min
+  end
+
+  def shortest_common_final_matching_background(arr)
+    arr.map { |str| str.reverse.index(non_background) }.min
   end
 
   def at(x, y)

@@ -81,6 +81,18 @@ RSpec.describe ImageEnhancer do
       end
   
     end
+
+    context "after 50 enhancements" do
+      before {
+        i = image
+        50.times { i = subject.enhance(i) }
+        @result = i
+      }
+
+      it "has the correct number of lights" do
+        expect(@result.count_lit).to eq(3351)
+      end
+    end
   end
 
   context "with a background-flipping algorithm" do
