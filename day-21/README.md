@@ -29,7 +29,7 @@ Player 2 rolls 16+17+18 and moves to space 7 for a total score of 16.
 Player 1 rolls 19+20+21 and moves to space 6 for a total score of 26.
 Player 2 rolls 22+23+24 and moves to space 6 for a total score of 22.
 
-... many turns later ...
+... many turns later  ...
 
 Player 2 rolls 82+83+84 and moves to space 6 for a total score of 742.
 Player 1 rolls 85+86+87 and moves to space 4 for a total score of 990.
