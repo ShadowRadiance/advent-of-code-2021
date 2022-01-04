@@ -19,6 +19,20 @@ module DiracDice
       @loser = nil
     end
 
+    DIRAC_DICE_DISTRIBUTION = {
+      3 => 1 , # 111
+      4 => 3 , # 112, 121, 211
+      5 => 6 , # 113, 122, 131, 212, 221, 311
+      6 => 7 , # 123, 132, 213, 222, 231, 312, 321
+      7 => 6 , # 133, 223, 232, 313, 322, 331
+      8 => 3 , # 233, 323, 332
+      9 => 1 , # 333
+    }.freeze
+
+    def play_all
+      # uuuuhhhhh????
+    end
+
     def play
       until @game_over do
         take_turn
