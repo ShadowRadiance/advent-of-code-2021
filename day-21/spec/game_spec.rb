@@ -1,16 +1,17 @@
 # frozen_string_literal: true
 
 require "./dirac_dice/game"
+require "./dirac_dice/game2"
 require "./dirac_dice/deterministic_die"
 
-RSpec.describe DiracDice::Game do
-  let(:game) { described_class.new(p1_start, p2_start, die: die) }
+RSpec.describe "Dice Game" do
   let(:p1_start) { 4 }
   let(:p2_start) { 8 }
-  
+
   context "in the deterministic die scenario" do
     let(:die) { DeterministicDie.new(100) }
-    
+    let(:game) { DiracDice::Game.new(p1_start, p2_start, die: die) }
+      
     before { game.play }
 
     it "determines the correct score" do
@@ -21,9 +22,8 @@ RSpec.describe DiracDice::Game do
   end
 
   context "in a multiversal scenario" do
-    let(:die) { DiracDice::Die.new }
-
-    before { game.play_all }
+    let(:game) { DiracDice::Game2.new(p1_start, p2_start) }
+    before { game.play }
 
     it "determines the correct score" do
       expect(game.player_one_wins).to eq(444356092776315)
