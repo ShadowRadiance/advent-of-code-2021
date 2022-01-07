@@ -84,7 +84,7 @@ class ReactorCore
   private
 
   def perform(instruction)
-    puts "ADDING CUBOID #{instruction}"
+    puts "INSTRUCTION #{instruction}"
 
     intersections = @cuboids.map { |existing| instruction.intersection(existing) }.compact
     @cuboids << instruction if instruction.on
