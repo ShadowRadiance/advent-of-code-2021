@@ -1,6 +1,7 @@
 # frozen_string_literal: true
 
 require "./solver"
+require "./pods/room"
 
 RSpec.describe Solver do
   subject { Solver.new(initial, solved) }
@@ -32,6 +33,16 @@ RSpec.describe Solver do
 
     it "is all cool and shit" do
       expect(subject.solve).to eq(44)
+    end
+  end
+
+  context "with the FULL sample data" do
+    let(:initial) { ".|.|BDDA|.|CCBD|.|BBAC|.|DACA|.|." }
+    let(:solved)  { ".|.|AAAA|.|BBBB|.|CCCC|.|DDDD|.|." }
+
+    it "is all cool and shit" do
+      solver = Solver.new(initial, solved, room_size: 4)
+      expect(solver.solve).to eq(44169)
     end
   end
 

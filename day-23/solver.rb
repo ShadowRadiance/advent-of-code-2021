@@ -15,9 +15,10 @@ class Solver
     end
   end
 
-  def initialize(initial, solved=".|.|AA|.|BB|.|CC|.|DD|.|.")
-    @initial_state = Map.new(initial).state
-    @solved_state  = Map.new(solved).state
+  def initialize(initial, solved=".|.|AA|.|BB|.|CC|.|DD|.|.", room_size: 2)
+    @room_size = room_size
+    @initial_state = Map.new(initial, room_size: @room_size).state
+    @solved_state  = Map.new(solved, room_size: @room_size).state
   end
 
   def solve
@@ -55,14 +56,14 @@ class Solver
       # 3. Set the non-visited node with the smallest current distance as the current node "C."
       # unvisited_nodes = unvisited_nodes.sort_by(&:cost_to_get_here).reverse
       current_node = unvisited_nodes.extract
-      current_map = Map.new(current_node.state)
+      current_map = Map.new(current_node.state, room_size: @room_size)
       
       # 4. For each neighbor "N" of your current node: 
       #    add the current distance of "C" with the weight of the edge connecting "C"->"N". 
       #    If it's smaller than the current distance of "N", set it as the new current distance of "N".
       moves = current_map.all_possible_moves.map(&:to_s) # to_s to detach from current_map
       moves.each { |move| 
-        new_map = Map.new(current_node.state)
+        new_map = Map.new(current_node.state, room_size: @room_size)
         cost = new_map.apply_move_str(move)
 
         create_or_update_node(
@@ -79,7 +80,7 @@ class Solver
       # 5. Mark the current node, "C", as visited.
       visited_nodes.push(current_node)
       
-      puts "#{visited_nodes.size} / #{current_node.cost_to_get_here} / #{unvisited_nodes.size}"
+      # puts "#{visited_nodes.size} / #{current_node.cost_to_get_here} / #{unvisited_nodes.size}"
 
       # 6. Repeat the step above from step 3 until the destination point is visited.
       return current_node if current_node.state == @solved_state

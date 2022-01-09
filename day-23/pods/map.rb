@@ -7,17 +7,18 @@ require "byebug"
 
 module Pods
   class Map
-    def initialize(string_representation)
+    def initialize(string_representation, room_size: 2)
+      @room_size = room_size
       @corridor = [
         Hall.new(self,  0), 
         Hall.new(self,  1), 
-        Door.new(self,  2, "A"),
+        Door.new(self,  2, "A", room_size: @room_size),
         Hall.new(self,  3),
-        Door.new(self,  4, "B"),
+        Door.new(self,  4, "B", room_size: @room_size),
         Hall.new(self,  5),
-        Door.new(self,  6, "C"),
+        Door.new(self,  6, "C", room_size: @room_size),
         Hall.new(self,  7),
-        Door.new(self,  8, "D"),
+        Door.new(self,  8, "D", room_size: @room_size),
         Hall.new(self,  9),
         Hall.new(self, 10)
       ]
@@ -120,7 +121,7 @@ module Pods
         #  "###B#C#B#D###",
         #  "#...........#",
         #  "#############"]
-        .slice(1..3)
+        .slice(1..(@room_size+1))
         # ["  #A#D#C#A#",
         #  "###B#C#B#D###",
         #  "#...........#",]
@@ -140,7 +141,7 @@ module Pods
         @corridor[8].room,
       ]
 
-      lines[0..1].each do |line|
+      lines[0...@room_size].each do |line|
         line.each.with_index do |char, index|
           next if char=="."
           room = rooms[index]
@@ -149,7 +150,7 @@ module Pods
           room.push(amphipod)
         end
       end
-      lines[2][0].each_char.with_index do |char, index|
+      lines.last.first.each_char.with_index do |char, index|
         hall = @corridor[index]
         next if char=="."
         amphipod = Amphipod.new(char, location: hall)

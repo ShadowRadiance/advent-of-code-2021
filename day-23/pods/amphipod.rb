@@ -63,14 +63,14 @@ module Pods
         case location
         when Room
           [
-            (location.full? ? 1 : 2),                           # move out of current room
+            (location.free_slots + 1),                          # move out of current room
             (location.door.index - target_room.door.index).abs, # move along the hall
-            (target_room.empty? ? 2 : 1),                       # move into target room
+            (target_room.free_slots),                           # move into target room
           ].sum
         when Hall
           [
             (location.index - target_room.door.index).abs,  # move along the hall
-            (target_room.empty? ? 2 : 1),                   # move into target room
+            (target_room.free_slots),                       # move into target room
           ].sum
         end
 

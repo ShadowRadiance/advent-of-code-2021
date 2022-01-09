@@ -24,6 +24,10 @@ module Pods
       @contents.empty?
     end
 
+    def free_slots
+      @contents.capacity - @contents.size
+    end
+
     def top
       @contents.top
     end
@@ -78,7 +82,7 @@ module Pods
           from: self, 
           to: hall,
           cost: per_move_cost * (
-            (full? ? 1 : 2) +             # move to door
+            (free_slots + 1) +            # move to door
             (door_index - hall.index).abs # move to target hall
           ),
         )
