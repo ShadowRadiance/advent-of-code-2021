@@ -12,6 +12,8 @@ class ALU
     @input_stream = input_stream
   end
 
+  attr_writer :input_stream
+
   OPERATIONS = %w[inp add mul div mod eql].freeze
 
   %i[w x y z].each do |register_name|
