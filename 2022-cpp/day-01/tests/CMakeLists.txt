@@ -1,5 +1,3 @@
-enable_testing()
-
 add_executable(
   day-01_test
   test.cpp
