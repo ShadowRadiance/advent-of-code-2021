@@ -63,5 +63,6 @@
     "variant": "cpp",
     "vector": "cpp",
     "algorithm": "cpp"
-  }
+  },
+  "cmake.sourceDirectory": "${workspaceFolder}/2022-cpp"
 }
