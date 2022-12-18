@@ -1,17 +1,10 @@
 #include <iostream>
 #include <vector>
 
-#include <utility.h>
+#include <day-01.h>
 
-int main(int argc, char** argv)
+double day_01(const std::vector<std::string>& input_data)
 {
-    for (auto v = std::vector{ 1, 2, 3 }; auto & e : v)
-    {
-        std::cout << e;
-    }
-
-    std::cout << std::endl
-        << "Hello, world!" << std::endl;
-
-    test_setup();
+	std::cout << "DAY 01" << std::endl;
+	return 0.0;
 }

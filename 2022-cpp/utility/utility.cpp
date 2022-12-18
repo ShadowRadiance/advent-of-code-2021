@@ -1,13 +1,10 @@
 #include <iostream>
 #include <vector>
+#include <format>
 
-void test_setup()
+std::vector<std::string> load_data(const std::string& filename)
 {
-  for (auto v = std::vector{1, 2, 3}; auto &e : v)
-  {
-    std::cout << e;
-  }
-
-  std::cout << std::endl
-            << "Hello, library!" << std::endl;
+	std::vector<std::string> result;
+	result.push_back(std::format("Loading {}!", filename));
+	return result;
 }
