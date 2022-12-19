@@ -1,12 +1,15 @@
 set(SOURCES framework-test.cpp)
+
 foreach(NUM RANGE 1 25)
 	set(PADDED "${NUM}")
 	if(NUM LESS 10)
 		string(PREPEND NUM "0")
 	endif()
 	set(SOURCES ${SOURCES} day-${NUM}-test.cpp)
+	set(DAY_LIBS ${DAY_LIBS} aoc2022-day-${NUM})
 endforeach()
+
 add_executable(aoc2022-tests ${SOURCES})
-target_link_libraries(aoc2022-tests GTest::gtest_main)
+target_link_libraries(aoc2022-tests PUBLIC ${DAY_LIBS} GTest::gtest_main)
 include(GoogleTest)
 gtest_discover_tests(aoc2022-tests)
