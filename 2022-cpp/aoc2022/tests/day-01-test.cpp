@@ -47,3 +47,25 @@ TEST(Day01, FullExample)
 
 	EXPECT_EQ("24000", day_01::answer_a(data));
 }
+
+TEST(Day01, Part2Example)
+{
+	std::vector<std::string> data{
+		"1000",
+		"2000",
+		"3000",
+		"",
+		"4000",
+		"",
+		"5000",
+		"6000",
+		"",
+		"7000",
+		"8000",
+		"9000",
+		"",
+		"10000",
+	};
+
+	EXPECT_EQ("45000", day_01::answer_b(data));
+}
