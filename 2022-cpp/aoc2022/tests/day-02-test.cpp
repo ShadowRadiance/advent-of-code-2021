@@ -46,7 +46,10 @@ TEST(Day02, Part1Example)
 TEST(Day02, Part2Example)
 {
 	std::vector<std::string> data{
+	  "A Y",
+	  "B X",
+	  "C Z",
 	};
 
-	EXPECT_EQ("PENDING", day_02::answer_b(data));
+	EXPECT_EQ("12", day_02::answer_b(data));
 }

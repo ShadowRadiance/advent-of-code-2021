@@ -25,6 +25,18 @@ namespace day_02
     }
   }
 
+  Throwable choose_throwable_for_outcome(Throwable theirs, char outcome) {
+    switch (outcome) {
+    case 'X': // lose
+      return Throwable((uint32_t(theirs) + 2) % 3);
+    case 'Y': // draw
+      return theirs;
+    case 'Z': // win
+      return Throwable((uint32_t(theirs) + 1) % 3);
+    default: throw "Do not be so damned daft";
+    }
+  }
+
   struct Round {
     Throwable them;
     Throwable us;
@@ -70,6 +82,19 @@ namespace day_02
     return game;
   }
 
+  Game initialize_correctly(const std::vector<std::string>& input_data)
+  {
+    Game game;
+
+    for (auto& line : input_data) {
+      Throwable theirs = make_throwable(line[0]);
+      char winlosedraw{ line[2] };
+      game.push_back(Round{ theirs, choose_throwable_for_outcome(theirs, winlosedraw) });
+    }
+
+    return game;
+  }
+
   std::string answer_a(const std::vector<std::string>& input_data)
   {
     Game game = initialize(input_data);
@@ -87,6 +112,16 @@ namespace day_02
 
   std::string answer_b(const std::vector<std::string>& input_data)
   {
-    return "PENDING";
+    Game game = initialize_correctly(input_data);
+
+    // what's my score
+
+    auto sum = std::accumulate(game.begin(), game.end(), uint32_t{ 0 },
+      [](uint32_t current, const Round& round) {
+        return current + round.score_us();
+      }
+    );
+
+    return std::format("{}", sum);
   }
 }
