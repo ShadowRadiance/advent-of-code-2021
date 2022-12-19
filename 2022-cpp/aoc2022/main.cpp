@@ -27,9 +27,16 @@
 #include <day-24.h>
 #include <day-25.h>
 
+#include <filesystem>
+namespace fs = std::filesystem;
+
 int main(int argc, char** argv)
 {
-    std::cout << "Day 01 Answer: " << day_01(load_data("day-01.txt")) << "\n";
+    std::cerr << "[          ] current_path = " << fs::current_path() << std::endl;
+    //            [          ] current_path = "C:\\Code\\advent-of-code\\2022-cpp\\out\\build\\x64-Debug\\aoc2022"
+
+    std::cout << "Day 01 Answer A: " << day_01::answer_a(load_data("./data/day-01.txt")) << "\n";
+    std::cout << "Day 01 Answer B: " << day_01::answer_b(load_data("./data/day-01.txt")) << "\n";
     //std::cout << "Day 02 Answer: " << day_02(load_data("day-02.txt")) << "\n";
     //std::cout << "Day 03 Answer: " << day_03(load_data("day-03.txt")) << "\n";
     //std::cout << "Day 04 Answer: " << day_04(load_data("day-04.txt")) << "\n";
