@@ -22,7 +22,13 @@ TEST(Day03, Part1Example)
 TEST(Day03, Part2Example)
 {
     std::vector<std::string> data{
+      "vJrwpWtwJgWrhcsFMMfFFhFp",
+      "jqHRNqRjqzjGDLGLrsFMfFZSrLrFZsSL",
+      "PmmdzqPrVvPwwTWBwg",
+      "wMqvLMZHhHMvwLHjbvcjnnSBnvTQFn",
+      "ttgJtRGJQctTZtZT",
+      "CrZsJsPPZsGzwwsLwLmpwMDw",
     };
 
-    EXPECT_EQ("PENDING", day_03::answer_b(data));
+    EXPECT_EQ("70", day_03::answer_b(data));
 }
