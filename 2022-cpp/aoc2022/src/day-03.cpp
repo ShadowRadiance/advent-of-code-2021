@@ -1,5 +1,3 @@
-#include <vector>
-#include <string>
 #include <array>
 #include <algorithm>
 #include <iterator>
@@ -7,7 +5,7 @@
 #include <cassert>
 #include <span>
 
-#include <day-03.h>
+#include <days.h>
 
 namespace day_03
 {

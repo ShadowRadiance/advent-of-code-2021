@@ -1,12 +1,12 @@
 set(SOURCES framework-test.cpp)
 
 foreach(NUM RANGE 1 25)
-	set(PADDED "${NUM}")
-	if(NUM LESS 10)
-		string(PREPEND NUM "0")
-	endif()
-	set(SOURCES ${SOURCES} day-${NUM}-test.cpp)
-	set(DAY_LIBS ${DAY_LIBS} aoc2022-day-${NUM})
+    set(PADDED "${NUM}")
+    if(NUM LESS 10)
+        string(PREPEND NUM "0")
+    endif()
+    set(SOURCES ${SOURCES} day-${NUM}-test.cpp)
+    set(DAY_LIBS ${DAY_LIBS} aoc2022-day-${NUM})
 endforeach()
 
 add_executable(aoc2022-tests ${SOURCES})

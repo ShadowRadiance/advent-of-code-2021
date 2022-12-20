@@ -1,22 +1,23 @@
 #include <fstream>
-#include <vector>
-#include <format>
-
 #include <utility.h>
 
-std::vector<std::string> load_data(const std::string& filename)
+using std::vector;
+using std::string;
+using std::ifstream;
+
+vector<string> load_data(const string& filename)
 {
-	std::vector<std::string> result;
+  vector<string> result;
 
-	std::ifstream input{ filename };
+  ifstream input{ filename };
 
-	std::string line;
-	if (input.is_open()) {
-		while (std::getline(input, line)) {
-			result.push_back(line);
-		}
-	}
+  string line;
+  if (input.is_open()) {
+    while (getline(input, line)) {
+      result.push_back(line);
+    }
+  }
 
-	return result;
+  return result;
 }
 

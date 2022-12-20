@@ -1,12 +1,14 @@
-#include <vector>
-#include <string>
 #include <format>
 #include <numeric>
 
-#include <day-02.h>
+#include <days.h>
 
 namespace day_02
 {
+  using std::string;
+  using std::vector;
+  using std::format;
+
   enum class Throwable {
     rock,                                                    // r-s 0-2   r -2  1                       r-p 0-1  p -1     2
     paper,                                                   // p-r 1-0   p +1  4 (1)                   p-s 1-2  s -1     2
@@ -67,9 +69,9 @@ namespace day_02
     }
   };
 
-  using Game = std::vector<Round>;
+  using Game = vector<Round>;
 
-  Game initialize(const std::vector<std::string>& input_data)
+  Game initialize(const vector<string>& input_data)
   {
     Game game;
 
@@ -82,7 +84,7 @@ namespace day_02
     return game;
   }
 
-  Game initialize_correctly(const std::vector<std::string>& input_data)
+  Game initialize_correctly(const vector<string>& input_data)
   {
     Game game;
 
@@ -95,33 +97,33 @@ namespace day_02
     return game;
   }
 
-  std::string answer_a(const std::vector<std::string>& input_data)
+  string answer_a(const vector<string>& input_data)
   {
     Game game = initialize(input_data);
 
     // what's my score
 
-    auto sum = std::accumulate(game.begin(), game.end(), uint32_t{ 0 },
+    auto sum = accumulate(game.begin(), game.end(), uint32_t{ 0 },
       [](uint32_t current, const Round& round) {
         return current + round.score_us();
       }
     );
 
-    return std::format("{}", sum);
+    return format("{}", sum);
   }
 
-  std::string answer_b(const std::vector<std::string>& input_data)
+  string answer_b(const vector<string>& input_data)
   {
     Game game = initialize_correctly(input_data);
 
     // what's my score
 
-    auto sum = std::accumulate(game.begin(), game.end(), uint32_t{ 0 },
+    auto sum = accumulate(game.begin(), game.end(), uint32_t{ 0 },
       [](uint32_t current, const Round& round) {
         return current + round.score_us();
       }
     );
 
-    return std::format("{}", sum);
+    return format("{}", sum);
   }
 }

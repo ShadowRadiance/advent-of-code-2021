@@ -1,9 +1,6 @@
 #include <gtest/gtest.h>
 
-#include <vector>
-#include <string>
-
-#include <day-03.h>
+#include <days.h>
 
 TEST(Day03, Part1Example)
 {

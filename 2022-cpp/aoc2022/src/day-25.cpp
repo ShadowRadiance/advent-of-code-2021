@@ -1,17 +1,17 @@
-#include <vector>
-#include <string>
-
-#include <day-25.h>
+#include <days.h>
 
 namespace day_25
 {
-	std::string answer_a(const std::vector<std::string>& input_data)
-	{
-		return "PENDING";
-	}
+  using std::string;
+  using std::vector;
 
-	std::string answer_b(const std::vector<std::string>& input_data)
-	{
-		return "PENDING";
-	}
+  string answer_a(const vector<string>& input_data)
+  {
+    return "PENDING";
+  }
+
+  string answer_b(const vector<string>& input_data)
+  {
+    return "PENDING";
+  }
 }
