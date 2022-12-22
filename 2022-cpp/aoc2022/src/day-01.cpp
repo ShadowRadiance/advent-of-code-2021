@@ -8,7 +8,7 @@ namespace day_01
 {
   using std::string;
   using std::vector;
-  using std::format;
+  using std::to_string;
 
   class Elf {
   public:
@@ -56,7 +56,7 @@ namespace day_01
 
     auto it = max_element(elves.begin(), elves.end(), lesserTotalFood);
 
-    return format("{}", it->totalFood());
+    return to_string(it->totalFood());
   }
 
   string answer_b(const vector<string>& input_data)
@@ -75,8 +75,6 @@ namespace day_01
     transform(begin, third, back_inserter(totals),
       [](auto& anElf) { return anElf.totalFood(); }
     );
-    return format("{}",
-      accumulate(totals.begin(), totals.end(), 0)
-    );
+    return to_string(accumulate(totals.begin(), totals.end(), 0));
   }
 }

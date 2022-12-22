@@ -7,7 +7,7 @@ namespace day_02
 {
   using std::string;
   using std::vector;
-  using std::format;
+  using std::to_string;
 
   enum class Throwable {
     rock,                                                    // r-s 0-2   r -2  1                       r-p 0-1  p -1     2
@@ -109,7 +109,7 @@ namespace day_02
       }
     );
 
-    return format("{}", sum);
+    return to_string(sum);
   }
 
   string answer_b(const vector<string>& input_data)
@@ -124,6 +124,6 @@ namespace day_02
       }
     );
 
-    return format("{}", sum);
+    return to_string(sum);
   }
 }

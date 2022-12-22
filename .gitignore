@@ -59,3 +59,6 @@ examples.txt
 # Ignore Visual Studio config
 .vs/
 out/
+
+# Ignore CLion CMAKE
+cmake-build-debug/

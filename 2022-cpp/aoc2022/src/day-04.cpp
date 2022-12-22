@@ -11,19 +11,35 @@ namespace day_04
   using std::string;
   using std::vector;
   using std::array;
-  using std::ranges::iota_view;
   using std::stringstream;
-  using std::views::iota;
   using std::to_string;
-  using std::ranges::includes;
-  using std::views::filter;
-  using std::ranges::set_intersection;
+  using std::includes;
+  using std::set_intersection;
+
+  class Range
+  {
+      int start_, end_;
+  public:
+      Range(int start, int end) : start_(start), end_(end) {}
+
+      bool overlaps(const Range & other) {
+        return
+          other.start_ >= this->start_ && other.start_ <= this->end_ // start within
+          ||
+          other.end_ >= this->start_ && other.end_ <= this->end_; // end within
+      }
+
+      bool covers(const Range & other) {
+        return
+          other.start_ >= this->start_ // start later
+          &&
+          other.end_ <= this->end_;   // end earlier
+      }
+  };
 
   using strings = vector<string>;
-  using Range = iota_view<int, int>;
   using RangePair = array<Range, 2>;
   using RangePairs = vector<RangePair>;
-
 
   RangePair buildRangePair(const string& s)
   {
@@ -34,9 +50,8 @@ namespace day_04
     ss >> start1 >> dummy >> end1 >> dummy >> start2 >> dummy >> end2;
     
     return {
-      // +1 because iota requires "one-past-the-end" like iterators
-      iota(start1, end1+1),
-      iota(start2, end2+1),
+      Range(start1, end1),
+      Range(start2, end2),
     };
   }
 
@@ -49,30 +64,25 @@ namespace day_04
 
   bool completelyOverlaps(RangePair rangePair)
   {
-    return includes(rangePair[0], rangePair[1]) || includes(rangePair[1], rangePair[0]);
+    return rangePair[0].covers(rangePair[1]) || rangePair[1].covers(rangePair[0]);
   }
 
   bool overlaps(RangePair rangePair)
   {
-    // is the intersection empty? - then overlaps == false - else true
-    vector<int> intersection;
-    set_intersection(
-      rangePair[0],
-      rangePair[1],
-      back_inserter(intersection)
-    );
-    return !intersection.empty();
+    return rangePair[0].overlaps(rangePair[1]);
   }
 
   RangePairs findCompletelyOverlapping(RangePairs rangePairs)
   {
-    auto filteredPairs = rangePairs | filter(completelyOverlaps);
+    RangePairs filteredPairs;
+    copy_if(rangePairs.begin(), rangePairs.end(), back_inserter(filteredPairs), completelyOverlaps);
     return { filteredPairs.begin(), filteredPairs.end() };
   }
 
   RangePairs findOverlapping(RangePairs rangePairs)
   {
-    auto filteredPairs = rangePairs | filter(overlaps);
+    RangePairs filteredPairs;
+    copy_if(rangePairs.begin(), rangePairs.end(), back_inserter(filteredPairs), overlaps);
     return { filteredPairs.begin(), filteredPairs.end() };
   }
 
