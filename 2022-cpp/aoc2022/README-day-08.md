@@ -79,7 +79,8 @@ This tree's scenic score is 8 (2 * 2 * 1 * 2); this is the ideal spot for the tr
 
 Consider each tree on your map. What is the highest scenic score possible for any tree?
 
-Answer: 
+Answer: 225 NOPE :(
+    321975
  
 
 
