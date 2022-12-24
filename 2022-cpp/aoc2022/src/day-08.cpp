@@ -207,13 +207,8 @@ namespace day_08
 	string answer_b(const vector<string>& input_data)
 	{
 		Forest forest = generateForest(input_data);
-
-		std::cout << "FOREST" << std::endl;
-		std::cout << forest << std::endl;
 		forest.determineRelationships();
 		forest.determineScenicScores();
-		std::cout << forest << std::endl;
-
 		return to_string(forest.highestScenicScore());
 	}
 } // namespace day_08
