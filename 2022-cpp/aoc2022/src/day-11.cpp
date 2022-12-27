@@ -8,8 +8,8 @@
 
 namespace day_11
 {
-  using std::string;
-  using std::vector;
+    using std::string;
+    using std::vector;
     using std::function;
     using std::regex;
     using std::smatch;
@@ -141,6 +141,7 @@ namespace day_11
 
         int64_t inspections() const { return inspectionsMade; }
 
+        static void resetCommonModulus() { commonModulus = 1; }
     private:
         int64_t id{ 0 };
         vector<int64_t> itemWorryLevels;
@@ -159,6 +160,8 @@ namespace day_11
     int64_t Monkey::commonModulus = 1;
 
     Monkeys initializeMonkeys(const strings& input_data, int64_t calmness = 3) {
+        // remember to reset static data on each run!
+        Monkey::resetCommonModulus();
         Monkeys monkeys;
 
         strings::const_iterator itMonkeyData = input_data.begin();
@@ -191,17 +194,17 @@ namespace day_11
     }
 
     string answer_a(const strings& input_data)
-  {
+    {
         Monkeys monkeys = initializeMonkeys(input_data);
         playAround(20, monkeys);
         return to_string(monkeyBusiness(monkeys));
-  }
+    }
 
     string answer_b(const strings& input_data)
-  {
+    {
         const int64_t calmness = 1;
         Monkeys monkeys = initializeMonkeys(input_data, calmness);
         playAround(10000, monkeys);
         return to_string(monkeyBusiness(monkeys));
-  }
+    }
 }
