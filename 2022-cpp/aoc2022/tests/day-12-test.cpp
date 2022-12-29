@@ -17,5 +17,5 @@ TEST(Day12, Part1Example)
 
 TEST(Day12, Part2Example)
 {
-  EXPECT_EQ("PENDING", day_12::answer_b(data));
+  EXPECT_EQ("29", day_12::answer_b(data));
 }

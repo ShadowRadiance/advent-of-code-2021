@@ -18,20 +18,20 @@ namespace day_12
     using std::shared_ptr, std::make_shared;
     using std::make_heap, std::pop_heap, std::sort_heap, std::push_heap;
 
-    struct Position {
+    struct Position2I {
         int x;
         int y;
 
-        static const Position up() { return { 0,-1 }; }
-        static const Position dn() { return { 0,+1 }; }
-        static const Position lt() { return { -1,0 }; }
-        static const Position rt() { return { +1,0 }; }
+        static const Position2I up() { return { 0,-1 }; }
+        static const Position2I dn() { return { 0,+1 }; }
+        static const Position2I lt() { return { -1,0 }; }
+        static const Position2I rt() { return { +1,0 }; }
 
-        bool operator<(const Position& rhs) const { return x < rhs.x || (x == rhs.x && y < rhs.y); }
-        bool operator==(const Position& rhs) const { return x == rhs.x && y == rhs.y; }
-        Position operator+(const Position& rhs) const { return { x + rhs.x, y + rhs.y }; }
-        Position operator-(const Position& rhs) const { return { x - rhs.x, y - rhs.y }; }
-        int manhattanDistanceFrom(const Position& rhs) { Position pos{ *this - rhs }; return abs(pos.x) + abs(pos.y); }
+        bool operator<(const Position2I& rhs) const { return x < rhs.x || (x == rhs.x && y < rhs.y); }
+        bool operator==(const Position2I& rhs) const { return x == rhs.x && y == rhs.y; }
+        Position2I operator+(const Position2I& rhs) const { return { x + rhs.x, y + rhs.y }; }
+        Position2I operator-(const Position2I& rhs) const { return { x - rhs.x, y - rhs.y }; }
+        int manhattanDistanceFrom(const Position2I& rhs) { Position2I pos{ *this - rhs }; return abs(pos.x) + abs(pos.y); }
     };
 
     class CharHeightNode {
@@ -58,41 +58,25 @@ namespace day_12
         int height() const { return height_; }
         int width() const { return width_; }
 
-        CharHeightNode at(Position pos) const { return data_[indexFromPosition(pos)]; }
-        void set(Position pos, CharHeightNode node) { data_[indexFromPosition(pos)] = node; }
+        CharHeightNode at(Position2I pos) const { return data_[indexFromPosition(pos)]; }
+        void set(Position2I pos, CharHeightNode node) { data_[indexFromPosition(pos)] = node; }
 
-        vector<Position> neighbouringPositionsOf(Position pos) const {
-            vector<Position> neighbours;
+        vector<Position2I> neighbouringPositionsOf(Position2I pos) const {
+            vector<Position2I> neighbours;
 
             int maxHeight = height_ - 1;
             int maxWidth = width_ - 1;
 
-            if (pos.y - 1 >= 0)
-            {
-                neighbours.push_back(pos + Position::up());
-            }
+            if (pos.y - 1 >= 0) neighbours.push_back(pos + Position2I::up());
+            if (pos.y + 1 <= maxHeight) neighbours.push_back(pos + Position2I::dn());
+            if (pos.x - 1 >= 0) neighbours.push_back(pos + Position2I::lt());
+            if (pos.x + 1 <= maxWidth) neighbours.push_back(pos + Position2I::rt());
 
-            if (pos.y + 1 <= maxHeight)
-            {
-                neighbours.push_back(pos + Position::dn());
-            }
-
-            if (pos.x - 1 >= 0)
-            {
-                neighbours.push_back(pos + Position::lt());
-            }
-
-            if (pos.x + 1 <= maxWidth)
-            {
-                neighbours.push_back(pos + Position::rt());
-            }
-
-            if (neighbours.empty()) return {};
-            else return neighbours;
+            return neighbours;
         }
 
-        Position positionFromIndex(int index) const { return { index % width_, index / width_ }; }
-        int indexFromPosition(Position pos) const { return pos.x + width_ * pos.y; }
+        Position2I positionFromIndex(int index) const { return { index % width_, index / width_ }; }
+        int indexFromPosition(Position2I pos) const { return pos.x + width_ * pos.y; }
     private:
         int height_;
         int width_;
@@ -102,20 +86,20 @@ namespace day_12
     class AStar {
         struct Node
         {
-            Position value;
+            Position2I value;
             int cheapestCostToNode = INT_MAX;    // gScore
             int bestGuessCostToFinish = INT_MAX; // fScore
             shared_ptr<Node> cameFrom;
         };
     public:
-        using EstimateDistanceToTargetFn = function<int(Position)>;
-        using IsTargetFn = function<bool(Position)>;
-        using GetNeighboursOfFn = function<vector<Position>(Position)>;
-        using DistanceToMoveFn = function<int(Position, Position)>;
-        using Path = vector<Position>;
+        using EstimateDistanceToTargetFn = function<int(Position2I)>;
+        using IsTargetFn = function<bool(Position2I)>;
+        using GetNeighboursOfFn = function<vector<Position2I>(Position2I)>;
+        using DistanceToMoveFn = function<int(Position2I, Position2I)>;
+        using Path = vector<Position2I>;
     private:
         using NodePtr = shared_ptr<Node>;
-        using Lookup = map<Position, NodePtr>;
+        using Lookup = map<Position2I, NodePtr>;
         using MinHeap = vector<NodePtr>;
 
     public:
@@ -132,7 +116,7 @@ namespace day_12
         {
         }
 
-        optional<Path> execute(Position startValue)
+        optional<Path> execute(Position2I startValue)
         {
             Lookup allNodes;
 
@@ -161,8 +145,8 @@ namespace day_12
                 // are we done?
                 if (isTarget(current->value)) return constructPath(current);
 
-                vector<Position> posNeighbours = getNeighboursOf(current->value);
-                for (Position posNeighbour : posNeighbours) {
+                vector<Position2I> posNeighbours = getNeighboursOf(current->value);
+                for (Position2I posNeighbour : posNeighbours) {
                     if (!allNodes.contains(posNeighbour)) {
                         allNodes.insert({ posNeighbour, make_shared<Node>(posNeighbour) });
                     }
@@ -202,25 +186,25 @@ namespace day_12
     class GridRunner
     {
     public:
-        GridRunner(const Grid& grid, Position start, Position end)
-            : grid_(grid), start_(start), end_(end)
+        GridRunner(const Grid& grid)
+            : grid_(grid)
         {
         }
-        optional<vector<Position>> findOptimalPath() {
-            auto estimateDistanceToTarget = [=](Position pos) -> int {
+        optional<vector<Position2I>> findOptimalPath(Position2I startPos, Position2I endPos) {
+            auto estimateDistanceToTarget = [=](Position2I pos) -> int {
                 return 25 - grid_.at(pos).height();
             };
-            auto isTarget = [=](Position pos) -> bool {
-                return end_ == pos;
+            auto isTarget = [=](Position2I pos) -> bool {
+                return endPos == pos;
             };
-            auto getValidNeighboursOf = [=](Position posCurrent) -> vector<Position> {
-                vector<Position> neighbours = grid_.neighbouringPositionsOf(posCurrent);
+            auto getValidNeighboursOf = [=](Position2I posCurrent) -> vector<Position2I> {
+                vector<Position2I> neighbours = grid_.neighbouringPositionsOf(posCurrent);
                 if (neighbours.empty())
                     return neighbours;
                 else {
                     neighbours.erase(remove_if(
                         begin(neighbours), end(neighbours),
-                        [=](Position posNeighbour)
+                        [=](Position2I posNeighbour)
                         {
                             return grid_.at(posNeighbour).height() > grid_.at(posCurrent).height() + 1;
                         }),
@@ -228,7 +212,7 @@ namespace day_12
                     return neighbours;
                 }
             };
-            auto distanceToMove = [=](Position a, Position b) -> int {
+            auto distanceToMove = [=](Position2I a, Position2I b) -> int {
                 return 1;
             };
 
@@ -239,14 +223,61 @@ namespace day_12
                 distanceToMove
             };
 
-            optional<vector<Position>> path = aStar.execute(start_);
+            optional<vector<Position2I>> path = aStar.execute(startPos);
             if (path.has_value()) return path.value();
             return {};
         }
     private:
         const Grid& grid_;
-        Position start_{ 0,0 };
-        Position end_{ 0,0 };
+    };
+
+    class ReverseGridRunner
+    {
+    public:
+        ReverseGridRunner(const Grid& grid)
+            : grid_(grid)
+        {
+        }
+        optional<vector<Position2I>> findOptimalPath(Position2I startPos, int targetHeight) {
+            auto estimateDistanceToTarget = [=](Position2I pos) -> int {
+                return grid_.at(pos).height();
+            };
+            auto isTarget = [=](Position2I pos) -> bool {
+                return grid_.at(pos).height() == 0;
+            };
+            auto getValidNeighboursOf = [=](Position2I posCurrent) -> vector<Position2I> {
+                vector<Position2I> neighbours = grid_.neighbouringPositionsOf(posCurrent);
+                if (neighbours.empty())
+                    return neighbours;
+                else {
+                    neighbours.erase(remove_if(
+                        begin(neighbours), end(neighbours),
+                        [=](Position2I posNeighbour)
+                        {
+                            return grid_.at(posNeighbour).height() < grid_.at(posCurrent).height() - 1;
+                            return grid_.at(posNeighbour).height() < grid_.at(posCurrent).height() - 1;
+                        }),
+                        end(neighbours));
+                    return neighbours;
+                }
+            };
+            auto distanceToMove = [=](Position2I a, Position2I b) -> int {
+                return 1;
+            };
+
+            AStar aStar{
+                estimateDistanceToTarget,
+                isTarget,
+                getValidNeighboursOf,
+                distanceToMove
+            };
+
+            optional<vector<Position2I>> path = aStar.execute(startPos);
+            if (path.has_value()) return path.value();
+            return {};
+        }
+    private:
+        const Grid& grid_;
     };
 
     string answer_a(const vector<string>& input_data)
@@ -266,18 +297,76 @@ namespace day_12
         }
 
         Grid grid{ nodes, width, height };
-        Position start = grid.positionFromIndex(indexStart);
-        Position end = grid.positionFromIndex(indexEnd);
+        Position2I start = grid.positionFromIndex(indexStart);
+        Position2I end = grid.positionFromIndex(indexEnd);
 
-        GridRunner runner{ grid, start, end };
-        optional<vector<Position>> path = runner.findOptimalPath();
+        GridRunner runner{ grid };
+        optional<vector<Position2I>> path = runner.findOptimalPath(start, end);
 
-        if (path.has_value()) return to_string(path.value().size()-1);
+        if (path.has_value()) return to_string(path.value().size() - 1);
         return "no path found from S to E";
     }
 
     string answer_b(const vector<string>& input_data)
     {
-        return "PENDING";
+        vector<CharHeightNode> nodes;
+        int indexStart;
+        int height = input_data.size();
+        int width = input_data[0].length();
+
+        for (const string& str : input_data) {
+            for (char c : str) {
+                nodes.push_back(CharHeightNode{ c });
+                if (c == 'E') { indexStart = nodes.size() - 1; }
+            }
+        }
+
+        Grid grid{ nodes, width, height };
+        ReverseGridRunner runner{ grid };
+
+        vector<vector<Position2I>> possiblePaths;
+
+        Position2I startPos = grid.positionFromIndex(indexStart);
+
+        optional<vector<Position2I>> path = runner.findOptimalPath(startPos, 0);
+
+        if (path.has_value()) possiblePaths.push_back(path.value());
+
+        auto it = min_element(begin(possiblePaths), end(possiblePaths), [](auto& pathA, auto& pathB) { return pathA.size() < pathB.size(); });
+        return to_string(it->size() - 1);
+    }
+
+
+    string answer_b_1(const vector<string>& input_data)
+    {
+        vector<CharHeightNode> nodes;
+        vector<int> indexesStart;
+        int indexEnd = 0;
+        int height = input_data.size();
+        int width = input_data[0].length();
+
+        for (const string& str : input_data) {
+            for (char c : str) {
+                nodes.push_back(CharHeightNode{ c });
+                if (c == 'S' || c == 'a') { indexesStart.push_back(nodes.size() - 1); }
+                if (c == 'E') { indexEnd = nodes.size() - 1; }
+            }
+        }
+
+        Grid grid{ nodes, width, height };
+        Position2I endPos = grid.positionFromIndex(indexEnd);
+        GridRunner runner{ grid };
+
+        vector<vector<Position2I>> possiblePaths;
+        for (int indexStart : indexesStart) {
+            Position2I startPos = grid.positionFromIndex(indexStart);
+
+            optional<vector<Position2I>> path = runner.findOptimalPath(startPos, endPos);
+
+            if (path.has_value()) possiblePaths.push_back(path.value());
+        }
+
+        auto it = min_element(begin(possiblePaths), end(possiblePaths), [](auto& pathA, auto& pathB) { return pathA.size() < pathB.size(); });
+        return to_string(it->size() - 1);
     }
 }
