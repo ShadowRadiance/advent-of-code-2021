@@ -2,18 +2,20 @@
 
 #include <days.h>
 
+const std::vector<std::string> data{
+    "Sabqponm",
+    "abcryxxl",
+    "accszExk",
+    "acctuvwj",
+    "abdefghi",
+};
+
 TEST(Day12, Part1Example)
 {
-  std::vector<std::string> data{
-  };
-
-  EXPECT_EQ("PENDING", day_12::answer_a(data));
+  EXPECT_EQ("31", day_12::answer_a(data));
 }
 
 TEST(Day12, Part2Example)
 {
-  std::vector<std::string> data{
-  };
-
   EXPECT_EQ("PENDING", day_12::answer_b(data));
 }
