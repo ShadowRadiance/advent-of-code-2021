@@ -26,6 +26,17 @@ namespace Packet13
         explicit Node(int i) : data(i) {}
         explicit Node(vector<Node> v) : data(std::move(v)) {}
 
+        friend bool operator==(Node const& lhs, Node const& rhs)
+        {
+            auto overloads = overloaded{
+                [](int l, int r) { return l == r; },
+                [](vector<Node> const& l, vector<Node> const& r) { return l == r; },
+                [](int l, vector<Node> const& r) { return vector<Node>{Node{l}} == r; },
+                [](vector<Node> const& l, int r) { return l == vector<Node>{Node{r}}; },
+            };
+            return std::visit(overloads, lhs.data, rhs.data);
+        }
+
         friend bool operator<(Node const& lhs, Node const& rhs)
         {
             auto overloads = overloaded{
@@ -112,8 +123,9 @@ namespace day_13
         pair<Node, Node> pair;
     };
     using NodePairs = vector<NodePair>;
+    using Nodes = vector<Node>;
 
-    NodePairs parseInput(vector<string> const& input)
+    NodePairs parseNodePairs(vector<string> const& input)
     {
         vector<string> filtered;
         copy_if(input.begin(), input.end(), back_inserter(filtered), [](auto& s) { return !s.empty();  });
@@ -132,6 +144,16 @@ namespace day_13
         return result;
     }
 
+    Nodes parseNodes(vector<string> const& input) {
+        vector<string> filtered;
+        copy_if(input.begin(), input.end(), back_inserter(filtered), [](auto& s) { return !s.empty();  });
+
+        vector<Node> allNodes;
+        std::transform(filtered.begin(), filtered.end(), back_inserter(allNodes), parseNode);
+
+        return allNodes;
+    }
+
     bool ordered(NodePair& nodePair)
     {
         return nodePair.pair.first < nodePair.pair.second;
@@ -139,7 +161,7 @@ namespace day_13
 
     string answer_a(const vector<string>& input_data)
     {
-        NodePairs nodePairs = parseInput(input_data);
+        NodePairs nodePairs = parseNodePairs(input_data);
         //std::cout << "Pairs 1, 2, 4, and 6 should be considered ordered correctly." << std::endl;
 
         int sum = 0;
@@ -159,6 +181,23 @@ namespace day_13
 
     string answer_b(const vector<string>& input_data)
     {
-        return "PENDING";
+        vector<string> modified_data{ input_data.begin(), input_data.end() };
+        modified_data.push_back("[[2]]");
+        modified_data.push_back("[[6]]");
+
+        Nodes nodes = parseNodes(modified_data);
+
+        Node twoSeparator = parseNode("[[2]]");
+        Node sixSeparator = parseNode("[[6]]");
+
+        std::sort(nodes.begin(), nodes.end());
+
+        auto itSeparator2 = std::find(nodes.begin(), nodes.end(), twoSeparator);
+        auto itSeparator6 = std::find(nodes.begin(), nodes.end(), sixSeparator);
+
+        int index2 = std::distance(nodes.begin(), itSeparator2) + 1;
+        int index6 = std::distance(nodes.begin(), itSeparator6) + 1;
+
+        return std::to_string(index2 * index6);
     }
 }
