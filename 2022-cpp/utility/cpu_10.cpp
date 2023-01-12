@@ -94,4 +94,9 @@ CPU_10::CostedOperation CPU_10::operation(const string& instruction)
             operations_costs.at(command)
         );
     }
+
+    return make_tuple(
+        [=, this]() -> void { return; },
+        0
+    );
 }
