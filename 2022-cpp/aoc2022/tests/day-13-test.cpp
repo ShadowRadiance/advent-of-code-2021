@@ -2,7 +2,7 @@
 
 #include <days.h>
 
-std::vector<std::string> data = {
+const std::vector<std::string> data = {
     "[1,1,3,1,1]",
     "[1,1,5,1,1]",
     "",
