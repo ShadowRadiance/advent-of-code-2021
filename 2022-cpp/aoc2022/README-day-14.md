@@ -163,7 +163,7 @@ In the example above, the highest y coordinate of any point is 9, and so the flo
 <-- etc #################### etc -->
 ```
 
-To find somewhere safe to stand, you'll need to simulate falling sand until a unit of sand comes to rest at 500,0, blocking the source entirely and stopping the flow of sand into the cave. In the example above, the situation finally looks like this after 93 units of sand come to rest:
+To find somewhere safe to stand, you'll need to simulate falling sand until a unit of sand comes to rest at 500,0, blocking the source entirely and stopping the flow of sand into the cave. In the example above, the situation finally looks like this after `93` units of sand come to rest:
 
 ```
 ............o............
@@ -183,4 +183,6 @@ To find somewhere safe to stand, you'll need to simulate falling sand until a un
 Using your scan, simulate the falling sand until the source of the sand becomes blocked. How many units of sand come to rest?
 
 Answer: 
- 
+
+Day 14 Answer B (Recursive): ( 9907057us) 26686
+Day 14 Answer B (Iterative): ( 2888792us) 26686

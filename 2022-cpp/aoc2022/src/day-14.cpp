@@ -89,13 +89,15 @@ namespace day_14
 	class SandInjector
 	{
 	public:
-		SandInjector(Cave& cave, Vector2D injectionPoint)
-			: cave(cave), injectionPoint(injectionPoint)
+		SandInjector(Cave& cave, Vector2D injectionPoint, bool infiniteFalloff = true)
+			: cave(cave)
+			, injectionPoint(injectionPoint)
+			, infiniteFalloff(infiniteFalloff)
 		{
 			auto lesserY = [](auto& lPair, auto& rPair) {
 				return lPair.first.y < rPair.first.y;
 			};
-			falloffPoint = {
+			lowestLevel = {
 				0.0,
 				std::max_element(
 					cave.begin(), cave.end(), lesserY
@@ -103,17 +105,33 @@ namespace day_14
 			};
 		}
 		std::optional<Vector2D> injectSand() {
+			if (injectionPointBlocked()) return {};
+
 			cave.add("sand", injectionPoint);
 			return settle(injectionPoint);
 		}
 	private:
+		bool injectionPointBlocked() {
+			return cave.at(injectionPoint) == "sand";
+		}
+
+		bool isFloor(Vector2D position) {
+			return !infiniteFalloff 
+				&& position.y == lowestLevel.y + 2;
+		}
+
+		bool fallingIntoInfinity(Vector2D position) {
+			return infiniteFalloff 
+				&& position.y > lowestLevel.y;
+		}
+
 		std::optional<Vector2D> settle(Vector2D position) {
 			return settle_iterative(position);
 		}
 
 		std::optional<Vector2D> settle_recursive(Vector2D position) {
 			assert(cave.at(position) == "sand");
-			if (position.y > falloffPoint.y) {
+			if (fallingIntoInfinity(position)) {
 				cave.remove(position);
 				return {};
 			}
@@ -121,15 +139,15 @@ namespace day_14
 			auto dn = position + Vector2D::dn();
 			auto dn_lt = dn + Vector2D::lt();
 			auto dn_rt = dn + Vector2D::rt();
-			if (cave.at(dn) == "") {
+			if (cave.at(dn) == "" && !isFloor(dn)) {
 				cave.add(cave.remove(position), dn);
 				return settle(dn);
 			}
-			if (cave.at(dn_lt) == "") {
+			if (cave.at(dn_lt) == "" && !isFloor(dn_lt)) {
 				cave.add(cave.remove(position), dn_lt);
 				return settle(dn_lt);
 			}
-			if (cave.at(dn_rt) == "") {
+			if (cave.at(dn_rt) == "" && !isFloor(dn_rt)) {
 				cave.add(cave.remove(position), dn_rt);
 				return settle(dn_rt);
 			}
@@ -141,23 +159,23 @@ namespace day_14
 			assert(cave.at(position) == "sand");
 
 			while (true) {
-				if (targetPos.y > falloffPoint.y) {
+				if (fallingIntoInfinity(targetPos)) {
 					cave.remove(position);
 					return {};
 				}
 
 				Vector2D newPos = targetPos + Vector2D::dn();
-				if (cave.at(newPos) == "") {
+				if (cave.at(newPos) == "" && !isFloor(newPos)) {
 					targetPos = newPos;
 					continue;
 				}
 				newPos = targetPos + Vector2D::dn() + Vector2D::lt();
-				if (cave.at(newPos) == "") {
+				if (cave.at(newPos) == "" && !isFloor(newPos)) {
 					targetPos = newPos;
 					continue;
 				}
 				newPos = targetPos + Vector2D::dn() + Vector2D::rt();
-				if (cave.at(newPos) == "") {
+				if (cave.at(newPos) == "" && !isFloor(newPos)) {
 					targetPos = newPos;
 					continue;
 				}
@@ -168,7 +186,8 @@ namespace day_14
 	private:
 		Cave& cave;
 		Vector2D injectionPoint;
-		Vector2D falloffPoint;
+		Vector2D lowestLevel;
+		bool infiniteFalloff;
 	};
 
 	class Parser
@@ -256,6 +275,11 @@ namespace day_14
 
 	string answer_b(const vector<string>& input_data)
 	{
-		return "PENDING";
+		Cave cave;
+		Parser parser(input_data);
+		parser.populate(cave);
+		SandInjector sandInjector{ cave, {500, 0}, false };
+		while (sandInjector.injectSand()) {}
+		return std::to_string(cave.count("sand"));
 	}
 }
