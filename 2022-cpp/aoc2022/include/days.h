@@ -75,7 +75,9 @@ namespace day_14 {
 
 namespace day_15 {
   std::string answer_a(const std::vector<std::string>& input_data);
+  std::string answer_a_test(const std::vector<std::string>& input_data);
   std::string answer_b(const std::vector<std::string>& input_data);
+  std::string answer_b_test(const std::vector<std::string>& input_data);
 }
 
 namespace day_16 {
