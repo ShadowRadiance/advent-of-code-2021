@@ -82,7 +82,11 @@
     "span": "cpp",
     "stack": "cpp",
     "thread": "cpp",
-    "unordered_set": "cpp"
+    "unordered_set": "cpp",
+    "functional": "cpp",
+    "iterator": "cpp",
+    "memory_resource": "cpp",
+    "filesystem": "cpp"
   },
   "cmake.sourceDirectory": "${workspaceFolder}/2022-cpp"
 }
