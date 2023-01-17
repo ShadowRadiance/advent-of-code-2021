@@ -17,8 +17,11 @@ namespace Packet13
     using std::variant;
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    //template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-
+    #if defined(__clang__) && defined(__apple_build_version__)
+        #if __apple_build_version__ <= 14000029
+            template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+        #endif
+    #endif
     struct Node
     {
         variant<int, vector<Node>> data;
@@ -55,7 +58,7 @@ namespace Packet13
                 for (Node& node : std::get<vector<Node>>(node.data)) {
                     if (!firstTime) os << ",";
                     os << node;
-                    firstTime = false;                    
+                    firstTime = false;
                 }
                 os << "]";
             }
@@ -113,7 +116,7 @@ namespace day_13
     using std::string;
     using std::vector;
     using std::pair;
-    
+
     using Packet13::Node;
     using Packet13::parseNode;
 
@@ -137,7 +140,7 @@ namespace day_13
         auto it = allNodes.begin();
         auto end = allNodes.end();
         while (it != end) {
-            result.emplace_back(result.size()+1, std::make_pair(*it, *(it + 1)));
+            result.push_back({result.size()+1, std::make_pair(*it, *(it + 1))});
             it += 2;
         }
 
