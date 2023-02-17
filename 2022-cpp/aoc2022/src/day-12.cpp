@@ -90,6 +90,21 @@ namespace day_12
             int cheapestCostToNode = INT_MAX;    // gScore
             int bestGuessCostToFinish = INT_MAX; // fScore
             shared_ptr<Node> cameFrom;
+
+            #if defined(__clang__) && defined(__apple_build_version__)
+                #if __apple_build_version__ <= 14000029
+                    Node(
+                        Position2I value = Position2I{},
+                        int cheapestCostToNode = INT_MAX,
+                        int bestGuessCostToFinish = INT_MAX
+                    )
+                        : value(value)
+                        , cheapestCostToNode(cheapestCostToNode)
+                        , bestGuessCostToFinish(bestGuessCostToFinish)
+                        , cameFrom(nullptr)
+                    {}
+                #endif
+            #endif
         };
     public:
         using EstimateDistanceToTargetFn = function<int(Position2I)>;
@@ -173,7 +188,7 @@ namespace day_12
         Path constructPath(NodePtr end) {
             Path path;
             NodePtr n = end;
-            do { path.push_back(n->value); } while (n = n->cameFrom);
+            do { path.push_back(n->value); } while ((n = n->cameFrom));
             return path;
         }
     private:
