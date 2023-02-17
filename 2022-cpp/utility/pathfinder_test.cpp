@@ -26,7 +26,7 @@ SimpleGraph buildSimpleGraph()
 TEST(Pathfinder, SimpleGraph)
 {
 	SimpleGraph graph = buildSimpleGraph();
-	
+
 	EXPECT_THROW(graph.addNode('H', {}), std::invalid_argument);
 
 	auto a = graph.findNode('A');
@@ -46,8 +46,8 @@ TEST(Pathfinder, BreadthFirstSearch)
 	auto h = graph.findNode('H');
 	auto j = graph.findNode('J');
 
-	CameFromMap result = breadth_first_search(graph,a,h);
-	Path path = reconstruct_path(a, h, result);
+	CameFromMap result = breadth_first_search(graph, a, h);
+	auto path = reconstruct_path(a, h, result);
 	EXPECT_EQ(path.size(), 6); // ADEFGH
 
 	std::string s;
@@ -71,7 +71,7 @@ TEST(Pathfinder, DijkstraSearch)
 	CameFromMap result;
 	CostMap costs;
 	dijkstra_search(graph, a, h, result, costs);
-	Path path = reconstruct_path(a, h, result);
+	auto path = reconstruct_path(a, h, result);
 	EXPECT_EQ(path.size(), 6); // ADEFGH
 
 	std::string s;
@@ -98,7 +98,7 @@ TEST(Pathfinder, AStarSearch)
 	CostMap costs;
 	auto fn = [](auto _next, auto _goal) { return 1; };
 	a_star_search(graph, a, h, fn, result, costs);
-	Path path = reconstruct_path(a, h, result);
+	auto path = reconstruct_path(a, h, result);
 	EXPECT_EQ(path.size(), 6); // ADEFGH
 
 	std::string s;

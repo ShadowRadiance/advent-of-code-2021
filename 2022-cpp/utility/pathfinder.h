@@ -12,6 +12,8 @@ namespace advent_of_code
 		{
 		public:
 			typedef void* NodeHandle;
+			virtual std::vector<NodeHandle> allNodes() const = 0;
+			virtual size_t numberOfNodes() const = 0;
 			virtual std::vector<NodeHandle> neighbours(NodeHandle handle) const = 0;
 		};
 
@@ -31,6 +33,8 @@ namespace advent_of_code
 				bool hasEdge(char id) const;
 			};
 			double cost(NodeHandle from, NodeHandle to) const override;
+			std::vector<NodeHandle> allNodes() const override;
+			size_t numberOfNodes() const override;
 			std::vector<NodeHandle> neighbours(NodeHandle handle) const override;
 			NodeHandle findNode(char id) const;
 			NodeHandle addNode(char id, std::vector<char> edges);
@@ -44,9 +48,8 @@ namespace advent_of_code
 			ptrdiff_t index(char id) const;
 		};
 
-		using CameFromMap = std::unordered_map<IGraph::NodeHandle, IGraph::NodeHandle>;
-		using CostMap = std::unordered_map<IGraph::NodeHandle, double>;
-		using Path = std::vector<IGraph::NodeHandle>;
+		class CameFromMap : public std::unordered_map<IGraph::NodeHandle, IGraph::NodeHandle> {};
+		class CostMap : public std::unordered_map<IGraph::NodeHandle, double> {};
 
 		CameFromMap breadth_first_search(const IGraph& graph,
 										 IGraph::NodeHandle start,
@@ -58,9 +61,9 @@ namespace advent_of_code
 							 CameFromMap& came_from,
 							 CostMap& cost_so_far);
 
-		Path reconstruct_path(IGraph::NodeHandle start,
-							  IGraph::NodeHandle goal,
-							  CameFromMap came_from);
+		std::vector<IGraph::NodeHandle> reconstruct_path(IGraph::NodeHandle start,
+														 IGraph::NodeHandle goal,
+														 CameFromMap came_from);
 
 		using HeuristicFunction = std::function<double(IGraph::NodeHandle, IGraph::NodeHandle)>;
 
@@ -70,5 +73,14 @@ namespace advent_of_code
 						   HeuristicFunction heuristic_fn,
 						   CameFromMap& came_from,
 						   CostMap& cost_so_far);
+
+		class FloydWarshallDistances :public std::unordered_map<IGraph::NodeHandle, std::unordered_map<IGraph::NodeHandle, double>> {};
+		class FloydWarshallNexts :public std::unordered_map<IGraph::NodeHandle, std::unordered_map<IGraph::NodeHandle, IGraph::NodeHandle>> {};
+		void floyd_warshall(const IWeightedGraph& graph, FloydWarshallDistances& distances, FloydWarshallNexts& nexts);
+
+		std::vector<IGraph::NodeHandle> reconstruct_path(IGraph::NodeHandle from,
+														 IGraph::NodeHandle to,
+														 const FloydWarshallNexts& nexts);
+
 	} // namespace Pathfinder
 } // namespace advent_of_code
