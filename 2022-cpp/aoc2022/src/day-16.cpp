@@ -9,6 +9,7 @@
 #include <unordered_map>
 
 #include <iostream>
+#include <algorithm>
 
 namespace day_16
 {
@@ -72,13 +73,13 @@ namespace day_16
     auto floyd_warshall(const vector<Valve>& valves)
     {
         auto size = valves.size();
-        // Matrix<size_t> distances(size, size, INT_MAX);
-        // Matrix<maybe_int> nexts(size, size, {});
+        std::vector<std::vector<size_t>> distances(size, std::vector<size_t>(size, INT_MAX));
+        std::vector<std::vector<maybe_int>> nexts(size, std::vector<maybe_int>(size));
 
         // record the vertices
         for (int i = 0; i < size; ++i) {
-            distances(i, i) = 0;
-            nexts(i, i) = i;
+            distances[i][i] = 0;
+            nexts[i][i] = i;
         }
 
         // record the edges
@@ -92,9 +93,9 @@ namespace day_16
                 if (it != valves.end()) {
                     auto j = std::distance(valves.begin(), it);
                     auto& valveU = *it;
-                    distances(i, j) = 1; // edge weight
-                    distances(j, i) = 1; // reverse link
-                    nexts(i, j) = j;
+                    distances[i][j] = 1; // edge weight
+                    distances[j][i] = 1; // reverse link
+                    nexts[i][j] = j;
                 }
             }
         }
@@ -103,9 +104,10 @@ namespace day_16
         for (int k = 0; k < size; ++k) {
             for (int i = 0; i < size; ++i) {
                 for (int j = 0; j < size; ++j) {
-                    if (distances(i, j) > distances(i, k) + distances(k, j)) {
-                        distances(i, j) = distances(i, k) + distances(k, j);
-                        nexts(i, j) = nexts(i, k);
+                    size_t newDistance = distances[i][k] + distances[k][j];
+                    if (distances[i][j] > newDistance) {
+                      distances[i][j] = newDistance;
+                      nexts[i][j] = nexts[i][k];
                     }
                 }
             }
@@ -117,37 +119,42 @@ namespace day_16
     vector<int> findPath(
         size_t fromIndex, 
         size_t toIndex,
-        const Matrix<maybe_int>& f_w_next_matrix)
+        std::vector<std::vector<maybe_int>> &f_w_next_matrix)
     {
-        vector<int> valveIndices;
-        if (!f_w_next_matrix(fromIndex, toIndex).has_value())
-            return valveIndices;
+        vector<int> path;
+        if (!f_w_next_matrix[fromIndex][toIndex].has_value())
+            return path;
         
-        valveIndices.push_back(f_w_next_matrix(fromIndex, fromIndex).value());
+        path.push_back(fromIndex);
         while (fromIndex != toIndex) {
-            fromIndex = f_w_next_matrix(fromIndex, toIndex).value();
-            valveIndices.push_back(fromIndex);
+            fromIndex = f_w_next_matrix[fromIndex][toIndex].value();
+            path.push_back(fromIndex);
         }
-        return valveIndices;
+        return path;
+    }
+
+    void printPaths(auto nexts, const vector<Valve> &valves) {
+        auto size = valves.size();
+        for (size_t u = 0; u < size; u++) {
+            std::cout << "Paths from " << valves[u].name << "\n";
+            for (size_t v = 0; v < size; v++) {
+                if (u == v)
+                    continue;
+                std::cout << "\t to " << valves[v].name << ": ";
+                auto indices = findPath(u, v, nexts);
+                for (int idx : indices) {
+                    std::cout << valves[idx].name << " ";
+                }
+                std::cout << "(" << indices.size() << ")\n";
+            }
+        }
     }
 
     int solve(const vector<Valve>& valves)
     {
         auto [distances, nexts] = floyd_warshall(valves);
         
-        auto size = valves.size();
-        for (size_t u = 0; u < size; u++) {
-            std::cout << "Paths from " << valves[u].name << "\n";
-            for (size_t v = 0; v < size; v++) {
-                if (u == v) continue;
-                std::cout << "\t to " << valves[v].name << ": ";
-                auto indices = findPath(u, v, nexts);
-                for (int idx : indices) {
-                    std::cout << valves[idx].name << " ";
-                }
-                std::cout << "(" << indices.size() << ")\n";            
-            }
-        }
+        printPaths(nexts, valves);
 
         return 0;
     }
