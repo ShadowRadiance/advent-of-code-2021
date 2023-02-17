@@ -8,6 +8,7 @@
 #include <utility>
 #include <vector>
 #include <stdexcept>
+#include <optional>
 
 namespace advent_of_code
 {
@@ -44,6 +45,11 @@ namespace advent_of_code
 			return result;
 		}
 
+		size_t SimpleGraph::numberOfNodes() const
+		{
+			return nodes.size();
+		}
+
 		double SimpleGraph::cost(NodeHandle from, NodeHandle to) const
 		{
 			// from and to must be adjacent
@@ -53,6 +59,16 @@ namespace advent_of_code
 			if (!fromNode.hasEdge(toNode.id)) throw invalid_argument("from and to must be adjacent");
 
 			return 1;
+		}
+
+		vector<NodeHandle> SimpleGraph::allNodes() const
+		{
+			vector<NodeHandle> result(nodes.size());
+			// convert each index into a handle
+			for (ptrdiff_t i = 0; i < nodes.size(); i++) {
+				result[i] = handle(i);
+			}
+			return result;
 		}
 
 		NodeHandle SimpleGraph::findNode(char id) const
@@ -80,12 +96,18 @@ namespace advent_of_code
 
 		NodeHandle SimpleGraph::handle(ptrdiff_t index) const
 		{
-			return reinterpret_cast<NodeHandle>(index);
+			// the 0 handle, nullptr, would equate to index==-1
+			// valid handles are > 0
+
+			return reinterpret_cast<NodeHandle>(index + 1);
 		}
 
 		ptrdiff_t SimpleGraph::index(NodeHandle handle) const
 		{
-			return reinterpret_cast<ptrdiff_t>(handle);
+			// the 0 handle, nullptr, would equate to index==-1
+			// valid handles are > 0
+
+			return reinterpret_cast<ptrdiff_t>(handle) - 1;
 		}
 
 		ptrdiff_t SimpleGraph::index(char id) const
@@ -94,24 +116,24 @@ namespace advent_of_code
 			return it - nodes.begin();
 		}
 
-		auto breadth_first_search(const IGraph& graph,
-								  IGraph::NodeHandle start,
-								  IGraph::NodeHandle goal
-		) -> unordered_map<IGraph::NodeHandle, IGraph::NodeHandle>
+		CameFromMap breadth_first_search(const IGraph& graph,
+										 NodeHandle start,
+										 NodeHandle goal
+		)
 		{
-			queue<IGraph::NodeHandle> frontier;
+			queue<NodeHandle> frontier;
 			frontier.push(start);
 
-			unordered_map<IGraph::NodeHandle, IGraph::NodeHandle> came_from;
+			CameFromMap came_from;
 			came_from[start] = start;
 
 			while (!frontier.empty()) {
-				IGraph::NodeHandle current = frontier.front();
+				NodeHandle current = frontier.front();
 				frontier.pop();
 				if (current == goal)
 					break;
 				// yield current if yield-fn provided
-				for (IGraph::NodeHandle next : graph.neighbours(current)) {
+				for (NodeHandle next : graph.neighbours(current)) {
 					if (came_from.find(next) == came_from.end()) {
 						frontier.push(next);
 						came_from[next] = current;
@@ -138,24 +160,25 @@ namespace advent_of_code
 				return best_item;
 			}
 		};
-		
+
+		// if you pass nullptr for goal, all paths from start are determined
 		void dijkstra_search(
 			const IWeightedGraph& graph,
-			IGraph::NodeHandle start,
-			IGraph::NodeHandle goal,
+			NodeHandle start,
+			NodeHandle goal,
 			CameFromMap& came_from,
 			CostMap& cost_so_far)
 		{
-			PriorityQueue<IGraph::NodeHandle, double> frontier;
+			PriorityQueue<NodeHandle, double> frontier;
 			frontier.put(start, 0);
 			came_from[start] = start;
 			cost_so_far[start] = 0;
 
 			while (!frontier.empty()) {
-				IGraph::NodeHandle current = frontier.get();
+				NodeHandle current = frontier.get();
 				if (current == goal)
 					break;
-				for (IGraph::NodeHandle next : graph.neighbours(current)) {
+				for (NodeHandle next : graph.neighbours(current)) {
 					double new_cost = cost_so_far[current] + graph.cost(current, next);
 					if (cost_so_far.find(next) == cost_so_far.end() || new_cost < cost_so_far[next]) {
 						cost_so_far[next] = new_cost;
@@ -166,12 +189,12 @@ namespace advent_of_code
 			}
 		}
 
-		Path reconstruct_path(IGraph::NodeHandle start,
-							  IGraph::NodeHandle goal,
-							  CameFromMap came_from)
+		vector<NodeHandle> reconstruct_path(NodeHandle start,
+											NodeHandle goal,
+											CameFromMap came_from)
 		{
-			Path path;
-			IGraph::NodeHandle current = goal;
+			vector<NodeHandle> path;
+			NodeHandle current = goal;
 			if (came_from.find(goal) == came_from.end())
 				return path;
 			while (current != start) {
@@ -184,23 +207,23 @@ namespace advent_of_code
 		}
 
 		void a_star_search(const IWeightedGraph& graph,
-						   IGraph::NodeHandle start,
-						   IGraph::NodeHandle goal,
+						   NodeHandle start,
+						   NodeHandle goal,
 						   HeuristicFunction heuristic_fn,
 						   CameFromMap& came_from,
 						   CostMap& cost_so_far)
 		{
-			PriorityQueue<IGraph::NodeHandle, double> frontier;
+			PriorityQueue<NodeHandle, double> frontier;
 			frontier.put(start, 0);
 			came_from[start] = start;
 			cost_so_far[start] = 0;
 
 			while (!frontier.empty()) {
-				IGraph::NodeHandle current = frontier.get();
+				NodeHandle current = frontier.get();
 				if (current == goal)
 					break;
 
-				for (IGraph::NodeHandle next : graph.neighbours(current)) {
+				for (NodeHandle next : graph.neighbours(current)) {
 					double new_cost = cost_so_far[current] + graph.cost(current, next);
 					if (cost_so_far.find(next) == cost_so_far.end() || new_cost < cost_so_far[next]) {
 						cost_so_far[next] = new_cost;
@@ -210,6 +233,66 @@ namespace advent_of_code
 					}
 				}
 			}
+		}
+
+		void floyd_warshall(const IWeightedGraph& graph, FloydWarshallDistances& distances, FloydWarshallNexts& nexts)
+		{
+			vector<NodeHandle> allNodes = graph.allNodes();
+			size_t size = allNodes.size();
+
+			for (NodeHandle v : allNodes) {
+				distances[v] = FloydWarshallDistances::mapped_type{}; // std::unordered_map<NodeHandle, double>{};
+				nexts[v] = FloydWarshallNexts::mapped_type{}; // std::unordered_map<NodeHandle, NodeHandle>{};
+				for (NodeHandle u : allNodes) {
+					distances[v][u] = std::numeric_limits<double>::infinity();
+					nexts[v][u] = nullptr;
+				}
+			}
+
+			// HANDLE VERTICES
+			for (NodeHandle v : allNodes) {
+				distances[v][v] = 0;
+				nexts[v][v] = v;
+			}
+
+			// HANDLE DIRECT EDGES
+			for (NodeHandle u : allNodes) {
+				for (NodeHandle v : graph.neighbours(u)) {
+					distances[u][v] = graph.cost(u, v);
+					nexts[u][v] = v;
+				}
+			}
+
+			// DETERMINE SHORTEST PATHS
+			for (NodeHandle k : allNodes) {
+				for (NodeHandle u : allNodes) {
+					for (NodeHandle v : allNodes) {
+						double newDistance = distances[u][k] + distances[k][v];
+						if (distances[u][v] > newDistance) {
+							distances[u][v] = newDistance;
+							nexts[u][v] = nexts[u][k];
+						}
+					}
+				}
+			}
+		}
+
+		std::vector<NodeHandle> reconstruct_path(
+			NodeHandle from,
+			NodeHandle to,
+			const FloydWarshallNexts& nexts)
+		{
+			vector<NodeHandle> path;
+
+			if (nexts.at(from).at(to) == nullptr) return path;
+
+			path.push_back(from);
+			while (from != to) {
+				from = nexts.at(from).at(to);
+				path.push_back(from);
+			}
+
+			return path;
 		}
 	}
 }
