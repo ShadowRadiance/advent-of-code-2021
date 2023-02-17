@@ -7,165 +7,208 @@
 #include <optional>
 #include <sstream>
 #include <unordered_map>
+#include <stdexcept>
 
 #include <iostream>
 #include <algorithm>
+#include <pathfinder.h>
 
 namespace day_16
 {
-    using std::string;
-    using std::vector;
-    using maybe_int = std::optional<size_t>;
+	using std::string;
+	using std::vector;
+	using std::invalid_argument;
+	using advent_of_code::Pathfinder::floyd_warshall;
+	using advent_of_code::Pathfinder::reconstruct_path;
+	using advent_of_code::Pathfinder::FloydWarshallDistances;
+	using advent_of_code::Pathfinder::FloydWarshallNexts;
+	using advent_of_code::Pathfinder::IWeightedGraph;
+	using NodeHandle = advent_of_code::Pathfinder::IGraph::NodeHandle;
 
-    struct Valve
-    {
-        string name{};
-        int flow{0};
-        vector<string> connectedValveNames{};
-    };
+	struct Valve
+	{
+		string name{};
+		int flow{ 0 };
+		vector<string> connectedValveNames{};
 
-    int parseInt(auto& it, auto end)
-    {
-        size_t size{0};
-        int parsed = std::stoi(string{it, end}, &size);
-        it += size;
-        return parsed;
-    }
+		bool hasEdge(string name) const
+		{
+			return std::find(connectedValveNames.begin(), connectedValveNames.end(), name)
+				!= connectedValveNames.end();
+		}
+	};
 
-    Valve parseValve(const string& str)
-    {
-        auto it = str.begin();
-        auto end = str.end();
+	class ValveGraph : public IWeightedGraph
+	{
+	public:
+		Valve valve(NodeHandle handle) const
+		{
+			return nodes[index(handle)];
+		}
+		double cost(NodeHandle from, NodeHandle to) const override
+		{
+			const Valve& fromNode = nodes[index(from)];
+			const Valve& toNode = nodes[index(to)];
 
-        assert(*it == 'V');
-        it += 6;                 // Valve_
-        string name{it, it + 2}; // AA
-        it += 2;
-        assert(*it == ' ');
-        it += 15; // _has_flow_rate=
-        int flowRate = parseInt(it, end);
-        assert(*it == ';');
-        it += 23;             // ;_tunnels_lead_to_valve
-        if (*it == 's') ++it; // s
-        vector<string> connectedValveNames;
-        while (it != end) { // DD, II, BB
-            if (*it >= 'A' && *it <= 'Z') {
-                connectedValveNames.push_back({it, it + 2});
-                it += 2;
-            } else {
-                ++it;
-            }
-        }
+			if (!fromNode.hasEdge(toNode.name)) throw invalid_argument("from and to must be adjacent");
 
-        return Valve{name, flowRate, connectedValveNames};
-    }
+			return 1;
+		}
+		vector<NodeHandle> allNodes() const override
+		{
+			vector<NodeHandle> result(nodes.size());
+			for (ptrdiff_t i = 0; i < nodes.size(); i++) {
+				result[i] = handle(i);
+			}
+			return result;
+		}
+		size_t numberOfNodes() const override
+		{
+			return nodes.size();
+		}
+		vector<NodeHandle> neighbours(NodeHandle handle) const override
+		{
+			const Valve& node = nodes[index(handle)];
 
-    vector<Valve> parseValves(const vector<string>& data)
-    {
-        vector<Valve> valves;
-        std::transform(data.begin(),
-                       data.end(),
-                       back_inserter(valves),
-                       parseValve);
-        return valves;
-    }
+			vector<NodeHandle> result(node.connectedValveNames.size());
+			transform(node.connectedValveNames.begin(),
+					  node.connectedValveNames.end(),
+					  result.begin(),
+					  [&](string name) { return findNode(name); });
+			return result;
+		}
 
-    auto floyd_warshall(const vector<Valve>& valves)
-    {
-        auto size = valves.size();
-        std::vector<std::vector<size_t>> distances(size, std::vector<size_t>(size, INT_MAX));
-        std::vector<std::vector<maybe_int>> nexts(size, std::vector<maybe_int>(size));
+		NodeHandle findNode(string name) const
+		{
+			return handle(index(name));
+		}
 
-        // record the vertices
-        for (int i = 0; i < size; ++i) {
-            distances[i][i] = 0;
-            nexts[i][i] = i;
-        }
+		NodeHandle addNode(string name, int flow, vector<string> edges)
+		{
+			return addNode(Valve{ name, flow, edges });
+		}
 
-        // record the edges
-        for (int i = 0; i < size; ++i) {
-            auto& valveV = valves[i];
-            for (auto& name : valveV.connectedValveNames) {
-                auto it = std::find_if(
-                    valves.begin(),
-                    valves.end(),
-                    [&](auto& valveU) { return valveU.name == name; });
-                if (it != valves.end()) {
-                    auto j = std::distance(valves.begin(), it);
-                    auto& valveU = *it;
-                    distances[i][j] = 1; // edge weight
-                    distances[j][i] = 1; // reverse link
-                    nexts[i][j] = j;
-                }
-            }
-        }
+		NodeHandle addNode(const Valve& node)
+		{
+			if (index(node.name) != nodes.size()) throw invalid_argument("id already exists");
 
-        // determine shortest paths to all other nodes
-        for (int k = 0; k < size; ++k) {
-            for (int i = 0; i < size; ++i) {
-                for (int j = 0; j < size; ++j) {
-                    size_t newDistance = distances[i][k] + distances[k][j];
-                    if (distances[i][j] > newDistance) {
-                      distances[i][j] = newDistance;
-                      nexts[i][j] = nexts[i][k];
-                    }
-                }
-            }
-        }
+			nodes.push_back(node);
+			return handle(index(node.name));
+		}
 
-        return std::make_tuple(distances, nexts);
-    }
+	private:
+		vector<Valve> nodes;
 
-    vector<int> findPath(
-        size_t fromIndex, 
-        size_t toIndex,
-        std::vector<std::vector<maybe_int>> &f_w_next_matrix)
-    {
-        vector<int> path;
-        if (!f_w_next_matrix[fromIndex][toIndex].has_value())
-            return path;
-        
-        path.push_back(fromIndex);
-        while (fromIndex != toIndex) {
-            fromIndex = f_w_next_matrix[fromIndex][toIndex].value();
-            path.push_back(fromIndex);
-        }
-        return path;
-    }
+		ptrdiff_t index(string name) const
+		{
+			auto it = find_if(nodes.begin(), nodes.end(), [name](auto& node) { return node.name == name; });
+			return it - nodes.begin();
+		}
 
-    void printPaths(auto nexts, const vector<Valve> &valves) {
-        auto size = valves.size();
-        for (size_t u = 0; u < size; u++) {
-            std::cout << "Paths from " << valves[u].name << "\n";
-            for (size_t v = 0; v < size; v++) {
-                if (u == v)
-                    continue;
-                std::cout << "\t to " << valves[v].name << ": ";
-                auto indices = findPath(u, v, nexts);
-                for (int idx : indices) {
-                    std::cout << valves[idx].name << " ";
-                }
-                std::cout << "(" << indices.size() << ")\n";
-            }
-        }
-    }
+		NodeHandle handle(ptrdiff_t index) const
+		{
+			// the 0 handle, nullptr, would equate to index==-1
+			// valid handles are > 0
 
-    int solve(const vector<Valve>& valves)
-    {
-        auto [distances, nexts] = floyd_warshall(valves);
-        
-        printPaths(nexts, valves);
+			return reinterpret_cast<NodeHandle>(index + 1);
+		}
 
-        return 0;
-    }
+		ptrdiff_t index(NodeHandle handle) const
+		{
+			// the 0 handle, nullptr, would equate to index==-1
+			// valid handles are > 0
 
-    string answer_a(const vector<string>& input_data)
-    {
-        return std::to_string(solve(parseValves(input_data)));
-    }
+			return reinterpret_cast<ptrdiff_t>(handle) - 1;
+		}
 
-  string answer_b(const vector<string>& input_data)
-  {
-    return "PENDING";
-  }
+	};
+
+
+	int parseInt(auto& it, auto end)
+	{
+		size_t size{ 0 };
+		int parsed = std::stoi(string{ it, end }, &size);
+		it += size;
+		return parsed;
+	}
+
+	Valve parseValve(const string& str)
+	{
+		auto it = str.begin();
+		auto end = str.end();
+
+		assert(*it == 'V');
+		it += 6;                 // Valve_
+		string name{ it, it + 2 }; // AA
+		it += 2;
+		assert(*it == ' ');
+		it += 15; // _has_flow_rate=
+		int flowRate = parseInt(it, end);
+		assert(*it == ';');
+		it += 23;             // ;_tunnels_lead_to_valve
+		if (*it == 's') ++it; // s
+		vector<string> connectedValveNames;
+		while (it != end) { // DD, II, BB
+			if (*it >= 'A' && *it <= 'Z') {
+				connectedValveNames.push_back({ it, it + 2 });
+				it += 2;
+			} else {
+				++it;
+			}
+		}
+
+		return Valve{ name, flowRate, connectedValveNames };
+	}
+
+	vector<Valve> parseValves(const vector<string>& data)
+	{
+		vector<Valve> valves;
+		std::transform(data.begin(),
+					   data.end(),
+					   back_inserter(valves),
+					   parseValve);
+		return valves;
+	}
+
+
+	void printPaths(const ValveGraph& graph, const FloydWarshallNexts& nexts, const vector<Valve>& valves)
+	{
+		for (auto& valve : valves) {
+			std::cout << "Paths from " << valve.name << "\n";
+			NodeHandle vHandle = graph.findNode(valve.name);
+			for (auto& other : valves) {
+				if (&valve == &other) continue;
+				std::cout << "\t to " << other.name << ": ";
+				NodeHandle uHandle = graph.findNode(other.name);
+				auto path = reconstruct_path(vHandle, uHandle, nexts);
+				for (auto& handle : path) {
+					std::cout << graph.valve(handle).name << " ";
+				}
+				std::cout << "(" << path.size() << ")\n";
+			}
+		}
+	}
+
+	int solve(const vector<Valve>& valves)
+	{
+		ValveGraph graph;
+		for (auto& valve : valves) { graph.addNode(valve); }
+		FloydWarshallDistances distances;
+		FloydWarshallNexts nexts;
+		floyd_warshall(graph, distances, nexts);
+
+		printPaths(graph, nexts, valves);
+
+		return 0;
+	}
+
+	string answer_a(const vector<string>& input_data)
+	{
+		return std::to_string(solve(parseValves(input_data)));
+	}
+
+	string answer_b(const vector<string>& input_data)
+	{
+		return "PENDING";
+	}
 }
