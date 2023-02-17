@@ -8,10 +8,13 @@
 #include <sstream>
 #include <unordered_map>
 
+#include <iostream>
+
 namespace day_16
 {
-  using std::string;
-  using std::vector;
+    using std::string;
+    using std::vector;
+    using maybe_int = std::optional<size_t>;
 
     struct Valve
     {
@@ -66,30 +69,85 @@ namespace day_16
         return valves;
     }
 
-    vector<vector<int>> buildAdjancyMatrix(const vector<Valve>& valves) {
-        int size = valves.size();
-        vector<vector<int>> adjancyMatrix(size, vector<int>(size));
-        for (size_t i = 0; i < size; i++) {
-            Valve valve = valves[i];
-            for (string name : valve.connectedValveNames) {
+    auto floyd_warshall(const vector<Valve>& valves)
+    {
+        auto size = valves.size();
+        // Matrix<size_t> distances(size, size, INT_MAX);
+        // Matrix<maybe_int> nexts(size, size, {});
+
+        // record the vertices
+        for (int i = 0; i < size; ++i) {
+            distances(i, i) = 0;
+            nexts(i, i) = i;
+        }
+
+        // record the edges
+        for (int i = 0; i < size; ++i) {
+            auto& valveV = valves[i];
+            for (auto& name : valveV.connectedValveNames) {
                 auto it = std::find_if(
                     valves.begin(),
                     valves.end(),
-                    [&name](auto& _) { return _.name == name; });
-                if (it == valves.end())
-                    throw std::runtime_error("expected to find " + name +
-                                             " in valves!");
-                int indexOfConnectedValve = std::distance(valves.begin(), it);
-                adjancyMatrix[i][indexOfConnectedValve] = 1; // link forward
-                adjancyMatrix[indexOfConnectedValve][i] = 1; // link reverse
+                    [&](auto& valveU) { return valveU.name == name; });
+                if (it != valves.end()) {
+                    auto j = std::distance(valves.begin(), it);
+                    auto& valveU = *it;
+                    distances(i, j) = 1; // edge weight
+                    distances(j, i) = 1; // reverse link
+                    nexts(i, j) = j;
+                }
             }
         }
-        return adjancyMatrix;
+
+        // determine shortest paths to all other nodes
+        for (int k = 0; k < size; ++k) {
+            for (int i = 0; i < size; ++i) {
+                for (int j = 0; j < size; ++j) {
+                    if (distances(i, j) > distances(i, k) + distances(k, j)) {
+                        distances(i, j) = distances(i, k) + distances(k, j);
+                        nexts(i, j) = nexts(i, k);
+                    }
+                }
+            }
+        }
+
+        return std::make_tuple(distances, nexts);
+    }
+
+    vector<int> findPath(
+        size_t fromIndex, 
+        size_t toIndex,
+        const Matrix<maybe_int>& f_w_next_matrix)
+    {
+        vector<int> valveIndices;
+        if (!f_w_next_matrix(fromIndex, toIndex).has_value())
+            return valveIndices;
+        
+        valveIndices.push_back(f_w_next_matrix(fromIndex, fromIndex).value());
+        while (fromIndex != toIndex) {
+            fromIndex = f_w_next_matrix(fromIndex, toIndex).value();
+            valveIndices.push_back(fromIndex);
+        }
+        return valveIndices;
     }
 
     int solve(const vector<Valve>& valves)
     {
-        vector<vector<int>> adjancyMatrix = buildAdjancyMatrix(valves);
+        auto [distances, nexts] = floyd_warshall(valves);
+        
+        auto size = valves.size();
+        for (size_t u = 0; u < size; u++) {
+            std::cout << "Paths from " << valves[u].name << "\n";
+            for (size_t v = 0; v < size; v++) {
+                if (u == v) continue;
+                std::cout << "\t to " << valves[v].name << ": ";
+                auto indices = findPath(u, v, nexts);
+                for (int idx : indices) {
+                    std::cout << valves[idx].name << " ";
+                }
+                std::cout << "(" << indices.size() << ")\n";            
+            }
+        }
 
         return 0;
     }
