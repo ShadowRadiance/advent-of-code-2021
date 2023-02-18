@@ -11,7 +11,7 @@ namespace advent_of_code
 		class IGraph
 		{
 		public:
-			typedef void* NodeHandle;
+			typedef const void* NodeHandle;
 			virtual std::vector<NodeHandle> allNodes() const = 0;
 			virtual size_t numberOfNodes() const = 0;
 			virtual std::vector<NodeHandle> neighbours(NodeHandle handle) const = 0;
