@@ -8,10 +8,14 @@
 #include <sstream>
 #include <unordered_map>
 #include <stdexcept>
+#include <unordered_set>
+#include <ranges>
 
 #include <iostream>
 #include <algorithm>
 #include <pathfinder.h>
+#include <deque>
+#include <numeric>
 
 namespace day_16
 {
@@ -24,31 +28,34 @@ namespace day_16
 	using advent_of_code::Pathfinder::FloydWarshallNexts;
 	using advent_of_code::Pathfinder::IWeightedGraph;
 	using NodeHandle = advent_of_code::Pathfinder::IGraph::NodeHandle;
+	using NEIGHBOURS = std::unordered_set<string>;
+
+	namespace vw = std::views;
 
 	struct Valve
 	{
 		string name{};
 		int flow{ 0 };
-		vector<string> connectedValveNames{};
+		NEIGHBOURS tunnels{};
 
 		bool hasEdge(string name) const
 		{
-			return std::find(connectedValveNames.begin(), connectedValveNames.end(), name)
-				!= connectedValveNames.end();
+			return tunnels.contains(name);
 		}
 	};
+	using VALVES = std::unordered_map<string, Valve>;
 
 	class ValveGraph : public IWeightedGraph
 	{
 	public:
-		Valve valve(NodeHandle handle) const
+		const Valve& valve(NodeHandle handle) const
 		{
-			return nodes[index(handle)];
+			return nodes.at(name(handle));
 		}
 		double cost(NodeHandle from, NodeHandle to) const override
 		{
-			const Valve& fromNode = nodes[index(from)];
-			const Valve& toNode = nodes[index(to)];
+			const Valve& fromNode = nodes.at(name(from));
+			const Valve& toNode = nodes.at(name(to));
 
 			if (!fromNode.hasEdge(toNode.name)) throw invalid_argument("from and to must be adjacent");
 
@@ -57,9 +64,8 @@ namespace day_16
 		vector<NodeHandle> allNodes() const override
 		{
 			vector<NodeHandle> result(nodes.size());
-			for (ptrdiff_t i = 0; i < nodes.size(); i++) {
-				result[i] = handle(i);
-			}
+			transform(nodes.begin(), nodes.end(), result.begin(),
+					  [&](auto& pair) { return handle(pair.second.name); });
 			return result;
 		}
 		size_t numberOfNodes() const override
@@ -68,61 +74,45 @@ namespace day_16
 		}
 		vector<NodeHandle> neighbours(NodeHandle handle) const override
 		{
-			const Valve& node = nodes[index(handle)];
+			const Valve& node = nodes.at(name(handle));
 
-			vector<NodeHandle> result(node.connectedValveNames.size());
-			transform(node.connectedValveNames.begin(),
-					  node.connectedValveNames.end(),
+			vector<NodeHandle> result(node.tunnels.size());
+			transform(node.tunnels.begin(),
+					  node.tunnels.end(),
 					  result.begin(),
 					  [&](string name) { return findNode(name); });
 			return result;
 		}
 
-		NodeHandle findNode(string name) const
+		NodeHandle findNode(const string& name) const
 		{
-			return handle(index(name));
-		}
+			if (!nodes.contains(name)) return nullptr;
 
-		NodeHandle addNode(string name, int flow, vector<string> edges)
-		{
-			return addNode(Valve{ name, flow, edges });
+			return handle(nodes.at(name).name);
 		}
 
 		NodeHandle addNode(const Valve& node)
 		{
-			if (index(node.name) != nodes.size()) throw invalid_argument("id already exists");
+			if (nodes.contains(node.name)) throw invalid_argument("id already exists");
 
-			nodes.push_back(node);
-			return handle(index(node.name));
+			nodes[node.name] = node;
+			return handle(nodes.at(node.name).name);
 		}
 
 	private:
-		vector<Valve> nodes;
+		VALVES nodes;
 
-		ptrdiff_t index(string name) const
+		NodeHandle handle(const string& name) const
 		{
-			auto it = find_if(nodes.begin(), nodes.end(), [name](auto& node) { return node.name == name; });
-			return it - nodes.begin();
+			return reinterpret_cast<NodeHandle>(&name);
 		}
 
-		NodeHandle handle(ptrdiff_t index) const
+		const string& name(NodeHandle handle) const
 		{
-			// the 0 handle, nullptr, would equate to index==-1
-			// valid handles are > 0
-
-			return reinterpret_cast<NodeHandle>(index + 1);
-		}
-
-		ptrdiff_t index(NodeHandle handle) const
-		{
-			// the 0 handle, nullptr, would equate to index==-1
-			// valid handles are > 0
-
-			return reinterpret_cast<ptrdiff_t>(handle) - 1;
+			return *reinterpret_cast<const string*>(handle);
 		}
 
 	};
-
 
 	int parseInt(auto& it, auto end)
 	{
@@ -147,40 +137,51 @@ namespace day_16
 		assert(*it == ';');
 		it += 23;             // ;_tunnels_lead_to_valve
 		if (*it == 's') ++it; // s
-		vector<string> connectedValveNames;
+		vector<string> tunnels;
 		while (it != end) { // DD, II, BB
 			if (*it >= 'A' && *it <= 'Z') {
-				connectedValveNames.push_back({ it, it + 2 });
+				tunnels.push_back({ it, it + 2 });
 				it += 2;
 			} else {
 				++it;
 			}
 		}
 
-		return Valve{ name, flowRate, connectedValveNames };
+		return Valve{ name, flowRate, NEIGHBOURS(tunnels.begin(), tunnels.end()) };
 	}
 
-	vector<Valve> parseValves(const vector<string>& data)
+	VALVES parseValves(const vector<string>& data)
 	{
-		vector<Valve> valves;
-		std::transform(data.begin(),
-					   data.end(),
-					   back_inserter(valves),
-					   parseValve);
+		VALVES valves;
+		for (auto& s : data) {
+			Valve v = parseValve(s);
+			valves[v.name] = v;
+		}
 		return valves;
 	}
 
-
-	void printPaths(const ValveGraph& graph, const FloydWarshallNexts& nexts, const vector<Valve>& valves)
+	void printDistances(const ValveGraph& graph, const FloydWarshallDistances& distances)
 	{
-		for (auto& valve : valves) {
-			std::cout << "Paths from " << valve.name << "\n";
-			NodeHandle vHandle = graph.findNode(valve.name);
-			for (auto& other : valves) {
-				if (&valve == &other) continue;
-				std::cout << "\t to " << other.name << ": ";
-				NodeHandle uHandle = graph.findNode(other.name);
-				auto path = reconstruct_path(vHandle, uHandle, nexts);
+		for (auto& handleV : graph.allNodes()) {
+			std::cout << "Distances from " << graph.valve(handleV).name << "\n";
+			for (auto& handleU : graph.allNodes()) {
+				if (handleV == handleU) continue;
+				std::cout
+					<< "\t to "
+					<< graph.valve(handleU).name << ": "
+					<< distances.at(handleV).at(handleU) << "\n";
+			}
+		}
+	}
+
+	void printPaths(const ValveGraph& graph, const FloydWarshallNexts& nexts)
+	{
+		for (auto& handleV : graph.allNodes()) {
+			std::cout << "Paths from " << graph.valve(handleV).name << "\n";
+			for (auto& handleU : graph.allNodes()) {
+				if (handleV == handleU) continue;
+				std::cout << "\t to " << graph.valve(handleU).name << ": ";
+				auto path = reconstruct_path(handleV, handleU, nexts);
 				for (auto& handle : path) {
 					std::cout << graph.valve(handle).name << " ";
 				}
@@ -189,26 +190,124 @@ namespace day_16
 		}
 	}
 
-	int solve(const vector<Valve>& valves)
+
+	struct State
 	{
-		ValveGraph graph;
-		for (auto& valve : valves) { graph.addNode(valve); }
-		FloydWarshallDistances distances;
-		FloydWarshallNexts nexts;
+		NodeHandle current;
+		std::unordered_set<NodeHandle> opened;
+		int elapsed_seconds;
+		int relieved_pressure;
+	};
+
+	struct SeenState
+	{
+		std::unordered_set<NodeHandle> opened;
+		int elapsed_seconds;
+		int relieved_pressure;
+
+	};
+	bool operator==(const SeenState& lhs, const SeenState& rhs)
+	{
+		return lhs.elapsed_seconds == rhs.elapsed_seconds
+			&& lhs.relieved_pressure == rhs.relieved_pressure
+			&& lhs.opened == rhs.opened;
+	}
+
+	auto relieved_per_min(const std::unordered_set<NodeHandle>& opened, const ValveGraph& graph)
+	{
+		auto relieved_per_min_by_valve = opened
+			| vw::transform([&graph](auto handle) { return graph.valve(handle).flow; })
+			| vw::common;
+		return std::accumulate(
+			relieved_per_min_by_valve.begin(),
+			relieved_per_min_by_valve.end(),
+			0);
+	}
+
+	int wait_until_end(int end_time, int elapsed_seconds, int relieved_pressure, const std::unordered_set<NodeHandle>& opened, const ValveGraph& graph)
+	{
+		auto time_left = end_time - elapsed_seconds;
+		return relieved_pressure + time_left * relieved_per_min(opened, graph);
+	}
+
+	// If I am at the valve at [position], I've opened a set of valves [opened], and I have [remaining]
+	// minutes remaining,
+	//		(PART TWO) and there are [helpers] acting after me, 
+	// how many points can I score from this position?
+	int solve(const VALVES& valves, int end_time = 30/*, helpers = 0*/)
+	{
+		ValveGraph graph; for (auto& valve : valves) { graph.addNode(valve.second); }
+		FloydWarshallDistances distances;	// distances[u][v] = (double) distance from u to v
+		FloydWarshallNexts nexts;			// nexts[u][target] = (handle) next step from u to get to target
 		floyd_warshall(graph, distances, nexts);
+		printDistances(graph, distances);	// checks out
+		printPaths(graph, nexts);			// checks out
 
-		printPaths(graph, nexts, valves);
+		auto hasFlow = [&graph](auto& handle) { return graph.valve(handle).flow > 0; };
+		auto flowing_view = graph.allNodes() | vw::filter(hasFlow);
+		auto flowing = std::vector<NodeHandle>(flowing_view.begin(), flowing_view.end());
 
-		return 0;
+		auto maxRelieved = 0;
+		auto queue = std::deque<State>();
+		auto seen = std::vector<SeenState>();
+
+		queue.push_back(State{ graph.findNode("AA"), {}, 0, 0 });
+		seen.push_back(SeenState{ {}, 0, 0 });
+
+		while (!queue.empty()) {
+			State state = queue.front(); queue.pop_front();
+			// if all flowing valves are opened, wait until the end
+			if (state.opened.size() == flowing.size() || state.elapsed_seconds >= end_time) {
+				auto relieved_at_end = wait_until_end(end_time, state.elapsed_seconds, state.relieved_pressure, state.opened, graph);
+				if (relieved_at_end > maxRelieved) maxRelieved = relieved_at_end;
+				continue;
+			}
+
+			// for every unopened valve, run simulation
+			auto handleNotInOpened = [&state](auto& handle) {
+				return std::none_of(
+					state.opened.begin(),
+					state.opened.end(),
+					[&handle](auto& openHandle) {
+						return openHandle == handle;
+					}
+				);
+			};
+			auto unopened = flowing | vw::filter(handleNotInOpened);
+
+			for (auto& destination : unopened) {
+				auto cost = int(distances[state.current][destination] + 1);
+				auto newElapsed = state.elapsed_seconds + cost;
+				// if opening the dest valve would exceed the time limit, wait until the end
+				if (newElapsed >= end_time) {
+					auto relieved_at_end = wait_until_end(end_time, state.elapsed_seconds, state.relieved_pressure, state.opened, graph);
+					if (relieved_at_end > maxRelieved) maxRelieved = relieved_at_end;
+					continue;
+				}
+				// relieve pressure of existing opened valves while we move to dest and open it
+				auto newRelieved = state.relieved_pressure + relieved_per_min(state.opened, graph) * cost;
+				std::unordered_set<NodeHandle> newOpened(state.opened);
+				newOpened.insert(destination);
+
+				SeenState newSeenState{ newOpened, newElapsed, newRelieved };
+				if (std::none_of(seen.begin(), seen.end(), [&newSeenState](auto& seenState) { return seenState == newSeenState; })) {
+					queue.push_back(State{ destination, newOpened, newElapsed, newRelieved });
+				}
+			}
+
+		}
+
+		return maxRelieved;
 	}
 
 	string answer_a(const vector<string>& input_data)
 	{
-		return std::to_string(solve(parseValves(input_data)));
+		return std::to_string(solve(parseValves(input_data), 30));
 	}
 
 	string answer_b(const vector<string>& input_data)
 	{
+		// return std::to_string(solve(parseValves(input_data), 26, 1));
 		return "PENDING";
 	}
 }
