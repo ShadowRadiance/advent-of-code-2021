@@ -95,7 +95,7 @@ int main(int argc, char** argv)
         auto data = load_data(path(day));
         auto fn = methods[i];
 
-        if (fn != day_16::answer_b) continue;
+        if (fn != day_17::answer_a) continue;
 
         auto [result, duration] = time(fn, data);
 
