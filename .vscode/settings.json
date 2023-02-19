@@ -88,5 +88,6 @@
     "memory_resource": "cpp",
     "filesystem": "cpp"
   },
-  "cmake.sourceDirectory": "${workspaceFolder}/2022-cpp"
+  "cmake.sourceDirectory": "${workspaceFolder}/2022-cpp",
+  "cmake.buildDirectory": "${workspaceFolder}/2022-cpp/build"
 }

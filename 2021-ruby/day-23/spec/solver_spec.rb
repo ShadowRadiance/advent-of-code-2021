@@ -41,6 +41,7 @@ RSpec.describe Solver do
     let(:solved)  { ".|.|AAAA|.|BBBB|.|CCCC|.|DDDD|.|." }
 
     it "is all cool and shit" do
+      puts "Buckle up this takes about 3m"
       solver = Solver.new(initial, solved, room_size: 4)
       expect(solver.solve).to eq(44169)
     end
