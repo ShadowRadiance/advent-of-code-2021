@@ -19,8 +19,7 @@
     #endif
 #endif
 
-template<typename Fn>
-std::tuple<std::string, std::chrono::microseconds> time(Fn fn, const std::vector<std::string>& data) {
+std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vector<std::string>& data) {
     auto start = std::chrono::high_resolution_clock::now();
     auto result = fn(data);
     auto stop = std::chrono::high_resolution_clock::now();
@@ -95,6 +94,9 @@ int main(int argc, char** argv)
         auto day = 1 + (i / 2);
         auto data = load_data(path(day));
         auto fn = methods[i];
+
+        if (fn != day_16::answer_b) continue;
+
         auto [result, duration] = time(fn, data);
 
         cout << "Day " << ((day < 10) ? "0" : "") << day << " Answer " << ((i % 2 == 0) ? "A" : "B") << ": "

@@ -65,7 +65,7 @@ namespace advent_of_code
 		{
 			vector<NodeHandle> result(nodes.size());
 			// convert each index into a handle
-			for (ptrdiff_t i = 0; i < nodes.size(); i++) {
+			for (ptrdiff_t i = 0; i < static_cast<ptrdiff_t>(nodes.size()); i++) {
 				result[i] = handle(i);
 			}
 			return result;

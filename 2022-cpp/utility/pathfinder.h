@@ -8,6 +8,8 @@ namespace advent_of_code
 {
 	namespace Pathfinder
 	{
+		using ptrdiff_t = int64_t;
+
 		class IGraph
 		{
 		public:
