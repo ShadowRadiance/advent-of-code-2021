@@ -236,7 +236,8 @@ With the elephant helping, after 26 minutes, the best you could do would release
 
 With you and an elephant working together for 26 minutes, what is the most pressure you could release?
 
-Answer: 
+Answer: 2594
+
+- Day 16 Answer B: (255,241,575us) 2594
  
-
-
+Infinite Thanks to [Nicky Meuleman's Rust Solution](https://nickymeuleman.netlify.app/garden/aoc2022-day16)
