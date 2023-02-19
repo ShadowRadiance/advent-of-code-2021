@@ -36,10 +36,8 @@ jobs:
         ruby-version: ${{ matrix.ruby-version }}
         bundler-cache: true # runs 'bundle install' and caches installed gems automatically
     - name: ChMod test-runner
-      run: chmod +x bin/run-tests.sh
+      working-directory: ${{github.workspace}}/2021-ruby
+      run: chmod +x ./bin/run-tests.sh
     - name: Run tests
       working-directory: ${{github.workspace}}/2021-ruby
-      run: bin/run-tests.sh
-
-
-      ## HMMMM NEED TO MAKE RAKE WORK IN THE RIGHT FOLDERS
+      run: ./bin/run-tests.sh
