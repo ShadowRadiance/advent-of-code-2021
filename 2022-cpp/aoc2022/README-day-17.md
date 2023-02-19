@@ -358,6 +358,7 @@ In the example above, the tower would be `1514285714288` units tall!
 
 *How tall will the tower be after 1000000000000 rocks have stopped?*
 
-Answer: 
- 
+Answer: 1585632183915
+
+Day 17 Answer B: (   38328us) 1585632183915
 

@@ -1,6 +1,8 @@
 #include <days.h>
 #include <algorithm>
 #include <iostream>
+#include <unordered_map>
+#include <tuple>
 
 namespace day_17
 {
@@ -9,8 +11,8 @@ namespace day_17
 
 	struct Point
 	{
-		int x; // increases "rt"
-		int y; // increases "up"
+		int64_t x; // increases "rt"
+		int64_t y; // increases "up"
 
 		static Point const lt;
 		static Point const rt;
@@ -40,11 +42,12 @@ namespace day_17
 		Jet next() const
 		{
 			Jet j = jets_[current_];
-			current_ = (current_ + 1) % jets_.size();
+			current_ = (current_ + 1) % repetitionLength();
 			++jets_produced_;
 			return j;
 		}
-		size_t jets_produced() const { return jets_produced_; }
+		int64_t repetitionLength() const { return static_cast<int64_t>(jets_.size()); }
+		int64_t jetsProduced() const { return jets_produced_; }
 		static vector<Jet> parse(string const& data)
 		{
 			vector<Jet> jets(data.length());
@@ -53,8 +56,8 @@ namespace day_17
 		}
 	private:
 		vector<Jet> const jets_;
-		size_t mutable jets_produced_ = 0;
-		size_t mutable current_ = 0;
+		int64_t mutable jets_produced_ = 0;
+		int64_t mutable current_ = 0;
 	};
 
 	struct RockShape
@@ -114,12 +117,13 @@ namespace day_17
 		RockShape next() const
 		{
 			RockShape rs = rock_shapes_[current_];
-			current_ = (current_ + 1) % rock_shapes_.size();
+			current_ = (current_ + 1) % repetitionLength();
 			return rs;
 		}
+		int64_t repetitionLength() const { return static_cast<int64_t>(rock_shapes_.size()); }
 	private:
 		vector<RockShape> const rock_shapes_;
-		size_t mutable current_ = 0;
+		int64_t mutable current_ = 0;
 	};
 
 	class RockGenerator
@@ -131,17 +135,18 @@ namespace day_17
 			++rocks_produced_;
 			return Rock{ rock_shape_generator_.next(), position };
 		}
-		size_t rocks_produced() const { return rocks_produced_; }
+		int64_t rocksProduced() const { return rocks_produced_; }
+		void pretend_rocks_produced(int64_t fake_rocks) { rocks_produced_ += fake_rocks; }
 	private:
 		RockShapeGenerator const& rock_shape_generator_;
-		size_t mutable rocks_produced_ = 0;
+		int64_t mutable rocks_produced_ = 0;
 	};
 
 	class Board
 	{
 	public:
 		explicit Board() {}
-		int top() const { return static_cast<int>(map.size()); }
+		int64_t top() const { return static_cast<int64_t>(map.size()); }
 		bool isValidLocation(const Rock& rock)
 		{
 			for (Point const& point : rock.shape.points) {
@@ -149,7 +154,7 @@ namespace day_17
 				if (offset.x < 0) return false;
 				if (offset.x >= width) return false;
 				if (offset.y < 0) return false;
-				if (offset.y < map.size() && map[offset.y][offset.x] == '#') return false;
+				if (offset.y < top() && map[offset.y][offset.x] == '#') return false;
 			}
 			return true;
 		}
@@ -158,7 +163,7 @@ namespace day_17
 			// add the rock to the map
 			for (Point const& point : rock.shape.points) {
 				Point offset = rock.position + point;
-				while (map.size() <= offset.y) { map.push_back(string(width, ' ')); }
+				while (top() <= offset.y) { map.push_back(string(width, ' ')); }
 				map[offset.y][offset.x] = '#';
 			}
 		}
@@ -183,14 +188,32 @@ namespace day_17
 		static const int width = 7;
 	};
 
-	string answer_a(vector<string> const& input_data)
+	int64_t solve_with_simulation(vector<string> const& input_data, int64_t requiredRocks)
 	{
 		Jetstream jetstream(input_data[0]);
 		RockShapeGenerator rsg;
 		RockGenerator rg(rsg);
 		Board b;
 
-		while (rg.rocks_produced() < 2022) {
+		using seen_key = std::tuple<int64_t, int64_t>; // rocks index, jet index
+		struct seen_key_hasher
+		{
+			size_t operator()(const seen_key& key) const
+			{
+				std::hash<int64_t> hasher;
+				auto h1 = hasher(std::get<0>(key));
+				auto h2 = hasher(std::get<1>(key));
+				return h1 ^ (h2 << 1);
+			}
+		};
+		using seen_value = std::tuple<int64_t, int64_t, int64_t>; // timesSeen, rocksProduced, top
+		struct
+		{
+			std::unordered_map<seen_key, seen_value, seen_key_hasher> seen;
+			int64_t addedByRepetition = 0;
+		} state;
+
+		while (rg.rocksProduced() < requiredRocks) {
 			Rock rock = rg.next({ 2, b.top() + 3 });
 			Rock rockCopy(rock);
 			while (true) {
@@ -212,16 +235,45 @@ namespace day_17
 				}
 			}
 			b.addRock(rock);
-			//if (rg.rocks_produced() < 11) {
-			//	b.print(std::cout);
-			//}
-		}
 
-		return std::to_string(b.top());
+			// look for a cycle
+			if (state.addedByRepetition == 0) {
+				seen_key key{
+					rg.rocksProduced() % rsg.repetitionLength(),
+					jetstream.jetsProduced() % jetstream.repetitionLength()
+				};
+
+				// at third occurrence of key, the values in the seen-map repeat
+				// add as many of them as possible without hitting the goal piece_count
+				if (state.seen.contains(key)) {
+					auto& [timesSeen, oldRocksProduced, oldTop] = state.seen[key];
+					if (timesSeen == 2) {
+						auto deltaTop = b.top() - oldTop;
+						auto deltaRocks = rg.rocksProduced() - oldRocksProduced;
+						auto repeats = (requiredRocks - b.top()) / deltaRocks;
+						state.addedByRepetition += repeats * deltaTop;
+						rg.pretend_rocks_produced(repeats * deltaRocks);
+					}
+
+					// update seen map with key: (timesSeen+1, rocksProduced, top)
+					state.seen[key] = std::make_tuple(timesSeen + 1, rg.rocksProduced(), b.top());
+				} else {
+					// update seen map with key: (1, rocksProduced, top)
+					state.seen[key] = std::make_tuple(int64_t{ 1 }, rg.rocksProduced(), b.top());
+				}
+			}
+		}
+		return b.top() + state.addedByRepetition;
+	}
+
+	string answer_a(vector<string> const& input_data)
+	{
+		return std::to_string(solve_with_simulation(input_data, 2022));
 	}
 
 	string answer_b(vector<string> const& input_data)
 	{
-		return "PENDING";
+		int64_t one_trillion = 1000000000000;
+		return std::to_string(solve_with_simulation(input_data, one_trillion));
 	}
 }
