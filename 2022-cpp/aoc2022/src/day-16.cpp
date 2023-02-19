@@ -48,7 +48,6 @@ namespace day_16
 	using NodeHandle = advent_of_code::Pathfinder::IGraph::NodeHandle;
 	using NEIGHBOURS = unordered_set<string>;
 
-
 	struct Valve
 	{
 		string name{};
