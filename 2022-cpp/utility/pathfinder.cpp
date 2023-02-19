@@ -244,7 +244,7 @@ namespace advent_of_code
 				distances[v] = FloydWarshallDistances::mapped_type{}; // std::unordered_map<NodeHandle, double>{};
 				nexts[v] = FloydWarshallNexts::mapped_type{}; // std::unordered_map<NodeHandle, NodeHandle>{};
 				for (NodeHandle u : allNodes) {
-					distances[v][u] = std::numeric_limits<double>::infinity();
+					distances[v][u] = (std::numeric_limits<double>::max)();
 					nexts[v][u] = nullptr;
 				}
 			}
