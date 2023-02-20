@@ -36,7 +36,7 @@ To begin, get your puzzle input.
 
 Answer: 4244
 
-Day 18 Answer A: (  161628us) 4244
+Day 18 Answer A: (  140085us) 4244
 
 # --- Part Two ---
 
@@ -48,6 +48,6 @@ In the larger example above, exactly one cube of air is trapped within the lava 
 
 What is the exterior surface area of your scanned lava droplet?
 
-Answer: 
+Answer:  2460
  
-
+Day 18 Answer B: (  142953us) 2460
