@@ -11,21 +11,23 @@ using std::string;
 using std::vector;
 using std::cerr;
 
-class UtilityFileTest : public testing::Test {
+class UtilityFileTest : public testing::Test
+{
 protected:
-    static void SetUpTestSuite() {
+    static void SetUpTestSuite()
+    {
         if (filename.empty()) {
             filename = fs::temp_directory_path().string() + "test.txt";
             ofstream out{ filename };
-            out << "1234"                  << "\n"
-                << "2345"                  << "\n"
-                << ""                      << "\n"
-                << "3456"                  << "\n"
-                << ""                      << "\n"
+            out << "1234" << "\n"
+                << "2345" << "\n"
+                << "" << "\n"
+                << "3456" << "\n"
+                << "" << "\n"
                 << "This is a long string" << "\n"
-                << ""                      << "\n"
-                << ""                      << "\n"
-            ;
+                << "" << "\n"
+                << "" << "\n"
+                ;
         }
     }
 

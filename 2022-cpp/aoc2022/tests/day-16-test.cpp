@@ -17,10 +17,10 @@ const std::vector<std::string> data{
 
 TEST(Day16, Part1Example)
 {
-  EXPECT_EQ("1651", day_16::answer_a(data));
+    EXPECT_EQ("1651", day_16::answer_a(data));
 }
 
 TEST(Day16, Part2Example)
 {
-  EXPECT_EQ("1707", day_16::answer_b(data));
+    EXPECT_EQ("1707", day_16::answer_b(data));
 }

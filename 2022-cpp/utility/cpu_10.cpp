@@ -36,13 +36,14 @@ CPU_10::CPU_10(const strings& instructions)
     );
 }
 
-int CPU_10::cycles_required() const {
+int CPU_10::cycles_required() const
+{
     return accumulate(
-        operations_.begin(), operations_.end(), 
+        operations_.begin(), operations_.end(),
         0,
         [](int accum, const CostedOperation& op) {
             auto& [_, cost] = op;
-            return accum + cost;
+    return accum + cost;
         }
     );
 }
@@ -51,15 +52,18 @@ int CPU_10::x() const { return x_; }
 
 int CPU_10::current_cycle() const { return current_cycle_; }
 
-int CPU_10::signal_strength() const {
+int CPU_10::signal_strength() const
+{
     return x_ * current_cycle_;
 }
 
-void CPU_10::begin_cycle() {
+void CPU_10::begin_cycle()
+{
     current_cycle_ += 1;
 }
 
-void CPU_10::end_cycle() {
+void CPU_10::end_cycle()
+{
     auto [op, cost] = currentOperation();
     bool completed = (cost == current_cycle_ - last_execution_cycle_);
     if (completed) {

@@ -18,7 +18,8 @@ namespace day_12
     using std::shared_ptr, std::make_shared;
     using std::make_heap, std::pop_heap, std::sort_heap, std::push_heap;
 
-    struct Position2I {
+    struct Position2I
+    {
         int x;
         int y;
 
@@ -34,9 +35,11 @@ namespace day_12
         int manhattanDistanceFrom(const Position2I& rhs) { Position2I pos{ *this - rhs }; return abs(pos.x) + abs(pos.y); }
     };
 
-    class CharHeightNode {
+    class CharHeightNode
+    {
     public:
-        CharHeightNode(char c) {
+        CharHeightNode(char c)
+        {
             switch (c) {
             case 'E': height_ = 25; break;
             case 'S': height_ = 0; break;
@@ -48,12 +51,12 @@ namespace day_12
         int height_;
     };
 
-    class Grid {
+    class Grid
+    {
     public:
         Grid(vector<CharHeightNode> nodes, int w, int h)
             : data_(nodes), width_(w), height_(h)
-        {
-        }
+        {}
 
         int height() const { return height_; }
         int width() const { return width_; }
@@ -61,7 +64,8 @@ namespace day_12
         CharHeightNode at(Position2I pos) const { return data_[indexFromPosition(pos)]; }
         void set(Position2I pos, CharHeightNode node) { data_[indexFromPosition(pos)] = node; }
 
-        vector<Position2I> neighbouringPositionsOf(Position2I pos) const {
+        vector<Position2I> neighbouringPositionsOf(Position2I pos) const
+        {
             vector<Position2I> neighbours;
 
             int maxHeight = height_ - 1;
@@ -83,7 +87,8 @@ namespace day_12
         vector<CharHeightNode> data_;
     };
 
-    class AStar {
+    class AStar
+    {
         struct Node
         {
             Position2I value;
@@ -91,20 +96,20 @@ namespace day_12
             int bestGuessCostToFinish = INT_MAX; // fScore
             shared_ptr<Node> cameFrom;
 
-            #if defined(__clang__) && defined(__apple_build_version__)
-                #if __apple_build_version__ <= 14000029
-                    Node(
-                        Position2I value = Position2I{},
-                        int cheapestCostToNode = INT_MAX,
-                        int bestGuessCostToFinish = INT_MAX
-                    )
-                        : value(value)
-                        , cheapestCostToNode(cheapestCostToNode)
-                        , bestGuessCostToFinish(bestGuessCostToFinish)
-                        , cameFrom(nullptr)
-                    {}
-                #endif
-            #endif
+#if defined(__clang__) && defined(__apple_build_version__)
+#if __apple_build_version__ <= 14000029
+            Node(
+                Position2I value = Position2I{},
+                int cheapestCostToNode = INT_MAX,
+                int bestGuessCostToFinish = INT_MAX
+            )
+                : value(value)
+                , cheapestCostToNode(cheapestCostToNode)
+                , bestGuessCostToFinish(bestGuessCostToFinish)
+                , cameFrom(nullptr)
+            {}
+#endif
+#endif
         };
     public:
         using EstimateDistanceToTargetFn = function<int(Position2I)>;
@@ -128,8 +133,7 @@ namespace day_12
             , isTarget(isTargetFn)
             , getNeighboursOf(getNeighboursOfFn)
             , distanceToMove(distanceToMoveFn)
-        {
-        }
+        {}
 
         optional<Path> execute(Position2I startValue)
         {
@@ -185,7 +189,8 @@ namespace day_12
             return {};
         }
 
-        Path constructPath(NodePtr end) {
+        Path constructPath(NodePtr end)
+        {
             Path path;
             NodePtr n = end;
             do { path.push_back(n->value); } while ((n = n->cameFrom));
@@ -203,9 +208,9 @@ namespace day_12
     public:
         GridRunner(const Grid& grid)
             : grid_(grid)
+        {}
+        optional<vector<Position2I>> findOptimalPath(Position2I startPos, Position2I endPos)
         {
-        }
-        optional<vector<Position2I>> findOptimalPath(Position2I startPos, Position2I endPos) {
             auto estimateDistanceToTarget = [=](Position2I pos) -> int {
                 return 25 - grid_.at(pos).height();
             };
@@ -219,8 +224,7 @@ namespace day_12
                 else {
                     neighbours.erase(remove_if(
                         begin(neighbours), end(neighbours),
-                        [=](Position2I posNeighbour)
-                        {
+                        [=](Position2I posNeighbour) {
                             return grid_.at(posNeighbour).height() > grid_.at(posCurrent).height() + 1;
                         }),
                         end(neighbours));
@@ -251,9 +255,9 @@ namespace day_12
     public:
         ReverseGridRunner(const Grid& grid)
             : grid_(grid)
+        {}
+        optional<vector<Position2I>> findOptimalPath(Position2I startPos, int targetHeight)
         {
-        }
-        optional<vector<Position2I>> findOptimalPath(Position2I startPos, int targetHeight) {
             auto estimateDistanceToTarget = [=](Position2I pos) -> int {
                 return grid_.at(pos).height();
             };
@@ -267,10 +271,9 @@ namespace day_12
                 else {
                     neighbours.erase(remove_if(
                         begin(neighbours), end(neighbours),
-                        [=](Position2I posNeighbour)
-                        {
+                        [=](Position2I posNeighbour) {
                             return grid_.at(posNeighbour).height() < grid_.at(posCurrent).height() - 1;
-                            return grid_.at(posNeighbour).height() < grid_.at(posCurrent).height() - 1;
+                    return grid_.at(posNeighbour).height() < grid_.at(posCurrent).height() - 1;
                         }),
                         end(neighbours));
                     return neighbours;

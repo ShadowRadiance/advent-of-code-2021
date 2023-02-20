@@ -16,23 +16,28 @@ namespace day_09
 
     using strings = vector<string>;
 
-    struct vec2d {
+    struct vec2d
+    {
         int x;
         int y;
 
-        bool operator==(const vec2d& other) const {
+        bool operator==(const vec2d& other) const
+        {
             return x == other.x && y == other.y;
         }
 
-        vec2d operator+(const vec2d& other) const {
+        vec2d operator+(const vec2d& other) const
+        {
             return { x + other.x, y + other.y };
         }
 
-        vec2d operator-(const vec2d& other) const {
+        vec2d operator-(const vec2d& other) const
+        {
             return { x - other.x, y - other.y };
         }
 
-        vec2d unit() const {
+        vec2d unit() const
+        {
             return {
                 (x == 0) ? 0 : x / abs(x),
                 (y == 0) ? 0 : y / abs(y)
@@ -40,13 +45,16 @@ namespace day_09
         }
     };
 
-    ostream& operator<<(ostream& os, const vec2d& v) {
+    ostream& operator<<(ostream& os, const vec2d& v)
+    {
         return os << v.x << "," << v.y;
     }
 
-    class command {
+    class command
+    {
     public:
-        command(const string& data) {
+        command(const string& data)
+        {
             stringstream ss{ data };
             char c;
             ss >> c >> distance;
@@ -56,7 +64,8 @@ namespace day_09
         int distance;
 
     private:
-        vec2d vec2dFromChar(char c) {
+        vec2d vec2dFromChar(char c)
+        {
             switch (c) {
             case 'U': return { 0, -1 };
             case 'D': return { 0, 1 };
@@ -67,16 +76,19 @@ namespace day_09
         }
     };
 
-    bool locationExists(const vec2d& location, const vector<vec2d>& vecs) {
+    bool locationExists(const vec2d& location, const vector<vec2d>& vecs)
+    {
         auto it = find(vecs.begin(), vecs.end(), location);
         return it != vecs.end();
     }
-    
-    bool tailOkay(const vec2d& head, const vec2d& tail) {
+
+    bool tailOkay(const vec2d& head, const vec2d& tail)
+    {
         return (abs(head.x - tail.x) <= 1 && abs(head.y - tail.y) <= 1); // adjacent/overlapping
     }
 
-    vec2d tailMove(const vec2d& head, const vec2d& tail) {
+    vec2d tailMove(const vec2d& head, const vec2d& tail)
+    {
         return (head - tail).unit();
     }
 
@@ -89,8 +101,7 @@ namespace day_09
         vector<vec2d> tailHistory{ tail };
 
         for (auto& command : commands) {
-            for (size_t i = 0; i < command.distance; i++)
-            {
+            for (size_t i = 0; i < command.distance; i++) {
                 head = head + command.direction;
                 if (!tailOkay(head, tail)) {
                     vec2d move = tailMove(head, tail);
@@ -113,12 +124,10 @@ namespace day_09
         vector<vec2d> tailHistory{ { 0, 0 } };
 
         for (auto& command : commands) {
-            for (size_t i = 0; i < command.distance; i++)
-            {
+            for (size_t i = 0; i < command.distance; i++) {
                 knots[0] = knots[0] + command.direction;
 
-                for (size_t knotIndex = 1; knotIndex < knots.size(); knotIndex++)
-                {
+                for (size_t knotIndex = 1; knotIndex < knots.size(); knotIndex++) {
                     if (!tailOkay(knots[knotIndex - 1], knots[knotIndex])) {
                         vec2d move = tailMove(knots[knotIndex - 1], knots[knotIndex]);
                         knots[knotIndex] = knots[knotIndex] + move;

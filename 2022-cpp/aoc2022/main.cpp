@@ -5,21 +5,23 @@
 #include <utility.h>
 
 #if defined(__clang__) && defined(__apple_build_version__)
-    #if __apple_build_version__ <= 14000029
-        #include <iomanip>
-        #include <sstream>
-        std::ostream& operator<<(std::ostream& os, const std::chrono::microseconds ms) {
-            std::stringstream ss;
-            ss.flags(os.flags());
-            ss.imbue(os.getloc());
-            ss.precision(os.precision());
-            ss << ms.count() << "µs";
-            return os << ss.str();
-        }
-    #endif
+#if __apple_build_version__ <= 14000029
+#include <iomanip>
+#include <sstream>
+std::ostream& operator<<(std::ostream& os, const std::chrono::microseconds ms)
+{
+    std::stringstream ss;
+    ss.flags(os.flags());
+    ss.imbue(os.getloc());
+    ss.precision(os.precision());
+    ss << ms.count() << "µs";
+    return os << ss.str();
+}
+#endif
 #endif
 
-std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vector<std::string>& data) {
+std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vector<std::string>& data)
+{
     auto start = std::chrono::high_resolution_clock::now();
     auto result = fn(data);
     auto stop = std::chrono::high_resolution_clock::now();
@@ -27,7 +29,8 @@ std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vect
     return { result, duration };
 }
 
-std::string path(int n) {
+std::string path(int n)
+{
     if (n < 10) return std::string{ "./data/day-0" + std::to_string(n) + ".txt" };
     return std::string{ "./data/day-" + std::to_string(n) + ".txt" };
 }
@@ -100,6 +103,6 @@ int main(int argc, char** argv)
         auto [result, duration] = time(fn, data);
 
         cout << "Day " << ((day < 10) ? "0" : "") << day << " Answer " << ((i % 2 == 0) ? "A" : "B") << ": "
-             << "(" << std::setw(10) << duration << ") " << result << "\n";
+            << "(" << std::setw(10) << duration << ") " << result << "\n";
     }
 }

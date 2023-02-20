@@ -2,7 +2,7 @@
 
 #include <days.h>
 
-const std::vector<std::string> input {
+const std::vector<std::string> input{
     "addx 15",
     "addx -11",
     "addx 6",
@@ -153,24 +153,24 @@ const std::vector<std::string> input {
 
 TEST(Day10, Part1Example)
 {
-  std::vector<std::string> data{input};
+    std::vector<std::string> data{ input };
 
-  EXPECT_EQ("13140", day_10::answer_a(data));
+    EXPECT_EQ("13140", day_10::answer_a(data));
 }
 
 TEST(Day10, Part2Example)
 {
-  std::vector<std::string> data{input};
+    std::vector<std::string> data{ input };
 
-  std::string expected =
-      "\n" \
-      "##..##..##..##..##..##..##..##..##..##..\n" \
-      "###...###...###...###...###...###...###.\n" \
-      "####....####....####....####....####....\n" \
-      "#####.....#####.....#####.....#####.....\n" \
-      "######......######......######......####\n" \
-      "#######.......#######.......#######.....\n" \
-      "\n";
+    std::string expected =
+        "\n" \
+        "##..##..##..##..##..##..##..##..##..##..\n" \
+        "###...###...###...###...###...###...###.\n" \
+        "####....####....####....####....####....\n" \
+        "#####.....#####.....#####.....#####.....\n" \
+        "######......######......######......####\n" \
+        "#######.......#######.......#######.....\n" \
+        "\n";
 
-  EXPECT_EQ(expected, day_10::answer_b(data));
+    EXPECT_EQ(expected, day_10::answer_b(data));
 }

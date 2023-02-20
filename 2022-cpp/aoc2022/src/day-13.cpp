@@ -17,11 +17,11 @@ namespace Packet13
     using std::variant;
 
     template<class... Ts> struct overloaded : Ts... { using Ts::operator()...; };
-    #if defined(__clang__) && defined(__apple_build_version__)
-        #if __apple_build_version__ <= 14000029
-            template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
-        #endif
-    #endif
+#if defined(__clang__) && defined(__apple_build_version__)
+#if __apple_build_version__ <= 14000029
+    template<class... Ts> overloaded(Ts...) -> overloaded<Ts...>;
+#endif
+#endif
     struct Node
     {
         variant<int, vector<Node>> data;
@@ -51,7 +51,8 @@ namespace Packet13
             return std::visit(overloads, lhs.data, rhs.data);
         }
 
-        friend auto operator<<(std::ostream& os, Node& node) -> std::ostream& {
+        friend auto operator<<(std::ostream& os, Node& node) -> std::ostream&
+        {
             if (std::holds_alternative<vector<Node>>(node.data)) {
                 os << "[";
                 bool firstTime = true;
@@ -61,8 +62,7 @@ namespace Packet13
                     firstTime = false;
                 }
                 os << "]";
-            }
-            else {
+            } else {
                 os << std::get<int>(node.data);
             }
             return os;
@@ -71,7 +71,7 @@ namespace Packet13
 
     int parseInt(auto& it, auto end)
     {
-        size_t size{0};
+        size_t size{ 0 };
         int parsed = std::stoi(string{ it, end }, &size);
         it += size;
         return parsed;
@@ -87,8 +87,7 @@ namespace Packet13
         while (it != end && *it != ']') {
             if (std::isdigit(*it)) {
                 nodes.emplace_back(parseInt(it, end)); // parseInt will advance it
-            }
-            else if (*it == '[') {
+            } else if (*it == '[') {
                 nodes.emplace_back(parseList(it, end)); // recurse,  advancing it
             }
             if (*it == ',') ++it;
@@ -140,14 +139,15 @@ namespace day_13
         auto it = allNodes.begin();
         auto end = allNodes.end();
         while (it != end) {
-            result.push_back({result.size()+1, std::make_pair(*it, *(it + 1))});
+            result.push_back({ result.size() + 1, std::make_pair(*it, *(it + 1)) });
             it += 2;
         }
 
         return result;
     }
 
-    Nodes parseNodes(vector<string> const& input) {
+    Nodes parseNodes(vector<string> const& input)
+    {
         vector<string> filtered;
         copy_if(input.begin(), input.end(), back_inserter(filtered), [](auto& s) { return !s.empty();  });
 
@@ -168,8 +168,7 @@ namespace day_13
         //std::cout << "Pairs 1, 2, 4, and 6 should be considered ordered correctly." << std::endl;
 
         int sum = 0;
-        for (NodePair& nodePair : nodePairs)
-        {
+        for (NodePair& nodePair : nodePairs) {
             //std::cout << "PACKET " << nodePair.number << "A:" << nodePair.pair.first << std::endl;
             //std::cout << "PACKET " << nodePair.number << "B:" << nodePair.pair.second << std::endl;
 

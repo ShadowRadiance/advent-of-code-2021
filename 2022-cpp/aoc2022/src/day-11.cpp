@@ -18,20 +18,24 @@ namespace day_11
 
     using strings = vector<string>;
 
-    int64_t add(int64_t old, int64_t amount) {
+    int64_t add(int64_t old, int64_t amount)
+    {
         assert(amount < INT64_MAX - old);
         return old + amount;
     }
-    int64_t multiply(int64_t old, int64_t amount) {
+    int64_t multiply(int64_t old, int64_t amount)
+    {
         assert(amount != 0);
         assert(amount < INT64_MAX / old);
         return old * amount;
     }
-    int64_t square(int64_t old, int64_t _) {
+    int64_t square(int64_t old, int64_t _)
+    {
         return multiply(old, old);
     }
 
-    strings split(const std::string& str, const regex& regex) {
+    strings split(const std::string& str, const regex& regex)
+    {
         return strings{
             sregex_token_iterator(str.begin(), str.end(), regex, -1),
             sregex_token_iterator()
@@ -39,7 +43,8 @@ namespace day_11
     }
 
     template<typename T>
-    T pop_front(vector<T>& vec) {
+    T pop_front(vector<T>& vec)
+    {
         T item = vec.front();
         vec.erase(vec.begin());
         return item;
@@ -99,14 +104,11 @@ namespace day_11
             if (operation == "+") {
                 worryOperation = add;
                 worryOperationAmount = stoi(next);
-            }
-            else if (operation == "*") {
+            } else if (operation == "*") {
                 if (next == "old") {
                     worryOperation = square;
                     worryOperationAmount = 0;
-                }
-                else
-                {
+                } else {
                     worryOperation = multiply;
                     worryOperationAmount = stoi(next);
                 }
@@ -118,14 +120,16 @@ namespace day_11
             commonModulus *= divisibleByTest;
         }
 
-        void catchItem(int64_t item) {
+        void catchItem(int64_t item)
+        {
             if (item % commonModulus != 0) {
                 item = item % commonModulus;
             }
             itemWorryLevels.push_back(item);
         }
 
-        void playAround(Monkeys& allTheMonkeys) {
+        void playAround(Monkeys& allTheMonkeys)
+        {
             while (itemWorryLevels.size() > 0) {
                 int64_t item = pop_front(itemWorryLevels);
                 item = worryOperation(item, worryOperationAmount);
@@ -159,7 +163,8 @@ namespace day_11
 
     int64_t Monkey::commonModulus = 1;
 
-    Monkeys initializeMonkeys(const strings& input_data, int64_t calmness = 3) {
+    Monkeys initializeMonkeys(const strings& input_data, int64_t calmness = 3)
+    {
         // remember to reset static data on each run!
         Monkey::resetCommonModulus();
         Monkeys monkeys;
@@ -175,7 +180,8 @@ namespace day_11
         return monkeys;
     }
 
-    void playAround(int64_t rounds, Monkeys& monkeys) {
+    void playAround(int64_t rounds, Monkeys& monkeys)
+    {
         for (int64_t round = 0; round < rounds; round++) {
 
             for (Monkey& monkey : monkeys) {
@@ -184,11 +190,12 @@ namespace day_11
         }
     }
 
-    int64_t monkeyBusiness(Monkeys& monkeys) {
+    int64_t monkeyBusiness(Monkeys& monkeys)
+    {
         sort(monkeys.begin(), monkeys.end(),
-            [](Monkey& a, Monkey& b) {
-                return a.inspections() > b.inspections();
-            }
+             [](Monkey& a, Monkey& b) {
+                 return a.inspections() > b.inspections();
+             }
         );
         return monkeys[0].inspections() * monkeys[1].inspections();
     }
