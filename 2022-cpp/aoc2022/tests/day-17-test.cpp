@@ -2,7 +2,7 @@
 
 #include <days.h>
 
-std::vector<std::string> data{
+std::vector<std::string> const data{
 	">>><<><>><<<>><>>><<<>>><<<><<<>><>><<>>"
 };
 
