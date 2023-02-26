@@ -58,6 +58,7 @@ namespace day_19
         auto end();
         auto begin() const;
         auto end() const;
+        void applyHungryElephants();
     private:
         vector<Blueprint> blueprints_;
     };
@@ -218,6 +219,13 @@ namespace day_19
 
     auto Blueprints::end() const { return blueprints_.end(); }
 
+    void Blueprints::applyHungryElephants()
+    {
+        if (blueprints_.size() > 3) {
+            blueprints_.erase(blueprints_.begin() + 3);
+        }
+    }
+
     ostream& operator<<(ostream& os, Blueprints const& blueprints)
     {
         os << "BLUEPRINTS:" << "\n";
@@ -310,7 +318,6 @@ namespace day_19
                 q.push(maybeState.value());
             }
         }
-
     }
 
     int Factory::qualityLevel() const
@@ -391,8 +398,6 @@ namespace day_19
     }
 #pragma endregion
 
-    // ----------------------------------------------------------------------------------------------------------------
-
     string answer_a(vector<string> const& input_data)
     {
         Factory::setMaxExecutionTime(24);
@@ -411,16 +416,18 @@ namespace day_19
 
     string answer_b(vector<string> const& input_data)
     {
-        return "PENDING";
+        Factory::setMaxExecutionTime(32);
+        Blueprints blueprints(input_data);
+        blueprints.applyHungryElephants();
 
-        //Blueprints blueprints(input_data);
-        //std::cout << blueprints << std::endl;
+        Factories factories(blueprints.begin(), blueprints.end());
+        std::cout << factories << "\n";
 
-        //Factories factories(blueprints.begin(), blueprints.end());
-        //std::for_each(factories.begin(), factories.end(), std::mem_fn(Factory::determineMaxGeodes));
+        std::for_each(factories.begin(), factories.end(), std::mem_fn(&Factory::determineMaxGeodes));
+        std::cout << factories << "\n";
 
-        //return std::to_string(std::transform_reduce(
-        //    factories.begin(), factories.end(),
-        //    0, std::plus<int>{}, std::mem_fn(Factory::qualityLevel)));
+        return std::to_string(std::transform_reduce(
+            factories.begin(), factories.end(),
+            1, std::multiplies<int>{}, std::mem_fn(&Factory::maxGeodes)));
     }
 }

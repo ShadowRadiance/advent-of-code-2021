@@ -22,5 +22,5 @@ TEST(Day19, Part1Example)
 
 TEST(Day19, Part2Example)
 {
-    EXPECT_EQ("PENDING", day_19::answer_b(data));
+    EXPECT_EQ(std::to_string(56*62), day_19::answer_b(data));
 }
