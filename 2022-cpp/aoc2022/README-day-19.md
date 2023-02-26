@@ -389,6 +389,6 @@ You no longer have enough blueprints to worry about quality levels. Instead, _fo
 
 Don't worry about quality levels; instead, just determine the largest number of geodes you could open using each of the first three blueprints. **What do you get if you multiply these numbers together?**
 
-Answer: 
+Answer: 37604
  
-
+Day 19 Answer B: (  130064us) 37604

@@ -222,7 +222,7 @@ namespace day_19
     void Blueprints::applyHungryElephants()
     {
         if (blueprints_.size() > 3) {
-            blueprints_.erase(blueprints_.begin() + 3);
+            blueprints_.erase(blueprints_.begin()+3, blueprints_.end());
         }
     }
 
@@ -315,6 +315,19 @@ namespace day_19
             for (Bot bot : ResourceBotTypes) {
                 MaybeState maybeState = tryCreateBot(bot, current);
                 if (!maybeState.has_value()) continue;
+
+                // If we theoretically only built geode bots every turn, 
+                // and we still wouldn’t beat the current maximum, 
+                // don’t push the state the the queue, but skip to the next item.
+                // THIS MAKES AN ELEPHANTINE DIFFERENCE
+                State newState = maybeState.value();
+                int minutesRemaining = maxTime_ - newState.minutesElapsed();
+                // 1+2+3+..n == n(n-1)/2;
+                int maxPotentialNewGeodes =
+                    (minutesRemaining * (minutesRemaining - 1)) / 2
+                    + minutesRemaining * newState.bots(Bot::geode);
+                if (newState.geodes() + maxPotentialNewGeodes < maxGeodes_) continue;
+
                 q.push(maybeState.value());
             }
         }
