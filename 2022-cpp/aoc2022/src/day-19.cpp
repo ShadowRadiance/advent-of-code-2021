@@ -434,10 +434,10 @@ namespace day_19
         blueprints.applyHungryElephants();
 
         Factories factories(blueprints.begin(), blueprints.end());
-        std::cout << factories << "\n";
+        //std::cout << factories << "\n";
 
         std::for_each(factories.begin(), factories.end(), std::mem_fn(&Factory::determineMaxGeodes));
-        std::cout << factories << "\n";
+        //std::cout << factories << "\n";
 
         return std::to_string(std::transform_reduce(
             factories.begin(), factories.end(),

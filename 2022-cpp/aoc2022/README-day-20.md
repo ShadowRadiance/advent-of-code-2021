@@ -115,4 +115,8 @@ The grove coordinates can still be found in the same way. Here, the 1000th numbe
 
 Apply the decryption key and mix your encrypted file ten times. **What is the sum of the three numbers that form the grove coordinates?**
 
-Answer: 
+Answer: 912226207972
+
+Day 20 Answer B: (14376345us) 1693141220 WRONG!
+Oops - failed to change one of the ints to an int64 so it got truncated!
+Day 20 Answer B: ( 1966609us) 912226207972 MUCH BETTER!

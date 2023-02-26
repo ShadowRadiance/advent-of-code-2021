@@ -10,7 +10,7 @@ namespace day_20
 
     struct Value
     {
-        int actualValue = 0;
+        int64_t actualValue = 0;
         int originalIndex = 0;
     };
 
@@ -31,9 +31,7 @@ namespace day_20
         Mixer(vector<Value>&& sequence) : sequence_(std::move(sequence)) {}
         void mix()
         {
-            //std::cout << sequence_ << std::endl;
-
-            int size = sequence_.size();
+            int64_t size = sequence_.size();
 
             vector<Value> newSequence(sequence_);
 
@@ -42,15 +40,16 @@ namespace day_20
                     newSequence.begin(), newSequence.end(),
                     [i](auto& value) { return value.originalIndex == i; }
                 );
-                int currentIndex = itItemToMove - newSequence.begin();
-                int distanceToMove = itItemToMove->actualValue;
+                int64_t currentIndex = itItemToMove - newSequence.begin();
+                int64_t distanceToMove = itItemToMove->actualValue;
 
-                int destinationIndex = (currentIndex + distanceToMove) % (size - 1);
-                if (destinationIndex <= 0) destinationIndex = (size - 1) + destinationIndex;
-                //std::cout << "Moving the " << distanceToMove << " at index " << currentIndex << " to index " << destinationIndex << "...\n";
+                int64_t destinationIndex = (currentIndex + distanceToMove) % (size - 1);
+                if (destinationIndex < 0)
+                    destinationIndex = (size - 1) + destinationIndex;
+                if (destinationIndex == 0 && currentIndex!=destinationIndex)
+                    destinationIndex = (size - 1) + destinationIndex;
 
                 if (destinationIndex == currentIndex) {
-                    //std::cout << newSequence << std::endl;
                     continue;
                 }
 
@@ -65,13 +64,13 @@ namespace day_20
                     last = newSequence.begin() + destinationIndex + 1;
                 }
                 std::rotate(first, middle, last);
-                //std::cout << newSequence << std::endl;
             }
 
             sequence_ = std::move(newSequence);
+            //std::cout << sequence_ << std::endl;
         }
 
-        int indexOfFirstZero() const
+        int64_t indexOfFirstZero() const
         {
             auto itZero = std::find_if(
                 sequence_.begin(), sequence_.end(),
@@ -80,7 +79,7 @@ namespace day_20
             return itZero - sequence_.begin();
         }
 
-        int at(int location) const
+        int64_t at(int location) const
         {
             int realIndex = location % sequence_.size();
             return sequence_[realIndex].actualValue;
@@ -111,9 +110,29 @@ namespace day_20
         );
     }
 
-    string answer_b(vector<string>const& input_data)
+    string answer_b(vector<string>const& inputData)
     {
-        return "PENDING";
+        const auto decryption_key = 811589153;
+        // Multiply each number by the decryption key before you begin
+
+        vector<Value> sequence(inputData.size());
+
+        // the numbers in the sequence are NOT unique! 
+        // so we have to keep track of their original locations
+        for (int i = 0; i < inputData.size(); i++) {
+            sequence[i] = Value{ decryption_key * std::stoll(inputData[i]), i };
+        }
+
+        Mixer mixer(std::move(sequence));
+        for(int i=0; i<10; ++i) mixer.mix();
+
+        int zeroIndex = mixer.indexOfFirstZero();
+
+        return std::to_string(
+            mixer.at(zeroIndex + 1000) +
+            mixer.at(zeroIndex + 2000) +
+            mixer.at(zeroIndex + 3000)
+        );
     }
 
 }
