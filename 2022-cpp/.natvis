@@ -1,0 +1,6 @@
+<?xml version="1.0" encoding="utf-8"?>
+<AutoVisualizer xmlns="http://schemas.microsoft.com/vstudio/debugger/natvis/2010">
+  <Type Name="std::array&lt;int,4&gt;">
+    <DisplayString>{{ {_Elems[0]},{_Elems[1]},{_Elems[2]},{_Elems[3]} }}</DisplayString>
+  </Type>
+</AutoVisualizer>

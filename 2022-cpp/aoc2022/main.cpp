@@ -98,7 +98,9 @@ int main(int argc, char** argv)
         auto data = load_data(path(day));
         auto fn = methods[i];
 
-        if (fn != day_18::answer_a && fn != day_18::answer_b) continue;
+        if (fn == day_16::answer_a || fn == day_16::answer_b) {
+            cout << "Day 16 Suppressed - Slow."; continue;
+        }
 
         auto [result, duration] = time(fn, data);
 
