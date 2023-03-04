@@ -2,18 +2,29 @@
 
 #include <days.h>
 
+const std::vector<std::string> data{
+    "        ...#",
+    "        .#..",
+    "        #...",
+    "        ....",
+    "...#.......#",
+    "........#...",
+    "..#....#....",
+    "..........#.",
+    "        ...#....",
+    "        .....#..",
+    "        .#......",
+    "        ......#.",
+    "",
+    "10R5L5R10L4R5L5",
+};
+
 TEST(Day22, Part1Example)
 {
-    std::vector<std::string> data{
-    };
-
-    EXPECT_EQ("PENDING", day_22::answer_a(data));
+    EXPECT_EQ("6032", day_22::answer_a(data));
 }
 
 TEST(Day22, Part2Example)
 {
-    std::vector<std::string> data{
-    };
-
-    EXPECT_EQ("PENDING", day_22::answer_b(data));
+    EXPECT_EQ("5031", day_22::answer_b(data));
 }
