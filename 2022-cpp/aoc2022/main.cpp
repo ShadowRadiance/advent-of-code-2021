@@ -5,10 +5,10 @@
 #include <utility.h>
 
 #if defined(__clang__) && defined(__apple_build_version__)
-#if __apple_build_version__ <= 14000029
+#if __apple_build_version__ <= 14030022
 #include <iomanip>
 #include <sstream>
-std::ostream& operator<<(std::ostream& os, const std::chrono::microseconds ms)
+std::ostream &operator<<(std::ostream &os, const std::chrono::microseconds ms)
 {
     std::stringstream ss;
     ss.flags(os.flags());
@@ -20,22 +20,23 @@ std::ostream& operator<<(std::ostream& os, const std::chrono::microseconds ms)
 #endif
 #endif
 
-std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vector<std::string>& data)
+std::tuple<std::string, std::chrono::microseconds> time(auto fn, const std::vector<std::string> &data)
 {
     auto start = std::chrono::high_resolution_clock::now();
     auto result = fn(data);
     auto stop = std::chrono::high_resolution_clock::now();
     auto duration = duration_cast<std::chrono::microseconds>(stop - start);
-    return { result, duration };
+    return {result, duration};
 }
 
 std::string path(int n)
 {
-    if (n < 10) return std::string{ "./data/day-0" + std::to_string(n) + ".txt" };
-    return std::string{ "./data/day-" + std::to_string(n) + ".txt" };
+    if (n < 10)
+        return std::string{"./data/day-0" + std::to_string(n) + ".txt"};
+    return std::string{"./data/day-" + std::to_string(n) + ".txt"};
 }
 
-using AnswerFn = std::string(*)(const std::vector<std::string>&);
+using AnswerFn = std::string (*)(const std::vector<std::string> &);
 auto methods = std::vector<AnswerFn>{
     day_01::answer_a,
     day_01::answer_b,
@@ -89,22 +90,25 @@ auto methods = std::vector<AnswerFn>{
     day_25::answer_b,
 };
 
-int main(int argc, char** argv)
+int main(int argc, char **argv)
 {
     using std::cout;
 
-    for (int i = 0; i <= 49; i++) {
+    for (int i = 0; i <= 49; i++)
+    {
         auto day = 1 + (i / 2);
         auto data = load_data(path(day));
         auto fn = methods[i];
 
-        if (fn == day_16::answer_a || fn == day_16::answer_b) {
-            cout << "Day 16 Suppressed - Slow."; continue;
+        if (fn == day_16::answer_a || fn == day_16::answer_b)
+        {
+            cout << "Day 16 Suppressed - Slow.";
+            continue;
         }
 
         auto [result, duration] = time(fn, data);
 
         cout << "Day " << ((day < 10) ? "0" : "") << day << " Answer " << ((i % 2 == 0) ? "A" : "B") << ": "
-            << "(" << std::setw(10) << duration << ") " << result << "\n";
+             << "(" << std::setw(10) << duration << ") " << result << "\n";
     }
 }
