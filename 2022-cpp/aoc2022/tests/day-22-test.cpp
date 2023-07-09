@@ -26,5 +26,6 @@ TEST(Day22, Part1Example)
 
 TEST(Day22, Part2Example)
 {
+    day_22::set_test_mode(true);
     EXPECT_EQ("5031", day_22::answer_b(data));
 }

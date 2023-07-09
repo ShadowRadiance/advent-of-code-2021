@@ -133,6 +133,7 @@ namespace day_21
 
 namespace day_22
 {
+    void set_test_mode(bool b);
     std::string answer_a(const std::vector<std::string>& input_data);
     std::string answer_b(const std::vector<std::string>& input_data);
 }

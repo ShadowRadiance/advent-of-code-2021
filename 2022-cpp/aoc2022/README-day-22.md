@@ -167,8 +167,46 @@ The final password is still calculated from your final position and facing from 
 
 Fold the map into a cube, then follow the path given in the monkeys' notes. What is the final password?
 
-Answer: 
- 
+Answer:
 
+- Day 22 Answer B: (  61886µs) 19304 WRONG
 
+Note to self: running from the command line shows:
+```
+FACES:
+ .12
+ .3. 
+ 45.
+ 6..
+
+7L36R16L35R32R7R49L24R37R5L48L43L40...R6R8L30
+
+[50,0,f:>] (0,0) of face 1          (after start at 50,0 facing >)
+[53,0,f:>] (3,0) of face 1          (after 7 -- ie there's a rock at F1:4,0 -- there is)
+[53,0,f:^] (3,0) of face 1          (after L)
+[53,0,f:^] (3,0) of face 1          (after 36 -- ie there's a rock in the way up from face 1 -> F6:0,3 -- there is)
+[53,0,f:>] (3,0) of face 1          (after R)
+[53,0,f:>] (3,0) of face 1          (after 16 -- ie there's a rock at F1:4,0 -- there is)
+[53,0,f:^] (3,0) of face 1          (after L)
+[53,0,f:^] (3,0) of face 1          (after 35 -- ie there's a rock in the way up from face 1 -> F6:0,3 -- there is)
+[53,0,f:>] (3,0) of face 1          (after R)
+[53,0,f:>] (3,0) of face 1          (after 32 -- ie there's a rock at F1:4,0 -- there is)
+[53,0,f:v] (3,0) of face 1          (after R)
+[53,5,f:v] (3,5) of face 1          (after 7 -- ie there's a rock at F1:3,6 -- there is)
+[53,5,f:<] (3,5) of face 1          (after R)
+[15,144,f:>] (15,44) of face 4      (after 49 -- 3 steps to F1:0,0,<, 1 step to F4:0,44,>, 15 steps to F4:15,44 -- rock at F4:16,44 -- there is)
+[15,144,f:^] (15,44) of face 4      (after L)
+[15,132,f:^] (15,32) of face 4      (after 24 -- ie there is a rock at F4:15,31 -- there is)
+...
+So far so good...
+
+After running all the instructions we seem to end up at:
+...
+[71,18,f:v] (21,18) of face 1       (after 8)
+[71,18,f:>] (21,18) of face 1       (after L)
+[75,18,f:>] (25,18) of face 1       (after 30 -- ie there is a rock at F1:26,18 -- there is)
+
+Based on the rules, the final row is 18+1, col is 75+1, the final facing is 0 (>)
+so the password should be 1000 * 19 + 4 * 76 + 0 == (19000+304+0) == 19304 
+```
 
