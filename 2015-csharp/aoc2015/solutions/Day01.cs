@@ -1,27 +1,42 @@
 ﻿using aoc.support;
 
-namespace aoc
+namespace aoc;
+
+public class Day01 : Day
 {
-    public class Day01 : IDay
+    public override string Solve(int part)
     {
-        private string _input;
-        
-        public Day01(string input)
+        if (part == 1) return Naive().ToString();
+
+        var result = PositionOfCharacterFirstEnteringFloor(-1);
+
+        return result == 0 ? "FAIL" : result.ToString();
+    }
+
+    private int PositionOfCharacterFirstEnteringFloor(int targetFloor)
+    {
+        var currentFloor = 0;
+        var position = 0;
+
+        foreach (var c in Input)
         {
-            _input = input;
-        }
-        
-        public string Solve(int part)
-        {
-            if (part == 1)
-            {
-                return "0";
-            }
+            ++position;
+            if (c == '(')
+                ++currentFloor;
             else
-            {
-                return "PENDING";
-            }
+                --currentFloor;
+
+            if (currentFloor == targetFloor)
+                return position;
         }
+
+        return 0;
+    }
+
+    private int Naive()
+    {
+        var up = Input.Count(x => x == '(');
+        var down = Input.Length - up;
+        return up - down;
     }
 }
-

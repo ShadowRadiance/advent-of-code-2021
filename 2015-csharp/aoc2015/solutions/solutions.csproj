@@ -9,11 +9,11 @@
     </PropertyGroup>
 
     <ItemGroup>
-      <Folder Include="data\" />
-    </ItemGroup>
-
-    <ItemGroup>
       <ProjectReference Include="..\support\support.csproj" />
     </ItemGroup>
+
+    <Target Name="PostBuild" AfterTargets="PostBuildEvent">
+      <Exec Command="mkdir -p $(ProjectDir)$(OutDir)/data&#xA;cp $(ProjectDir)/data/* $(ProjectDir)$(OutDir)/data" />
+    </Target>
 
 </Project>

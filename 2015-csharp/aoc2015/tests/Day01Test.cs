@@ -1,4 +1,3 @@
-using System.Data;
 using aoc.support;
 
 namespace aoc;
@@ -7,7 +6,7 @@ namespace aoc;
 public class Day01Test
 {
     [TestMethod]
-    [DataRow("(())", "0")] 
+    [DataRow("(())", "0")]
     [DataRow("()()", "0")]
     [DataRow("(((", "3")]
     [DataRow("(()(()(", "3")]
@@ -18,16 +17,29 @@ public class Day01Test
     [DataRow(")())())", "-3")]
     public void Part1(string input, string expected)
     {
-        IDay day = new Day01(input);
-        string result = day.Solve(1);
+        Day day = new Day01();
+        day.SetInput(input);
+        var result = day.Solve(1);
         Assert.AreEqual(expected, result);
     }
-    
+
     [TestMethod]
-    public void CanSolvePart2()
+    [DataRow(")", "1")]
+    [DataRow("()())", "5")]
+    [DataRow("(())", "FAIL")]
+    [DataRow("()()", "FAIL")]
+    [DataRow("(((", "FAIL")]
+    [DataRow("(()(()(", "FAIL")]
+    [DataRow("))(((((", "1")]
+    [DataRow("())", "3")]
+    [DataRow("))(", "1")]
+    [DataRow(")))", "1")]
+    [DataRow(")())())", "1")]
+    public void Part2(string input, string expected)
     {
-        IDay day = new Day01("");
-        string result = day.Solve(2);
-        Assert.AreEqual("PENDING", result);
+        Day day = new Day01();
+        day.SetInput(input);
+        var result = day.Solve(2);
+        Assert.AreEqual(expected, result);
     }
 }

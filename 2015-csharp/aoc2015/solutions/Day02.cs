@@ -2,11 +2,7 @@
 
 namespace aoc
 {
-    public class Day02 : IDay
+    public class Day02 : Day
     {
-        public string Solve(int part)
-        {
-            return "PENDING";
-        }
     }
 }

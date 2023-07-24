@@ -58,7 +58,8 @@ public class DayTest
     public void CanSolve(int day, int part, string expected)
     {
         Type t = Type.GetType($"aoc.Day{day:D2},solutions")!;
-        IDay dayObject = (IDay)Activator.CreateInstance(t)!;
+        Day dayObject = (Day)Activator.CreateInstance(t)!;
+        // dayObject.SetInput(lookup test data);
         Assert.AreEqual(expected, dayObject.Solve(part));
     }
 
