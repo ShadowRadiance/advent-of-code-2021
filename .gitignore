@@ -4,6 +4,8 @@
 /coverage/
 /InstalledFiles
 /pkg/
+
+# Spec and Test
 /spec/reports/
 /spec/examples.txt
 /test/tmp/
@@ -35,7 +37,6 @@ build-iPhoneSimulator/
 ## Documentation cache and generated files:
 /.yardoc/
 /_yardoc/
-/doc/
 /rdoc/
 
 ## Environment normalization:
