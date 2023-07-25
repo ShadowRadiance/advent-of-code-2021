@@ -62,6 +62,14 @@ public class DayTest
             new("^>v<", "3"),
             new("^v^v^v^v^v", "11")
         };
+
+        ExpectationsSpecs[(4, 1)] = new List<Expectation>
+        {
+            // ReSharper disable StringLiteralTypo
+            new("abcdef", "609043"),
+            new("pqrstuv", "1048970")
+            // ReSharper restore StringLiteralTypo
+        };
     }
 
 
