@@ -2,6 +2,8 @@
 
 namespace aoc;
 
+// https://adventofcode.com/2015/day/1
+
 public class Day01 : Day
 {
     public override string Solve(int part)

@@ -36,6 +36,19 @@ public class DayTest
             new(")))", "1"),
             new(")())())", "1")
         };
+
+        ExpectationsSpecs[(2, 1)] = new List<Expectation>
+        {
+            new("2x3x4", "58"),
+            new("1x1x10", "43"),
+            new("2x3x4\n1x1x10", "101")
+        };
+        ExpectationsSpecs[(2, 2)] = new List<Expectation>
+        {
+            new("2x3x4", "34"),
+            new("1x1x10", "14"),
+            new("2x3x4\n1x1x10", "48")
+        };
     }
 
 
