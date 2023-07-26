@@ -97,6 +97,13 @@ public class DayTest
             new("turn on 0,0 through 999,999\ntoggle 0,0 through 999,0\nturn off 499,499 through 500,500",
                 (1000000 - 1000 - 4).ToString())
         };
+        ExpectationsSpecs[(6, 2)] = new List<Expectation>
+        {
+            new("turn on 0,0 through 999,999", "1000000"),
+            new("toggle 0,0 through 999,0", "2000"),
+            new("turn on 0,0 through 999,999\ntoggle 0,0 through 999,0\nturn off 499,499 through 500,500",
+                (1000000 + 2000 - 4).ToString())
+        };
     }
 
 

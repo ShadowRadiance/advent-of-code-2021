@@ -4,12 +4,20 @@ using aoc.support;
 
 namespace aoc;
 
-internal class Grid
+internal interface IGrid
+{
+    public void TurnOff(Point p);
+    public void TurnOn(Point p);
+    public void Toggle(Point p);
+    public int Brightness();
+}
+
+internal class BooleanGrid : IGrid
 {
     private readonly bool[] _data;
     private readonly int _width;
 
-    public Grid(int height, int width)
+    public BooleanGrid(int height, int width)
     {
         _width = width;
         _data = new bool[height * width];
@@ -33,9 +41,51 @@ internal class Grid
         _data[index] = !_data[index];
     }
 
-    public int Count(bool state)
+    public int Brightness()
     {
-        return _data.Count(x => x == state);
+        return _data.Count(x => x);
+    }
+
+    private int IndexFromPoint(Point p)
+    {
+        return p.X + _width * p.Y;
+    }
+}
+
+internal class WeirdGrid : IGrid
+{
+    private readonly int[] _data;
+    private readonly int _width;
+
+    public WeirdGrid(int height, int width)
+    {
+        _width = width;
+        _data = new int[height * width];
+    }
+
+    public void TurnOff(Point p)
+    {
+        var index = IndexFromPoint(p);
+        _data[index]--;
+        if (_data[index] < 0) _data[index] = 0;
+    }
+
+    public void TurnOn(Point p)
+    {
+        var index = IndexFromPoint(p);
+        _data[index]++;
+    }
+
+    public void Toggle(Point p)
+    {
+        var index = IndexFromPoint(p);
+        _data[index] += 2;
+        // because sure - ^that^ is what "toggle" means
+    }
+
+    public int Brightness()
+    {
+        return _data.Sum();
     }
 
     private int IndexFromPoint(Point p)
@@ -72,9 +122,9 @@ internal class Instruction
 
 internal class GridOperator
 {
-    private readonly Grid _grid;
+    private readonly IGrid _grid;
 
-    public GridOperator(Grid grid)
+    public GridOperator(IGrid grid)
     {
         _grid = grid;
     }
@@ -110,7 +160,9 @@ public class Day06 : Day
 {
     public override string Solve(int part)
     {
-        var grid = new Grid(1000, 1000);
+        IGrid grid = part == 1
+            ? new BooleanGrid(1000, 1000)
+            : new WeirdGrid(1000, 1000);
         var actor = new GridOperator(grid);
         var lines = Input.Split("\n");
         foreach (var line in lines)
@@ -119,6 +171,6 @@ public class Day06 : Day
             actor.Operate(instruction);
         }
 
-        return grid.Count(true).ToString();
+        return grid.Brightness().ToString();
     }
 }
