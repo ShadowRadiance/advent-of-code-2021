@@ -89,6 +89,14 @@ public class DayTest
             new("ieodomkazucvgmuy", "0"),
             new("qjhvhtzxzqqjkmpb\nxxyxx\nuurcxstgmygtbstg\nieodomkazucvgmuy", "2")
         };
+
+        ExpectationsSpecs[(6, 1)] = new List<Expectation>
+        {
+            new("turn on 0,0 through 999,999", "1000000"),
+            new("toggle 0,0 through 999,0", "1000"),
+            new("turn on 0,0 through 999,999\ntoggle 0,0 through 999,0\nturn off 499,499 through 500,500",
+                (1000000 - 1000 - 4).ToString())
+        };
     }
 
 
