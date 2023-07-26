@@ -70,6 +70,25 @@ public class DayTest
             new("pqrstuv", "1048970")
             // ReSharper restore StringLiteralTypo
         };
+
+        ExpectationsSpecs[(5, 1)] = new List<Expectation>
+        {
+            new("ugknbfddgicrmopn", "1"),
+            new("aaa", "1"),
+            new("jchzalrnumimnmhp", "0"),
+            new("haegwjzuvuyypxyu", "0"),
+            new("dvszwmarrgswjxmb", "0"),
+            new("ugknbfddgicrmopn\naaa\njchzalrnumimnmhp\nhaegwjzuvuyypxyu\ndvszwmarrgswjxmb", "2")
+        };
+        ExpectationsSpecs[(5, 2)] = new List<Expectation>
+        {
+            new("aaaxa", "0"),
+            new("qjhvhtzxzqqjkmpb", "1"),
+            new("xxyxx", "1"),
+            new("uurcxstgmygtbstg", "0"),
+            new("ieodomkazucvgmuy", "0"),
+            new("qjhvhtzxzqqjkmpb\nxxyxx\nuurcxstgmygtbstg\nieodomkazucvgmuy", "2")
+        };
     }
 
 
