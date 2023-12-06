@@ -27,7 +27,7 @@ func RunOnePart(day int, part int) {
 	fmt.Println("Running day", day, "part", part)
 
 	operation := getPart(part)
-	result := operation(getDay(day), data(day))
+	result := operation(getDay(day), readData(day))
 	fmt.Println(result)
 }
 
@@ -39,12 +39,12 @@ func getDay(day int) days.DayInterface {
 	return registeredDays[day-1]
 }
 
-func data(day int) string {
+func readData(day int) string {
 	// load input file based on day and part
 	filename := fmt.Sprintf("day%02d.txt", day)
-	if dat, err := os.ReadFile(path.Join("data", filename)); err != nil {
+	if data, err := os.ReadFile(path.Join("data", filename)); err != nil {
 		panic(err)
 	} else {
-		return string(dat)
+		return string(data)
 	}
 }
