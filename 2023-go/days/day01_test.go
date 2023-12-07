@@ -25,3 +25,23 @@ func TestDay01_Part01(t *testing.T) {
 		}
 	}
 }
+
+func TestDay01_Part02(t *testing.T) {
+	tests := []test{
+		{input: "two1nine", expected: "29"},
+		{input: "eightwothree", expected: "83"},
+		{input: "abcone2threexyz", expected: "13"},
+		{input: "xtwone3four", expected: "24"},
+		{input: "4nineeightseven2", expected: "42"},
+		{input: "zoneight234", expected: "14"},
+		{input: "7pqrstsixteen", expected: "76"},
+		{input: "two1nine\neightwothree\nabcone2threexyz\nxtwone3four\n4nineeightseven2\nzoneight234\n7pqrstsixteen", expected: "281"},
+	}
+
+	for _, test := range tests {
+		actual := Day01{}.Part02(test.input)
+		if test.expected != actual {
+			t.Errorf("expected: %v, got: %v", test.expected, actual)
+		}
+	}
+}
