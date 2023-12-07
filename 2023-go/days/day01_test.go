@@ -4,13 +4,8 @@ import (
 	"testing"
 )
 
-type test struct {
-	input    string
-	expected string
-}
-
 func TestDay01_Part01(t *testing.T) {
-	tests := []test{
+	tests := []Test{
 		{input: "1abc2", expected: "12"},
 		{input: "pqr3stu8vwx", expected: "38"},
 		{input: "a1b2c3d4e5f", expected: "15"},
@@ -27,7 +22,7 @@ func TestDay01_Part01(t *testing.T) {
 }
 
 func TestDay01_Part02(t *testing.T) {
-	tests := []test{
+	tests := []Test{
 		{input: "two1nine", expected: "29"},
 		{input: "eightwothree", expected: "83"},
 		{input: "abcone2threexyz", expected: "13"},
