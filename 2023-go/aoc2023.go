@@ -22,7 +22,7 @@ func main() {
 	var err error
 
 	aoc.RegisterDay(days.Day01{})
-	//aoc.RegisterDay(days.Day02{})
+	aoc.RegisterDay(days.Day02{})
 	//aoc.RegisterDay(days.Day03{})
 	//aoc.RegisterDay(days.Day04{})
 	//aoc.RegisterDay(days.Day05{})
