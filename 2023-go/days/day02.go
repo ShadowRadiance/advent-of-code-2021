@@ -75,6 +75,45 @@ func (Day02) Part01(input string) string {
 	return strconv.Itoa(sum)
 }
 
+// ------------------
+
+func powerOfSet(set Set) int {
+	return set.red * set.green * set.blue
+}
+
+func maxInt(a, b int) int {
+	if a > b {
+		return a
+	} else {
+		return b
+	}
+}
+
+func minimalSetFor(bag Set, set Set) Set {
+	return Set{
+		red:   maxInt(bag.red, set.red),
+		green: maxInt(bag.green, set.green),
+		blue:  maxInt(bag.blue, set.blue),
+	}
+}
+
 func (Day02) Part02(input string) string {
-	return "PENDING: " + input
+	lines := strings.Split(input, "\n")
+
+	games := make([]Game, 0, len(lines))
+	for _, line := range lines {
+		if len(line) > 0 {
+			games = append(games, makeGame(line))
+		}
+	}
+	var power int
+	for _, game := range games {
+		minimalBag := Set{}
+		for _, set := range game.sets {
+			minimalBag = minimalSetFor(minimalBag, set)
+		}
+		power += powerOfSet(minimalBag)
+	}
+
+	return strconv.Itoa(power)
 }
