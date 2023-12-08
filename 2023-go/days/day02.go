@@ -1,6 +1,7 @@
 package days
 
 import (
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"strconv"
 	"strings"
 )
@@ -81,19 +82,11 @@ func powerOfSet(set Set) int {
 	return set.red * set.green * set.blue
 }
 
-func maxInt(a, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
-}
-
 func minimalSetFor(bag Set, set Set) Set {
 	return Set{
-		red:   maxInt(bag.red, set.red),
-		green: maxInt(bag.green, set.green),
-		blue:  maxInt(bag.blue, set.blue),
+		red:   util.MaxInt(bag.red, set.red),
+		green: util.MaxInt(bag.green, set.green),
+		blue:  util.MaxInt(bag.blue, set.blue),
 	}
 }
 

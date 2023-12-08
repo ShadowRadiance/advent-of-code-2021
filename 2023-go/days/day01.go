@@ -2,13 +2,12 @@ package days
 
 import (
 	"errors"
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"strconv"
 	"strings"
 )
 
 type Day01 struct{}
-
-const numberChars = "1234567890"
 
 var englishNumbers = map[string]int{
 	"zero":  0,
@@ -29,7 +28,7 @@ func englishNumber(input string) (int, bool) {
 }
 
 func extractNumericLiteral(line string, method func(string, string) int) (int, error) {
-	idx := method(line, numberChars)
+	idx := method(line, util.NumberChars)
 	if idx == -1 {
 		return 0, errors.New("line does not contain any numeric literals")
 	}
