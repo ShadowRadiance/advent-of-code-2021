@@ -3,7 +3,6 @@ package main
 import (
 	"bufio"
 	"fmt"
-	"github.com/shadowradiance/advent-of-code/2023-go/days"
 	"os"
 	"strconv"
 
@@ -21,31 +20,9 @@ func userInput(output string) string {
 func main() {
 	var err error
 
-	aoc.RegisterDay(days.Day01{})
-	aoc.RegisterDay(days.Day02{})
-	aoc.RegisterDay(days.Day03{})
-	//aoc.RegisterDay(days.Day04{})
-	//aoc.RegisterDay(days.Day05{})
-	//aoc.RegisterDay(days.Day06{})
-	//aoc.RegisterDay(days.Day07{})
-	//aoc.RegisterDay(days.Day08{})
-	//aoc.RegisterDay(days.Day09{})
-	//aoc.RegisterDay(days.Day10{})
-	//aoc.RegisterDay(days.Day11{})
-	//aoc.RegisterDay(days.Day12{})
-	//aoc.RegisterDay(days.Day13{})
-	//aoc.RegisterDay(days.Day14{})
-	//aoc.RegisterDay(days.Day15{})
-	//aoc.RegisterDay(days.Day16{})
-	//aoc.RegisterDay(days.Day17{})
-	//aoc.RegisterDay(days.Day18{})
-	//aoc.RegisterDay(days.Day19{})
-	//aoc.RegisterDay(days.Day20{})
-	//aoc.RegisterDay(days.Day21{})
-	//aoc.RegisterDay(days.Day22{})
-	//aoc.RegisterDay(days.Day23{})
-	//aoc.RegisterDay(days.Day24{})
-	//aoc.RegisterDay(days.Day25{})
+	for _, solution := range aoc.Available() {
+		aoc.RegisterDay(solution)
+	}
 
 	dayStr := userInput("Day [Enter for all]: ")
 

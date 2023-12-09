@@ -1,4 +1,4 @@
-package days
+package day03
 
 import (
 	"github.com/shadowradiance/advent-of-code/2023-go/util"
@@ -6,7 +6,7 @@ import (
 	"strings"
 )
 
-type Day03 struct{}
+type Solution struct{}
 
 type Grid []string
 
@@ -16,7 +16,7 @@ func (g Grid) at(x, y int) rune {
 func (g Grid) numRows() int { return len(g) }
 func (g Grid) numCols() int { return len(g[0]) }
 
-func (Day03) Part01(input string) string {
+func (Solution) Part01(input string) string {
 	lines := strings.Split(input, "\n")
 	if len(lines) == 0 {
 		return "NO DATA"
@@ -87,7 +87,7 @@ func (g Grid) findSymbolAround(x1, y1, x2, y2 int) (rune, bool) {
 	return 0, false
 }
 
-func (Day03) Part02(input string) string {
+func (Solution) Part02(input string) string {
 	if len(input) == 0 {
 		return "NO DATA"
 	}

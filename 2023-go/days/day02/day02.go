@@ -1,12 +1,13 @@
-package days
+package day02
 
 import (
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"strconv"
 	"strings"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
-type Day02 struct{}
+type Solution struct{}
 
 type Set struct {
 	blue  int
@@ -55,7 +56,7 @@ func gamePossible(game Game, bag Set) bool {
 	return true
 }
 
-func (Day02) Part01(input string) string {
+func (Solution) Part01(input string) string {
 	lines := strings.Split(input, "\n")
 
 	games := make([]Game, 0, len(lines))
@@ -90,7 +91,7 @@ func minimalSetFor(bag Set, set Set) Set {
 	}
 }
 
-func (Day02) Part02(input string) string {
+func (Solution) Part02(input string) string {
 	lines := strings.Split(input, "\n")
 
 	games := make([]Game, 0, len(lines))

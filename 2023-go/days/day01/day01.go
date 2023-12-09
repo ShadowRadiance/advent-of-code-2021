@@ -1,13 +1,14 @@
-package days
+package day01
 
 import (
 	"errors"
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"strconv"
 	"strings"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
-type Day01 struct{}
+type Solution struct{}
 
 var englishNumbers = map[string]int{
 	"zero":  0,
@@ -77,7 +78,7 @@ func panicOnError(err error) {
 	}
 }
 
-func (Day01) Part01(input string) string {
+func (Solution) Part01(input string) string {
 	lines := strings.Split(input, "\n")
 	numbers := make([]int, 0, len(lines))
 
@@ -97,7 +98,7 @@ func (Day01) Part01(input string) string {
 	return strconv.Itoa(sum)
 }
 
-func (Day01) Part02(input string) string {
+func (Solution) Part02(input string) string {
 	lines := strings.Split(input, "\n")
 	numbers := make([]int, 0, len(lines))
 
