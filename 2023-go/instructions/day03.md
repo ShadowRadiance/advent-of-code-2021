@@ -83,3 +83,7 @@ In this schematic, there are two gears.
 - Adding up all of the gear ratios produces `467835`.
 
 What is the sum of all of the gear ratios in your engine schematic?
+
+Your puzzle answer was 84907174.
+
+Both parts of this puzzle are complete! They provide two gold stars: **
