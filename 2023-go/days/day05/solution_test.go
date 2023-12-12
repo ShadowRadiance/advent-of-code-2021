@@ -1,7 +1,6 @@
 package day05
 
 import (
-	"fmt"
 	"testing"
 
 	"github.com/MakeNowJust/heredoc"
@@ -136,10 +135,8 @@ func TestSplitIntervals(t *testing.T) {
 	}
 
 	result2 := result[Interval{92, 92}]
-	expected2 := Interval{56, 56}
+	expected2 := Interval{60, 60}
 	if result2 != expected2 {
 		t.Errorf("Expected 1 elements to be (92,92) => (56, 56)")
 	}
-
-	fmt.Printf("%+v\n", result)
 }

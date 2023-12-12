@@ -1,7 +1,6 @@
 package day05
 
 import (
-	"fmt"
 	"math"
 	"sort"
 	"strconv"
@@ -83,11 +82,9 @@ func (Solution) Part02(input string) string {
 		ranges[seedInterval] = seedInterval
 	}
 
-	for i, m := range maps {
-		fmt.Printf("%d: %+v\n", i, ranges)
+	for _, m := range maps {
 		applyMapToRanges(m, ranges)
 	}
-	fmt.Printf("7: %+v\n", ranges)
 
 	smallestLocation := math.MaxInt
 	for _, iLocation := range ranges {
