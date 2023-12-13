@@ -46,5 +46,5 @@ then
   echo "Cannot download data file without SESSION environment variable"
   echo "Visit https://adventofcode.com/2023/day/$day/input for your input"
 else
-  curl -o "$dataFile" https://adventofcode.com/2023/day/$day/input --cookie "session=$SESSION"
+  curl -o "$dataFile" "https://adventofcode.com/2023/day/$day/input" --cookie "session=$SESSION"
 fi

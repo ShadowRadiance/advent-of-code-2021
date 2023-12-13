@@ -1,9 +1,10 @@
 package day03
 
 import (
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"strconv"
 	"strings"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
 type Solution struct{}
@@ -145,7 +146,7 @@ func makeGear(x, y int, partsGrid [][]*Part) (gear Gear) {
 	for r := rect.top; r <= rect.bot; r++ {
 		for c := rect.lft; c <= rect.rgt; c++ {
 			if r != y || c != x {
-				var part *Part = partsGrid[r][c]
+				var part = partsGrid[r][c]
 				if part != nil && !gear.contains(part) {
 					gear.parts = append(gear.parts, part)
 				}

@@ -2,9 +2,10 @@ package aoc
 
 import (
 	"fmt"
-	"github.com/shadowradiance/advent-of-code/2023-go/days"
 	"os"
 	"path"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/days"
 )
 
 var (

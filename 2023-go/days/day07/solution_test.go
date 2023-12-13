@@ -11,6 +11,26 @@ import (
 func TestSolution_Part01(t *testing.T) {
 	examples := []util.TestExample{
 		{
+			Input:    heredoc.Doc(`32T3K 765`),
+			Expected: "765",
+		},
+		{
+			Input:    heredoc.Doc(`T55J5 684`),
+			Expected: "684",
+		},
+		{
+			Input:    heredoc.Doc(`KK677 28`),
+			Expected: "28",
+		},
+		{
+			Input:    heredoc.Doc(`KTJJT 220`),
+			Expected: "220",
+		},
+		{
+			Input:    heredoc.Doc(`QQQJA 483`),
+			Expected: "483",
+		},
+		{
 			Input: heredoc.Doc(`
 				32T3K 765
 				T55J5 684

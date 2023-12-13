@@ -1,12 +1,13 @@
 package day04
 
 import (
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"math"
 	"regexp"
 	"sort"
 	"strconv"
 	"strings"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
 type Solution struct{}

@@ -7,6 +7,7 @@ import (
 )
 
 func TestSolution_Part01(t *testing.T) {
+
 	examples := []util.TestExample{
 		{Input: "1abc2", Expected: "12"},
 		{Input: "pqr3stu8vwx", Expected: "38"},

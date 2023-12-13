@@ -8,7 +8,8 @@ import (
 const NumberChars = "1234567890"
 
 func ConvertNumeric(s string) (i int) {
-	i, _ = strconv.Atoi(s)
+	i, err := strconv.Atoi(s)
+	PanicOnError(err)
 	return
 }
 

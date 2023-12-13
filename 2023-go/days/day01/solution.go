@@ -33,7 +33,7 @@ func extractNumericLiteral(line string, method func(string, string) int) (int, e
 	if idx == -1 {
 		return 0, errors.New("line does not contain any numeric literals")
 	}
-	number, _ := strconv.Atoi(string(line[idx]))
+	number := util.ConvertNumeric(string(line[idx]))
 	return number, nil
 }
 
@@ -72,21 +72,15 @@ func extractLastNumber(line string) (int, error) {
 	return 0, errors.New(line + " does not contain any numbers")
 }
 
-func panicOnError(err error) {
-	if err != nil {
-		panic(err)
-	}
-}
-
 func (Solution) Part01(input string) string {
 	lines := strings.Split(input, "\n")
 	numbers := make([]int, 0, len(lines))
 
 	for _, line := range lines {
 		first, err := extractNumericLiteral(line, strings.IndexAny)
-		panicOnError(err)
+		util.PanicOnError(err)
 		last, err := extractNumericLiteral(line, strings.LastIndexAny)
-		panicOnError(err)
+		util.PanicOnError(err)
 		numbers = append(numbers, first*10+last)
 	}
 
@@ -104,9 +98,9 @@ func (Solution) Part02(input string) string {
 
 	for _, line := range lines {
 		first, err := extractFirstNumber(line)
-		panicOnError(err)
+		util.PanicOnError(err)
 		last, err := extractLastNumber(line)
-		panicOnError(err)
+		util.PanicOnError(err)
 		numbers = append(numbers, first*10+last)
 	}
 
