@@ -61,3 +61,31 @@ func ChunkIntSlice(slice []int, chunkSize int) [][]int {
 
 	return chunks
 }
+
+func GreatestCommonDivisor(a, b int) int {
+	for b != 0 {
+		t := b
+		b = a % b
+		a = t
+	}
+	return a
+}
+
+func LowestCommonMultiple(a, b int) int {
+	result := a * b / GreatestCommonDivisor(a, b)
+
+	return result
+}
+
+func LowestCommonMultipleSlice(numbers []int) int {
+	switch len(numbers) {
+	case 0:
+		return 0
+	case 1:
+		return numbers[0]
+	case 2:
+		return LowestCommonMultiple(numbers[0], numbers[1])
+	default:
+		return LowestCommonMultiple(numbers[0], LowestCommonMultipleSlice(numbers[1:]))
+	}
+}

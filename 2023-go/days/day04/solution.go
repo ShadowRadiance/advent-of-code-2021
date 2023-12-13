@@ -75,9 +75,9 @@ func NewCard(s string) Card {
 	matches := cardParser.FindStringSubmatch(s)
 
 	return Card{
-		id:             util.ConvertNumeric(matches[1]),
-		winningNumbers: util.MapStringsToIntegers(numSplitter.Split(matches[2], -1)),
-		yourNumbers:    util.MapStringsToIntegers(numSplitter.Split(matches[3], -1)),
+		id:             util.ConvertNumeric(strings.TrimSpace(matches[1])),
+		winningNumbers: util.MapStringsToIntegers(numSplitter.Split(strings.TrimSpace(matches[2]), -1)),
+		yourNumbers:    util.MapStringsToIntegers(numSplitter.Split(strings.TrimSpace(matches[3]), -1)),
 	}
 }
 
