@@ -3,6 +3,8 @@ package camel_cards
 type Hand struct {
 	Cards [5]Card
 	Bid   int
+
+	Part int
 }
 
 type HandClassification int
@@ -38,58 +40,76 @@ func (hand Hand) Classification() HandClassification {
 
 func (hand Hand) isFiveOfAKind() bool {
 	counts := hand.GroupCards()
+	jokers := 0
+	if hand.Part == 2 {
+		jokers = counts["J"]
+		delete(counts, "J")
+	}
 	for _, count := range counts {
-		if count == 5 {
+		if count+jokers == 5 {
 			return true
 		}
 	}
-	return false
+
+	return jokers == 5
 }
+
 func (hand Hand) isFourOfAKind() bool {
 	counts := hand.GroupCards()
+	jokers := 0
+	if hand.Part == 2 {
+		jokers = counts["J"]
+		delete(counts, "J")
+	}
 	for _, count := range counts {
-		if count == 4 {
+		if count+jokers == 4 {
 			return true
 		}
 	}
-	return false
+	return jokers == 4
 }
+
 func (hand Hand) isFullHouse() bool {
 	counts := hand.GroupCards()
-	hasThreeOfAKind := false
+	jokers := 0
+	if hand.Part == 2 {
+		jokers = counts["J"]
+		delete(counts, "J")
+	}
+
+	triples := 0
+	pairs := 0
 	for _, count := range counts {
 		if count == 3 {
-			hasThreeOfAKind = true
+			triples++
+		}
+		if count == 2 {
+			pairs++
 		}
 	}
-	if hasThreeOfAKind {
-		for _, count := range counts {
-			if count == 2 {
-				return true // 3 of one, 2 of another
-			}
-		}
-		return false // its just a 3OAK
-	}
-	return false // not even 3OAK
+
+	return (triples == 1 && pairs == 1) ||
+		(triples == 1 && pairs == 0 && jokers == 1) ||
+		(triples == 0 && pairs == 2 && jokers == 1) ||
+		(triples == 0 && pairs == 1 && jokers == 2) ||
+		(triples == 0 && pairs == 0 && jokers == 3)
 }
+
 func (hand Hand) isThreeOfAKind() bool {
 	counts := hand.GroupCards()
-	hasThreeOfAKind := false
+	jokers := 0
+	if hand.Part == 2 {
+		jokers = counts["J"]
+		delete(counts, "J")
+	}
 	for _, count := range counts {
-		if count == 3 {
-			hasThreeOfAKind = true
+		if count+jokers == 3 {
+			return true
 		}
 	}
-	if hasThreeOfAKind {
-		for _, count := range counts {
-			if count == 2 {
-				return false // it is a full house
-			}
-		}
-		return true // its a 3OAK
-	}
-	return false // not even a 3OAK
+	return jokers == 3
 }
+
 func (hand Hand) isTwoPair() bool {
 	counts := hand.GroupCards()
 	pairs := 0
@@ -99,26 +119,37 @@ func (hand Hand) isTwoPair() bool {
 		}
 	}
 	return pairs == 2
+	// interesting Jokers don't matter
+	// 0 jokers: would need two actual pairs
+	// 1 jokers: would need one real pair... but then it'd be a 3OAK
+	// 2 jokers: ... any card becomes a 3OAK
+	// ...
 }
+
 func (hand Hand) isOnePair() bool {
 	counts := hand.GroupCards()
+	jokers := 0
+	if hand.Part == 2 {
+		jokers = counts["J"]
+		delete(counts, "J")
+	}
 	pairs := 0
 	for _, count := range counts {
 		if count == 2 {
 			pairs++
 		}
 	}
-	return pairs == 1
+	return pairs == 1 || jokers == 1
 }
 
 func (hand Hand) StrongerThan(other Hand) bool {
 	classificationDifference := hand.Classification() - other.Classification()
 	if classificationDifference == 0 {
 		for i := range hand.Cards {
-			if hand.Cards[i].Rank() == other.Cards[i].Rank() {
+			if hand.Cards[i].Rank(hand.Part) == other.Cards[i].Rank(hand.Part) {
 				continue
 			}
-			return hand.Cards[i].Rank() > other.Cards[i].Rank()
+			return hand.Cards[i].Rank(hand.Part) > other.Cards[i].Rank(hand.Part)
 		}
 		panic("Identical hands!")
 	}

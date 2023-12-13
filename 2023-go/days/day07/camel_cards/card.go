@@ -8,7 +8,7 @@ type Card string
 
 type CardRank int
 
-func (card Card) Rank() CardRank {
+func (card Card) Rank(part int) CardRank {
 	switch card {
 	case "A":
 		return 14
@@ -17,7 +17,11 @@ func (card Card) Rank() CardRank {
 	case "Q":
 		return 12
 	case "J":
-		return 11
+		if part == 1 {
+			return 11
+		} else {
+			return 1
+		}
 	case "T":
 		return 10
 	default:

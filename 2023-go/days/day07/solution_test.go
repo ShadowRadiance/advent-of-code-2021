@@ -58,7 +58,7 @@ func TestSolution_Part02(t *testing.T) {
 				KTJJT 220
 				QQQJA 483
 			`),
-			Expected: "PENDING",
+			Expected: "5905",
 		},
 	}
 	for _, example := range examples {
