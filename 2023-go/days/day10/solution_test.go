@@ -72,7 +72,7 @@ func TestSolution_Part02(t *testing.T) {
 				.||....||.
 				.||....||.
 				.|L-7F-J|.
-				.|II||II|.
+				.|..||..|.
 				.L--JL--J.
 				..........
 			`),

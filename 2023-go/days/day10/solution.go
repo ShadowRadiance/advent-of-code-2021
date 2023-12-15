@@ -1,6 +1,7 @@
 package day10
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -33,7 +34,6 @@ func (Solution) Part01(input string) string {
 	grid := makeGrid(lines)
 	start := findStart(grid)
 	rover := Rover{start, allowableDirectionFrom(grid, start)}
-	// displayGrid(grid, rover)
 
 	moves := 0
 	for {
@@ -46,11 +46,11 @@ func (Solution) Part01(input string) string {
 				moves++
 			}
 		} else {
-			rover.processInstruction(instruction)
+			processInstruction(&rover, instruction)
 			moves++
 		}
 	}
-	// displayGrid(grid, rover)
+	displayGrid(grid, &rover)
 
 	return strconv.Itoa(moves / 2)
 }
@@ -61,55 +61,55 @@ func (Solution) Part02(input string) string {
 		return "NO DATA"
 	}
 
-	return "PENDING"
+	grid := makeGrid(lines)
+	start := findStart(grid)
+	rover := Rover{start, allowableDirectionFrom(grid, start)}
+
+	moves := 0
+
+	var pipes Grid = make([][]rune, grid.height())
+	for row := range pipes {
+		pipes[row] = make([]rune, grid.width())
+		for col := range pipes[row] {
+			pipes[row][col] = '.'
+		}
+	}
+
+	for {
+		instruction := grid.atPos(rover.pos)
+		pipes[rover.pos.y][rover.pos.x] = instruction
+		if instruction == 'S' {
+			if moves != 0 {
+				break
+			} else {
+				rover.move(1)
+				moves++
+			}
+		} else {
+			processInstruction(&rover, instruction)
+			moves++
+		}
+	}
+	displayGrid(pipes, &rover)
+
+	tripleGrid := expandGrid(pipes)
+	floodFill(tripleGrid)
+
+	inside := 0
+	for row := range grid {
+		for col := range grid[row] {
+			if tripleGrid[row*3+2][col*3+2] == ' ' {
+				tripleGrid[row*3+2][col*3+2] = 'I'
+				inside++
+			}
+		}
+	}
+	displayGrid(tripleGrid, nil)
+
+	return strconv.Itoa(inside)
 }
 
-type Grid [][]rune
-
-func (g Grid) at(x, y int) rune        { return g[y][x] }
-func (g Grid) atPos(pos Position) rune { return g.at(pos.x, pos.y) }
-func (g Grid) height() int             { return len(g) }
-func (g Grid) width() int              { return len(g[0]) }
-
-type Position struct {
-	x, y int
-}
-
-type Direction Position
-
-var (
-	North = Direction{0, -1}
-	South = Direction{0, 1}
-	West  = Direction{-1, 0}
-	East  = Direction{1, 0}
-)
-
-type Rover struct {
-	pos    Position
-	facing Direction
-}
-
-func (pos Position) Add(dir Direction) Position {
-	return Position{x: pos.x + dir.x, y: pos.y + dir.y}
-}
-
-func (pos Position) InBounds(x1, y1, x2, y2 int) bool {
-	return pos.x >= x1 && pos.x <= x2 && pos.y >= y1 && pos.y <= y2
-}
-
-func (pos Position) OutOfBounds(x1, y1, x2, y2 int) bool {
-	return !pos.InBounds(x1, y1, x2, y2)
-}
-
-func (dir Direction) ScalarProduct(n int) Direction {
-	return Direction{x: dir.x * n, y: dir.y * n}
-}
-
-func (dir Direction) Reverse() Direction {
-	return dir.ScalarProduct(-1)
-}
-
-func (rover *Rover) processInstruction(instruction rune) {
+func processInstruction(rover *Rover, instruction rune) {
 	switch instruction {
 	case '|': // do nothing
 	case '-': // do nothing
@@ -147,25 +147,6 @@ func (rover *Rover) processInstruction(instruction rune) {
 	rover.move(1)
 }
 
-func (rover *Rover) move(n int) {
-	rover.pos = rover.pos.Add(rover.facing.ScalarProduct(n))
-}
-
-func (rover *Rover) arrow() rune {
-	switch rover.facing {
-	case North:
-		return '↑'
-	case South:
-		return '↓'
-	case East:
-		return '→'
-	case West:
-		return '←'
-	default:
-		return '•'
-	}
-}
-
 func findStart(grid Grid) Position {
 	for y := 0; y < grid.height(); y++ {
 		for x := 0; x < grid.width(); x++ {
@@ -180,10 +161,10 @@ func findStart(grid Grid) Position {
 func allowableDirectionFrom(grid Grid, start Position) Direction {
 	var newPos Position
 	for _, direction := range []Direction{North, East, South, West} {
-		newPos = start.Add(direction)
+		newPos = start.Add(Position(direction))
 		if newPos.InBounds(0, 0, grid.width()-1, grid.height()-1) {
 			instruction := grid.atPos(newPos)
-			if connected(instruction, direction.Reverse()) {
+			if connected(instruction, Direction(Position(direction).Reverse())) {
 				return direction
 			}
 		}
@@ -214,7 +195,7 @@ func connected(instruction rune, direction Direction) bool {
 	}
 }
 
-func displayGrid(grid Grid, rover Rover) {
+func displayGrid(grid Grid, rover *Rover) {
 	grid2 := make([][]rune, grid.height())
 	for row, runeLine := range grid {
 		grid2[row] = make([]rune, grid.width())
@@ -222,7 +203,10 @@ func displayGrid(grid Grid, rover Rover) {
 			grid2[row][col] = runeChar
 		}
 	}
-	grid2[rover.pos.y][rover.pos.x] = rover.arrow()
+
+	if rover != nil {
+		grid2[rover.pos.y][rover.pos.x] = rover.arrow()
+	}
 
 	for _, s := range grid2 {
 		println(string(s))
@@ -238,4 +222,76 @@ func makeGrid(lines []string) Grid {
 		runeLines[i] = []rune(line)
 	}
 	return runeLines
+}
+
+func expandGrid(grid Grid) Grid {
+	newGrid := make([][]rune, grid.height()*3+2)
+	for row := range newGrid {
+		newGrid[row] = make([]rune, grid.width()*3+2)
+		for col := range newGrid[row] {
+			newGrid[row][col] = ' '
+		}
+	}
+
+	for row := range grid {
+		for col := range grid[row] {
+			switch grid[row][col] {
+			case '|':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune(" | ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune(" | ")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune(" | ")...)
+			case '-':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune("   ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune("---")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune("   ")...)
+			case 'L':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune(" L ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune(" LL")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune("   ")...)
+			case 'J':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune(" J ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune("JJ ")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune("   ")...)
+			case '7':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune("   ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune("77 ")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune(" 7 ")...)
+			case 'F':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune("   ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune(" FF")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune(" F ")...)
+			case '.':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune("   ")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune("   ")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune("   ")...)
+			case 'S':
+				slices.Replace(newGrid[row*3+1], col*3+1, col*3+4, []rune("SSS")...)
+				slices.Replace(newGrid[row*3+2], col*3+1, col*3+4, []rune("SSS")...)
+				slices.Replace(newGrid[row*3+3], col*3+1, col*3+4, []rune("SSS")...)
+			default:
+				panic("Unknown letter WTF")
+			}
+		}
+	}
+	return newGrid
+}
+
+func floodFill(grid Grid) Grid {
+	start := Position{0, 0}
+	sourceRune := grid.atPos(start) // should be ' '
+	if sourceRune != 'O' {
+		dfs(grid, start, sourceRune, 'O')
+	}
+	return grid
+}
+
+func dfs(grid Grid, pos Position, from, to rune) {
+	if !pos.InBounds(0, 0, grid.width()-1, grid.height()-1) || grid.atPos(pos) != from {
+		return
+	}
+	grid[pos.y][pos.x] = to
+	dfs(grid, pos.Add(Position(West)), from, to)
+	dfs(grid, pos.Add(Position(East)), from, to)
+	dfs(grid, pos.Add(Position(North)), from, to)
+	dfs(grid, pos.Add(Position(South)), from, to)
 }
