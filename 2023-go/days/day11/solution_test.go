@@ -48,11 +48,11 @@ func TestSolution_Part02(t *testing.T) {
 				.......#..
 				#...#.....
 			`),
-			Expected: "PENDING",
+			Expected: "1030",
 		},
 	}
 	for _, example := range examples {
-		actual := Solution{}.Part02(example.Input)
+		actual := Solution{testing: true}.Part02(example.Input)
 		if example.Expected != actual {
 			t.Errorf("Expected: %v, got: %v", example.Expected, actual)
 		}

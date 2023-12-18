@@ -1,6 +1,7 @@
 package day11
 
 import (
+	"slices"
 	"strconv"
 	"strings"
 
@@ -8,23 +9,15 @@ import (
 	"github.com/shadowradiance/advent-of-code/2023-go/util/grids"
 )
 
-type Solution struct{}
-
-func (Solution) Part01(input string) string {
-	lines := strings.Split(input, "\n")
-	if len(lines) == 0 {
-		return "NO DATA"
-	}
-
-	grid := grids.NewGrid(lines)
-	grid = expandGrid(grid)
-	pairLengths := determinePairLengths(grid)
-	sum := util.Accumulate(pairLengths, func(a int, b int) int { return a + b })
-
-	return strconv.Itoa(sum)
+type Solution struct {
+	testing bool
 }
 
-func (Solution) Part02(input string) string {
+func (Solution) Part01(input string) string {
+	return solve(input, 2)
+}
+
+func (s Solution) Part02(input string) string {
 	lines := strings.Split(input, "\n")
 	if len(lines) == 0 {
 		return "NO DATA"
@@ -42,61 +35,101 @@ func (Solution) Part02(input string) string {
 	// Step 3: apply it to the test data in Part 2
 	// Step 4: apply it to the real data in Part 2 and submit
 
-	return "PENDING"
+	if s.testing {
+		return solve(input, 10)
+	} else {
+		return solve(input, 1_000_000)
+	}
+
 }
 
-func expandGrid(grid grids.Grid) grids.Grid {
-	rowIndicesNeedingExpansion := make([]int, 0)
-	colIndicesNeedingExpansion := make([]int, 0)
-	for y := 0; y < grid.Height(); y++ {
-		if util.All(grid[y], func(value rune) bool { return value == '.' }) {
-			rowIndicesNeedingExpansion = append(rowIndicesNeedingExpansion, y)
-		}
+func solve(input string, expansionMultiplier int) string {
+	lines := strings.Split(input, "\n")
+	if len(lines) == 0 {
+		return "NO DATA"
 	}
-	for x := 0; x < grid.Width(); x++ {
-		columnHasGalaxy := false
-		for y := 0; y < grid.Height(); y++ {
-			if grid.At(x, y) == '#' {
-				columnHasGalaxy = true
-				break
+
+	galaxies := readGalaxies(lines)
+	minX, maxX, minY, maxY := determineBounds(galaxies)
+	rowsToExpand, colsToExpand := determineEmptySpace(galaxies, minX, maxX, minY, maxY)
+	galaxies = expandUniverse(galaxies, rowsToExpand, colsToExpand, expansionMultiplier-1)
+	pairLengths := determinePairLengths(galaxies)
+	sum := util.Accumulate(pairLengths, func(a int, b int) int { return a + b })
+	return strconv.Itoa(sum)
+}
+
+func readGalaxies(lines []string) []grids.Position {
+	galaxies := make([]grids.Position, 0)
+	for row := 0; row < len(lines); row++ {
+		if len(lines[row]) == 0 {
+			continue
+		}
+		for col := 0; col < len(lines[0]); col++ {
+			if lines[row][col] == '#' {
+				galaxies = append(galaxies, grids.Position{X: col, Y: row})
 			}
 		}
-		if !columnHasGalaxy {
-			colIndicesNeedingExpansion = append(colIndicesNeedingExpansion, x)
+	}
+	return galaxies
+}
+
+func determineBounds(galaxies []grids.Position) (minX, maxX, minY, maxY int) {
+	byX := func(a, b grids.Position) int { return a.X - b.X }
+	byY := func(a, b grids.Position) int { return a.Y - b.Y }
+
+	minX = slices.MinFunc(galaxies, byX).X
+	maxX = slices.MaxFunc(galaxies, byX).X
+	minY = slices.MinFunc(galaxies, byY).Y
+	maxY = slices.MaxFunc(galaxies, byY).Y
+
+	return
+}
+
+func determineEmptySpace(galaxies []grids.Position, minX, maxX, minY, maxY int) (rowsToExpand, colsToExpand []int) {
+	for row := minY; row <= maxY; row++ {
+		if util.None(galaxies, func(galaxy grids.Position) bool { return galaxy.Y == row }) {
+			rowsToExpand = append(rowsToExpand, row)
 		}
 	}
+	for col := minX; col <= maxX; col++ {
+		if util.None(galaxies, func(galaxy grids.Position) bool { return galaxy.X == col }) {
+			colsToExpand = append(colsToExpand, col)
+		}
+	}
+	return
+}
 
-	newGrid := grid.Clone()
+func expandUniverse(galaxies []grids.Position, rows, cols []int, amount int) []grids.Position {
+	// offset positions from the bottom to not mess up rows indexing
+	if last := len(rows) - 1; last >= 0 {
+		for i, rowIndex := last, rows[0]; i >= 0; i-- {
+			rowIndex = rows[i]
 
-	// insert rows from the bottom to not mess up indexing
-	if last := len(rowIndicesNeedingExpansion) - 1; last >= 0 {
-		for i, rowIndex := last, rowIndicesNeedingExpansion[0]; i >= 0; i-- {
-			rowIndex = rowIndicesNeedingExpansion[i]
-			newGrid.InsertRow(rowIndex, emptySpaceRow(newGrid.Width()))
+			for galIndex, galaxy := range galaxies {
+				if galaxy.Y >= rowIndex {
+					galaxies[galIndex].Y += amount
+				}
+			}
 		}
 	}
 
 	// insert cols from the right to not mess up indexing
-	if last := len(colIndicesNeedingExpansion) - 1; last >= 0 {
-		for i, colIndex := last, colIndicesNeedingExpansion[0]; i >= 0; i-- {
-			colIndex = colIndicesNeedingExpansion[i]
-			newGrid.InsertCol(colIndex, emptySpaceCol(newGrid.Height()))
+	if last := len(cols) - 1; last >= 0 {
+		for i, colIndex := last, cols[0]; i >= 0; i-- {
+			colIndex = cols[i]
+
+			for galIndex, galaxy := range galaxies {
+				if galaxy.X >= colIndex {
+					galaxies[galIndex].X += amount
+				}
+			}
 		}
 	}
-	return newGrid
+	return galaxies
 }
 
-func emptySpaceRow(width int) []rune {
-	return []rune(strings.Repeat(".", width))
-}
-
-func emptySpaceCol(height int) []rune {
-	return []rune(strings.Repeat(".", height))
-}
-
-func determinePairLengths(grid grids.Grid) []int {
+func determinePairLengths(galaxies []grids.Position) []int {
 	pairLengths := make([]int, 0)
-	galaxies := findGalaxies(grid)
 	for i := 0; i < len(galaxies); i++ {
 		galaxyA := galaxies[i]
 		for j := i + 1; j < len(galaxies); j++ {
@@ -105,17 +138,4 @@ func determinePairLengths(grid grids.Grid) []int {
 		}
 	}
 	return pairLengths
-}
-
-func findGalaxies(grid grids.Grid) []grids.Position {
-	var galaxies []grids.Position = make([]grids.Position, 0)
-	for row, runeList := range grid {
-		for col, runeChar := range runeList {
-			if runeChar == '#' {
-				galaxies = append(galaxies, grids.Position{X: col, Y: row})
-			}
-		}
-	}
-	return galaxies
-
 }

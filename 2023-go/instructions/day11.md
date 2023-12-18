@@ -141,3 +141,7 @@ In the example above,
 
 Starting with the same initial image, expand the universe according to these new rules, then find the length of the
 shortest path between every pair of galaxies. What is the sum of these lengths?
+
+Your puzzle answer was 726820169514.
+
+Both parts of this puzzle are complete! They provide two gold stars: **

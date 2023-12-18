@@ -50,7 +50,7 @@ func (Solution) Part01(input string) string {
 			moves++
 		}
 	}
-	displayGrid(grid, &rover)
+	// displayGrid(grid, &rover)
 
 	return strconv.Itoa(moves / 2)
 }
@@ -90,7 +90,7 @@ func (Solution) Part02(input string) string {
 			moves++
 		}
 	}
-	displayGrid(pipes, &rover)
+	// displayGrid(pipes, &rover)
 
 	tripleGrid := expandGrid(pipes)
 	floodFill(tripleGrid)
@@ -104,7 +104,7 @@ func (Solution) Part02(input string) string {
 			}
 		}
 	}
-	displayGrid(tripleGrid, nil)
+	// displayGrid(tripleGrid, nil)
 
 	return strconv.Itoa(inside)
 }
@@ -195,24 +195,24 @@ func connected(instruction rune, direction grids.Direction) bool {
 	}
 }
 
-func displayGrid(grid grids.Grid, rover *Rover) {
-	grid2 := make([][]rune, grid.Height())
-	for row, runeLine := range grid {
-		grid2[row] = make([]rune, grid.Width())
-		for col, runeChar := range runeLine {
-			grid2[row][col] = runeChar
-		}
-	}
-
-	if rover != nil {
-		grid2[rover.pos.Y][rover.pos.X] = rover.arrow()
-	}
-
-	for _, s := range grid2 {
-		println(string(s))
-	}
-	println(strings.Repeat("-", grid.Width()))
-}
+// func displayGrid(grid grids.Grid, rover *Rover) {
+// 	grid2 := make([][]rune, grid.Height())
+// 	for row, runeLine := range grid {
+// 		grid2[row] = make([]rune, grid.Width())
+// 		for col, runeChar := range runeLine {
+// 			grid2[row][col] = runeChar
+// 		}
+// 	}
+//
+// 	if rover != nil {
+// 		grid2[rover.pos.Y][rover.pos.X] = rover.arrow()
+// 	}
+//
+// 	for _, s := range grid2 {
+// 		println(string(s))
+// 	}
+// 	println(strings.Repeat("-", grid.Width()))
+// }
 
 func expandGrid(grid grids.Grid) grids.Grid {
 	newGrid := make([][]rune, grid.Height()*3+2)
