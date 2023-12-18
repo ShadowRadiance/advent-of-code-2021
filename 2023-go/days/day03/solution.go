@@ -73,7 +73,7 @@ func collectParts(grid Grid) (collectedParts []Part) {
 
 			if len(numberStr) != 0 {
 				number := util.ConvertNumeric(numberStr)
-				// numberStr runs from grid[r][c-len(numberStr)+1] to grid[r][c]
+				// numberStr runs from grids[r][c-len(numberStr)+1] to grids[r][c]
 				potentialPart := Part{c - len(numberStr), c - 1, r, number}
 				if _, found := grid.findSymbolAround(potentialPart); found {
 					collectedParts = append(collectedParts, potentialPart)
@@ -104,7 +104,7 @@ func (g Grid) findSymbolAround(part Part) (rune, bool) {
 	// ?numberStr?
 	// ???????????
 	//
-	// note that we cannot look off the edges of the grid
+	// note that we cannot look off the edges of the grids
 
 	// push out the boundaries, respect the edges
 	partRect := Rectangle{part.x1, part.y, part.x2, part.y}
@@ -124,12 +124,12 @@ func (g Grid) findSymbolAround(part Part) (rune, bool) {
 }
 
 func buildPartsGrid(grid Grid, parts []Part) (partGrid [][]*Part) {
-	// build an empty grid
+	// build an empty grids
 	partGrid = make([][]*Part, grid.numRows())
 	for i := 0; i < grid.numRows(); i++ {
 		partGrid[i] = make([]*Part, grid.numCols())
 	}
-	// put references to all the parts on the grid
+	// put references to all the parts on the grids
 	for idx, part := range parts {
 		for i := part.x1; i <= part.x2; i++ {
 			partGrid[part.y][i] = &parts[idx]

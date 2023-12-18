@@ -11,8 +11,14 @@ func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 
 func Accumulate[T any](values []T, operation func(a T, b T) T) T {
 	var total T
+	var doneFirst bool
 	for _, value := range values {
-		total = operation(total, value)
+		if !doneFirst {
+			total = value
+			doneFirst = true
+		} else {
+			total = operation(total, value)
+		}
 	}
 	return total
 }

@@ -5,7 +5,7 @@ import (
 	"strconv"
 	"strings"
 
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
+	"github.com/shadowradiance/advent-of-code/2023-go/util/grids"
 )
 
 type Solution struct{}
@@ -31,13 +31,13 @@ func (Solution) Part01(input string) string {
 	// the description makes it sound like pathfinding, but there is only one path
 	// so lets follow it until we get back to the start and divide by two to get the "furthest steps away"
 
-	grid := makeGrid(lines)
+	grid := grids.NewGrid(lines)
 	start := findStart(grid)
 	rover := Rover{start, allowableDirectionFrom(grid, start)}
 
 	moves := 0
 	for {
-		instruction := grid.atPos(rover.pos)
+		instruction := grid.AtPos(rover.pos)
 		if instruction == 'S' {
 			if moves != 0 {
 				break
@@ -61,23 +61,23 @@ func (Solution) Part02(input string) string {
 		return "NO DATA"
 	}
 
-	grid := makeGrid(lines)
+	grid := grids.NewGrid(lines)
 	start := findStart(grid)
 	rover := Rover{start, allowableDirectionFrom(grid, start)}
 
 	moves := 0
 
-	var pipes Grid = make([][]rune, grid.height())
+	var pipes = make([][]rune, grid.Height())
 	for row := range pipes {
-		pipes[row] = make([]rune, grid.width())
+		pipes[row] = make([]rune, grid.Width())
 		for col := range pipes[row] {
 			pipes[row][col] = '.'
 		}
 	}
 
 	for {
-		instruction := grid.atPos(rover.pos)
-		pipes[rover.pos.y][rover.pos.x] = instruction
+		instruction := grid.AtPos(rover.pos)
+		pipes[rover.pos.Y][rover.pos.X] = instruction
 		if instruction == 'S' {
 			if moves != 0 {
 				break
@@ -114,28 +114,28 @@ func processInstruction(rover *Rover, instruction rune) {
 	case '|': // do nothing
 	case '-': // do nothing
 	case 'L':
-		if rover.facing == South {
-			rover.facing = East
-		} else if rover.facing == West {
-			rover.facing = North
+		if rover.facing == grids.South {
+			rover.facing = grids.East
+		} else if rover.facing == grids.West {
+			rover.facing = grids.North
 		}
 	case 'J':
-		if rover.facing == South {
-			rover.facing = West
-		} else if rover.facing == East {
-			rover.facing = North
+		if rover.facing == grids.South {
+			rover.facing = grids.West
+		} else if rover.facing == grids.East {
+			rover.facing = grids.North
 		}
 	case '7':
-		if rover.facing == North {
-			rover.facing = West
-		} else if rover.facing == East {
-			rover.facing = South
+		if rover.facing == grids.North {
+			rover.facing = grids.West
+		} else if rover.facing == grids.East {
+			rover.facing = grids.South
 		}
 	case 'F':
-		if rover.facing == North {
-			rover.facing = East
-		} else if rover.facing == West {
-			rover.facing = South
+		if rover.facing == grids.North {
+			rover.facing = grids.East
+		} else if rover.facing == grids.West {
+			rover.facing = grids.South
 		}
 	case '.':
 		panic("Escaped the pipe somehow")
@@ -147,24 +147,24 @@ func processInstruction(rover *Rover, instruction rune) {
 	rover.move(1)
 }
 
-func findStart(grid Grid) Position {
-	for y := 0; y < grid.height(); y++ {
-		for x := 0; x < grid.width(); x++ {
-			if grid.at(x, y) == 'S' {
-				return Position{x, y}
+func findStart(grid grids.Grid) grids.Position {
+	for y := 0; y < grid.Height(); y++ {
+		for x := 0; x < grid.Width(); x++ {
+			if grid.At(x, y) == 'S' {
+				return grids.Position{X: x, Y: y}
 			}
 		}
 	}
 	panic("Start not found!")
 }
 
-func allowableDirectionFrom(grid Grid, start Position) Direction {
-	var newPos Position
-	for _, direction := range []Direction{North, East, South, West} {
-		newPos = start.Add(Position(direction))
-		if newPos.InBounds(0, 0, grid.width()-1, grid.height()-1) {
-			instruction := grid.atPos(newPos)
-			if connected(instruction, Direction(Position(direction).Reverse())) {
+func allowableDirectionFrom(grid grids.Grid, start grids.Position) grids.Direction {
+	var newPos grids.Position
+	for _, direction := range []grids.Direction{grids.North, grids.East, grids.South, grids.West} {
+		newPos = start.Add(grids.Position(direction))
+		if newPos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) {
+			instruction := grid.AtPos(newPos)
+			if connected(instruction, grids.Direction(grids.Position(direction).Reverse())) {
 				return direction
 			}
 		}
@@ -172,20 +172,20 @@ func allowableDirectionFrom(grid Grid, start Position) Direction {
 	panic("No allowable directions from position!")
 }
 
-func connected(instruction rune, direction Direction) bool {
+func connected(instruction rune, direction grids.Direction) bool {
 	switch instruction {
 	case '|':
-		return direction == North || direction == South
+		return direction == grids.North || direction == grids.South
 	case '-':
-		return direction == West || direction == East
+		return direction == grids.West || direction == grids.East
 	case 'L':
-		return direction == North || direction == East
+		return direction == grids.North || direction == grids.East
 	case 'J':
-		return direction == North || direction == West
+		return direction == grids.North || direction == grids.West
 	case '7':
-		return direction == South || direction == West
+		return direction == grids.South || direction == grids.West
 	case 'F':
-		return direction == South || direction == East
+		return direction == grids.South || direction == grids.East
 	case '.':
 		return false
 	case 'S':
@@ -195,39 +195,29 @@ func connected(instruction rune, direction Direction) bool {
 	}
 }
 
-func displayGrid(grid Grid, rover *Rover) {
-	grid2 := make([][]rune, grid.height())
+func displayGrid(grid grids.Grid, rover *Rover) {
+	grid2 := make([][]rune, grid.Height())
 	for row, runeLine := range grid {
-		grid2[row] = make([]rune, grid.width())
+		grid2[row] = make([]rune, grid.Width())
 		for col, runeChar := range runeLine {
 			grid2[row][col] = runeChar
 		}
 	}
 
 	if rover != nil {
-		grid2[rover.pos.y][rover.pos.x] = rover.arrow()
+		grid2[rover.pos.Y][rover.pos.X] = rover.arrow()
 	}
 
 	for _, s := range grid2 {
 		println(string(s))
 	}
-	println(strings.Repeat("-", grid.width()))
+	println(strings.Repeat("-", grid.Width()))
 }
 
-func makeGrid(lines []string) Grid {
-	lines = util.Filter(lines, func(s string) bool { return len(s) > 0 })
-	runeLines := make([][]rune, len(lines))
-
-	for i, line := range util.Filter(lines, func(s string) bool { return len(s) > 0 }) {
-		runeLines[i] = []rune(line)
-	}
-	return runeLines
-}
-
-func expandGrid(grid Grid) Grid {
-	newGrid := make([][]rune, grid.height()*3+2)
+func expandGrid(grid grids.Grid) grids.Grid {
+	newGrid := make([][]rune, grid.Height()*3+2)
 	for row := range newGrid {
-		newGrid[row] = make([]rune, grid.width()*3+2)
+		newGrid[row] = make([]rune, grid.Width()*3+2)
 		for col := range newGrid[row] {
 			newGrid[row][col] = ' '
 		}
@@ -276,22 +266,22 @@ func expandGrid(grid Grid) Grid {
 	return newGrid
 }
 
-func floodFill(grid Grid) Grid {
-	start := Position{0, 0}
-	sourceRune := grid.atPos(start) // should be ' '
+func floodFill(grid grids.Grid) grids.Grid {
+	start := grids.Position{}
+	sourceRune := grid.AtPos(start) // should be ' '
 	if sourceRune != 'O' {
 		dfs(grid, start, sourceRune, 'O')
 	}
 	return grid
 }
 
-func dfs(grid Grid, pos Position, from, to rune) {
-	if !pos.InBounds(0, 0, grid.width()-1, grid.height()-1) || grid.atPos(pos) != from {
+func dfs(grid grids.Grid, pos grids.Position, from, to rune) {
+	if !pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) || grid.AtPos(pos) != from {
 		return
 	}
-	grid[pos.y][pos.x] = to
-	dfs(grid, pos.Add(Position(West)), from, to)
-	dfs(grid, pos.Add(Position(East)), from, to)
-	dfs(grid, pos.Add(Position(North)), from, to)
-	dfs(grid, pos.Add(Position(South)), from, to)
+	grid[pos.Y][pos.X] = to
+	dfs(grid, pos.Add(grids.Position(grids.West)), from, to)
+	dfs(grid, pos.Add(grids.Position(grids.East)), from, to)
+	dfs(grid, pos.Add(grids.Position(grids.North)), from, to)
+	dfs(grid, pos.Add(grids.Position(grids.South)), from, to)
 }
