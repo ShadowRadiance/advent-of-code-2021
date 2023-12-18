@@ -14,7 +14,7 @@ func Accumulate[T any](values []T, operation func(a T, b T) T) T {
 		panic("util.Accumulate: empty list")
 	}
 
-	var total T = values[0]
+	var total = values[0]
 	for _, value := range values[1:] {
 		total = operation(total, value)
 	}

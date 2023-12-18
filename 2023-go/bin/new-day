@@ -16,10 +16,10 @@ fi
 
 echo "Building $dayStr"
 
-solutionFile="days/$dayStr/solution.go"
-solutionTestFile="days/$dayStr/solution_test.go"
+solutionFile="main/days/$dayStr/solution.go"
+solutionTestFile="main/days/$dayStr/solution_test.go"
 
-mkdir -p "days/$dayStr" && touch "$solutionFile" && touch "$solutionTestFile"
+mkdir -p "main/days/$dayStr" && touch "$solutionFile" && touch "$solutionTestFile"
 if [[ ! -s "$solutionFile" ]];
 then
   cp "bin/solution.tmp" "$solutionFile"
@@ -31,11 +31,11 @@ then
   sed -i "" "s/DAY/$dayStr/g" "$solutionTestFile"
 fi
 
-instructionsFile="instructions/$dayStr.md"
+instructionsFile="main/instructions/$dayStr.md"
 touch "$instructionsFile"
 echo "Visit https://adventofcode.com/2023/day/$day for the instructions"
 
-dataFile="data/$dayStr.txt"
+dataFile="main/data/$dayStr.txt"
 touch "$dataFile"
 if [[ -s "$dataFile" ]];
 then

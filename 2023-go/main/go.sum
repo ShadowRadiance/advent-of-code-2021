@@ -1,0 +1,4 @@
+github.com/MakeNowJust/heredoc v1.0.0 h1:cXCdzVdstXyiTqTvfqk9SDHpKNjxuom+DOlyEeQ4pzQ=
+github.com/MakeNowJust/heredoc v1.0.0/go.mod h1:mG5amYoWBHf8vpLOuehzbGGw0EHxpZZ6lCpQ4fNJ8LE=
+github.com/shadowradiance/advent-of-code/2023-go/util v0.0.0-20231218175822-56bc7a2e78b2 h1:mborNRMqBAgxETz9aIG4LaDeBCfjt7TayHV4xAPfCak=
+github.com/shadowradiance/advent-of-code/2023-go/util v0.0.0-20231218175822-56bc7a2e78b2/go.mod h1:Rza3931SCFZQvRied4Q05YfPbw9h927GtEJMbQakSPU=
