@@ -21,6 +21,15 @@ func Accumulate[T any](values []T, operation func(a T, b T) T) T {
 	return total
 }
 
+func Transform[T any, U any](values []T, operation func(item T) U) []U {
+	// example: Transform(blocks, func(s string) int { return s(item) })
+	result := make([]U, 0)
+	for _, value := range values {
+		result = append(result, operation(value))
+	}
+	return result
+}
+
 func All[T any](values []T, predicate func(value T) bool) bool {
 	for _, value := range values {
 		if !predicate(value) {
