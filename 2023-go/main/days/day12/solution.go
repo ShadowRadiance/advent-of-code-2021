@@ -22,8 +22,8 @@ func (Solution) Part01(input string) string {
 	for _, record := range records {
 		sum += validPermutations(record)
 	}
-	// fmt.Printf("%+v\n", records)
 
+	// Elapsed: 6.883779042s
 	return strconv.Itoa(sum)
 }
 
@@ -56,44 +56,29 @@ func parseRecord(line string) (record Record) {
 }
 
 func validPermutations(record Record) int {
-	return recursive(record.SpringList, record.Counts, 0)
+	return recursiveCount(record)
 }
 
-func recursive(list string, counts []int, currentIndex int) int {
-	if len(list) == currentIndex {
-		if isValid(list, counts) {
-			return 1
-		} else {
-			return 0
-		}
-	}
-
-	if list[currentIndex] == '?' {
-		return recursive(
-			list[:currentIndex]+"#"+list[currentIndex+1:],
-			counts,
-			currentIndex+1,
-		) + recursive(
-			list[:currentIndex]+"."+list[currentIndex+1:],
-			counts,
-			currentIndex+1,
-		)
+func recursiveCount(record Record) int {
+	if !strings.Contains(record.SpringList, "?") {
+		return util.BoolInt(record.isValid())
 	} else {
-		return recursive(list, counts, currentIndex+1)
+		return recursiveCount(Record{SpringList: strings.Replace(record.SpringList, "?", ".", 1), Counts: record.Counts}) +
+			recursiveCount(Record{SpringList: strings.Replace(record.SpringList, "?", "#", 1), Counts: record.Counts})
 	}
 }
 
-func isValid(list string, counts []int) bool {
+func (record Record) isValid() bool {
 	re := regexp.MustCompile(`#+`)
-	blocks := re.FindAllString(string(list), -1)
+	blocks := re.FindAllString(record.SpringList, -1)
 	// list #.#.### => blocks [ #, #, ### ]
-	if len(blocks) != len(counts) {
+	if len(blocks) != len(record.Counts) {
 		return false
 	}
 	blockCounts := util.Transform(blocks, func(item string) int { return len(item) })
 
 	for i, v := range blockCounts {
-		if v != counts[i] {
+		if v != record.Counts[i] {
 			return false
 		}
 	}

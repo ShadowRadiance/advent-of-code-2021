@@ -90,10 +90,10 @@ type Rectangle struct {
 
 func (r Rectangle) expand(minX, minY, maxX, maxY int) Rectangle {
 	return Rectangle{
-		lft: util.MaxInt(r.lft-1, minX),
-		top: util.MaxInt(r.top-1, minY),
-		rgt: util.MinInt(r.rgt+1, maxX),
-		bot: util.MinInt(r.bot+1, maxY),
+		lft: max(r.lft-1, minX),
+		top: max(r.top-1, minY),
+		rgt: min(r.rgt+1, maxX),
+		bot: min(r.bot+1, maxY),
 	}
 }
 

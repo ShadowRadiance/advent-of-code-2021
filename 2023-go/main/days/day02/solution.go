@@ -3,8 +3,6 @@ package day02
 import (
 	"strconv"
 	"strings"
-
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
 type Solution struct{}
@@ -85,9 +83,9 @@ func powerOfSet(set Set) int {
 
 func minimalSetFor(bag Set, set Set) Set {
 	return Set{
-		red:   util.MaxInt(bag.red, set.red),
-		green: util.MaxInt(bag.green, set.green),
-		blue:  util.MaxInt(bag.blue, set.blue),
+		red:   max(bag.red, set.red),
+		green: max(bag.green, set.green),
+		blue:  max(bag.blue, set.blue),
 	}
 }
 

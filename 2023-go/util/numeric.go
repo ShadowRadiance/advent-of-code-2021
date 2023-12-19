@@ -1,7 +1,7 @@
 package util
 
 import (
-	"sort"
+	"slices"
 	"strconv"
 )
 
@@ -13,33 +13,14 @@ func ConvertNumeric(s string) (i int) {
 	return
 }
 
-func MaxInt(a, b int) int {
-	if a > b {
-		return a
-	} else {
-		return b
-	}
-}
-
-func MinInt(a, b int) int {
-	if a < b {
-		return a
-	} else {
-		return b
-	}
-}
-
 func MapStringsToIntegers(ss []string) []int {
-	integers := make([]int, len(ss))
-	for i, s := range ss {
-		integers[i] = ConvertNumeric(s)
-	}
-	return integers
+	return Transform(ss, func(item string) int {
+		return ConvertNumeric(item)
+	})
 }
 
 func IntSliceContainsInt(slice []int, number int) bool {
-	idx := sort.SearchInts(slice, number)
-	return idx < len(slice) && slice[idx] == number
+	return slices.Contains(slice, number)
 }
 
 func ChunkIntSlice(slice []int, chunkSize int) [][]int {
@@ -87,5 +68,13 @@ func LowestCommonMultipleSlice(numbers []int) int {
 		return LowestCommonMultiple(numbers[0], numbers[1])
 	default:
 		return LowestCommonMultiple(numbers[0], LowestCommonMultipleSlice(numbers[1:]))
+	}
+}
+
+func BoolInt(b bool) int {
+	if b {
+		return 1
+	} else {
+		return 0
 	}
 }
