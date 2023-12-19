@@ -7,7 +7,7 @@ import (
 type Solution struct{}
 
 func (Solution) Part01(input string) string {
-    lines := strings.Split(input, "\n")
+    lines := strings.Split(strings.TrimSpace(input), "\n")
     if len(lines) == 0 {
         return "NO DATA"
     }
@@ -16,7 +16,7 @@ func (Solution) Part01(input string) string {
 }
 
 func (Solution) Part02(input string) string {
-    lines := strings.Split(input, "\n")
+    lines := strings.Split(strings.TrimSpace(input), "\n")
     if len(lines) == 0 {
         return "NO DATA"
     }
