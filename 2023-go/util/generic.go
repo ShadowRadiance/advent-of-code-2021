@@ -29,6 +29,14 @@ func Transform[T any, U any](values []T, operation func(item T) U) []U {
 	}
 	return result
 }
+func TransformWithIndex[T any, U any](values []T, operation func(item T, index int) U) []U {
+	// example: Transform(blocks, func(s string) int { return s(item) })
+	result := make([]U, 0)
+	for index, value := range values {
+		result = append(result, operation(value, index))
+	}
+	return result
+}
 
 func All[T any](values []T, predicate func(value T) bool) bool {
 	for _, value := range values {
