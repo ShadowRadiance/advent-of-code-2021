@@ -1,7 +1,6 @@
 package day12
 
 import (
-	"fmt"
 	"strconv"
 	"strings"
 
@@ -39,7 +38,7 @@ func (Solution) Part02(input string) string {
 	//  counts: 1,1,3,1,1,3,1,1,3,1,1,3,1,1,3
 	// }
 	records := unfoldRecords(parseRecords(lines))
-	fmt.Printf("%+v\n", records[0])
+	// fmt.Printf("%+v\n", records[0])
 
 	sum := 0
 	for _, record := range records {
