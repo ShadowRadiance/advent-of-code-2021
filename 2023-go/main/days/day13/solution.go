@@ -1,7 +1,6 @@
 package day13
 
 import (
-	"fmt"
 	"slices"
 	"strconv"
 	"strings"
@@ -19,8 +18,10 @@ func (Solution) Part01(input string) string {
 	}
 
 	patterns := parsePatterns(lines)
-	reflections := util.Transform(patterns, func(pattern grids.Grid) Reflection { return findReflection(pattern) })
-	reflectionScores := util.Transform(reflections, func(reflection Reflection) int {
+	reflections := util.Transform(patterns, func(pattern grids.Grid) *Reflection {
+		return findReflections(pattern)[0]
+	})
+	reflectionScores := util.Transform(reflections, func(reflection *Reflection) int {
 		if reflection.vertical {
 			return reflection.linesBeforeReflection
 		}
@@ -36,8 +37,25 @@ func (Solution) Part02(input string) string {
 	if len(lines) == 0 {
 		return "NO DATA"
 	}
+	// Every mirror has exactly one smudge:
+	// exactly one . or # should be the opposite type.
+	//
+	// In each pattern, locate and fix the smudge that
+	// causes a different reflection line to be valid.
 
-	return "PENDING"
+	patterns := parsePatterns(lines)
+	reflections := util.Transform(patterns, func(pattern grids.Grid) *Reflection {
+		return findUnsmudgedReflection(pattern)
+	})
+	reflectionScores := util.Transform(reflections, func(reflection *Reflection) int {
+		if reflection.vertical {
+			return reflection.linesBeforeReflection
+		}
+		return 100 * reflection.linesBeforeReflection
+	})
+	sum := util.Accumulate(reflectionScores, func(total, next int) int { return total + next })
+
+	return strconv.Itoa(sum)
 }
 
 type Reflection struct {
@@ -64,42 +82,66 @@ func parsePattern(lines []string) (grids.Grid, []string) {
 	return grids.NewGrid(lines[:firstEmptyIndex]), lines[firstEmptyIndex+1:]
 }
 
-func findReflection(pattern grids.Grid) Reflection {
-	if reflection, ok := findReflectionVertical(pattern); ok {
-		return reflection
+func findReflections(pattern grids.Grid) []*Reflection {
+	reflections := make([]*Reflection, 0)
+
+	for _, reflection := range findReflectionVerticals(pattern) {
+		reflections = append(reflections, reflection)
+	}
+	for _, reflection := range findReflectionHorizontals(pattern) {
+		reflections = append(reflections, reflection)
 	}
 
-	if reflection, ok := findReflectionHorizontal(pattern); ok {
-		return reflection
-	}
-
-	panic(
-		fmt.Sprintf("No reflections found in pattern %+v",
-			util.Transform(pattern, func(row []rune) string {
-				return string(row)
-			})))
+	return reflections
 }
 
-func findReflectionVertical(pattern grids.Grid) (Reflection, bool) {
+func findUnsmudgedReflection(pattern grids.Grid) *Reflection {
+	smudgyReflection := findReflections(pattern)[0]
+
+	for y := 0; y < pattern.Height(); y++ {
+		for x := 0; x < pattern.Width(); x++ {
+			newPattern := pattern.Clone()
+			switch newPattern[y][x] {
+			case '.':
+				newPattern[y][x] = '#'
+			case '#':
+				newPattern[y][x] = '.'
+			}
+
+			unsmudgedReflections := findReflections(newPattern)
+			for _, unsmudgedReflection := range unsmudgedReflections {
+				if *unsmudgedReflection != *smudgyReflection {
+					return unsmudgedReflection
+				}
+			}
+		}
+	}
+
+	return nil
+}
+
+func findReflectionVerticals(pattern grids.Grid) []*Reflection {
+	reflections := make([]*Reflection, 0)
 	for i := 1; i < pattern.Width(); i++ {
 		if string(pattern.ColAt(i-1)) == string(pattern.ColAt(i)) {
 			if reflectedAroundVertical(pattern, i-1, i) {
-				return Reflection{vertical: true, linesBeforeReflection: i}, true
+				reflections = append(reflections, &Reflection{vertical: true, linesBeforeReflection: i})
 			}
 		}
 	}
-	return Reflection{}, false
+	return reflections
 }
 
-func findReflectionHorizontal(pattern grids.Grid) (Reflection, bool) {
+func findReflectionHorizontals(pattern grids.Grid) []*Reflection {
+	reflections := make([]*Reflection, 0)
 	for i := 1; i < pattern.Height(); i++ {
 		if string(pattern.RowAt(i-1)) == string(pattern.RowAt(i)) {
 			if reflectedAroundHorizontal(pattern, i-1, i) {
-				return Reflection{vertical: false, linesBeforeReflection: i}, true
+				reflections = append(reflections, &Reflection{vertical: false, linesBeforeReflection: i})
 			}
 		}
 	}
-	return Reflection{}, false
+	return reflections
 }
 
 func reflectedAroundVertical(pattern grids.Grid, beforeIndex, afterIndex int) bool {

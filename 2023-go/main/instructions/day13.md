@@ -163,3 +163,7 @@ to the value `400`.
 
 In each pattern, fix the smudge and find the different line of reflection. What number do you get after summarizing the
 new reflection line in each pattern in your notes?
+
+Your puzzle answer was 37453.
+
+Both parts of this puzzle are complete! They provide two gold stars: **

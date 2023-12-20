@@ -65,8 +65,48 @@ func TestSolution_Part01(t *testing.T) {
 func TestSolution_Part02(t *testing.T) {
 	examples := []util.TestExample{
 		{
-			Input:    heredoc.Doc(``),
-			Expected: "PENDING",
+			Input: heredoc.Doc(`
+				#.##..##.
+				..#.##.#.
+				##......#
+				##......#
+				..#.##.#.
+				..##..##.
+				#.#.##.#.
+			`),
+			Expected: "300",
+		},
+		{
+			Input: heredoc.Doc(`
+				#...##..#
+				#....#..#
+				..##..###
+				#####.##.
+				#####.##.
+				..##..###
+				#....#..#
+			`),
+			Expected: "100",
+		},
+		{
+			Input: heredoc.Doc(`
+				#.##..##.
+				..#.##.#.
+				##......#
+				##......#
+				..#.##.#.
+				..##..##.
+				#.#.##.#.
+				
+				#...##..#
+				#....#..#
+				..##..###
+				#####.##.
+				#####.##.
+				..##..###
+				#....#..#
+			`),
+			Expected: "400",
 		},
 	}
 	for _, example := range examples {
