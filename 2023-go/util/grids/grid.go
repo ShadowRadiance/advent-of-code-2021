@@ -13,6 +13,13 @@ func (g *Grid) AtPos(pos Position) rune { return g.At(pos.X, pos.Y) }
 func (g *Grid) Height() int             { return len(*g) }
 func (g *Grid) Width() int              { return len((*g)[0]) }
 func (g *Grid) RowAt(y int) []rune      { return (*g)[y] }
+func (g *Grid) ColAt(x int) []rune {
+	col := make([]rune, g.Height())
+	for y := range *g {
+		col[y] = g.At(x, y)
+	}
+	return col
+}
 
 func NewGrid(lines []string) Grid {
 	lines = util.Filter(lines, func(s string) bool { return len(s) > 0 })
