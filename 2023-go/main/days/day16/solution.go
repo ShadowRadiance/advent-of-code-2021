@@ -1,7 +1,10 @@
 package day16
 
 import (
+	"strconv"
 	"strings"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util/grids"
 )
 
 type Solution struct{}
@@ -12,7 +15,95 @@ func (Solution) Part01(input string) string {
 		return "NO DATA"
 	}
 
-	return "PENDING"
+	grid := grids.NewGrid(lines)
+	visited := grid.Clone()
+	for y, row := range visited {
+		for x := range row {
+			visited.SetAt(x, y, '.')
+		}
+	}
+	cache := map[Beam]bool{}
+	beam := Beam{position: grids.Position{}, direction: grids.East}
+	shootBeam(beam, grid, visited, cache)
+
+	numberOfEnergizedTiles := 0
+	for _, row := range visited {
+		for _, char := range row {
+			if char == '#' {
+				numberOfEnergizedTiles++
+			}
+		}
+	}
+	return strconv.Itoa(numberOfEnergizedTiles)
+}
+
+func shootBeam(beam Beam, grid grids.Grid, visited grids.Grid, cache map[Beam]bool) {
+	if remembered, ok := cache[beam]; ok && remembered {
+		// we hit a cycle and we're done with this beam
+		return
+	}
+	cache[beam] = true
+	if !beam.position.InBounds(0, 0, grid.Width()-1, grid.Height()-1) {
+		// we exited the map, we're done with this beam
+		return
+	}
+
+	visited.SetAtPos(beam.position, '#')
+	switch grid.AtPos(beam.position) {
+	case '.':
+		// continue on
+		shootBeam(Beam{position: beam.position.Add(grids.Position(beam.direction)), direction: beam.direction}, grid, visited, cache)
+	case '|':
+		if beam.direction == grids.East || beam.direction == grids.West {
+			// split N/S
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.North)), direction: grids.North}, grid, visited, cache)
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.South)), direction: grids.South}, grid, visited, cache)
+		} else {
+			// continue on
+			shootBeam(Beam{position: beam.position.Add(grids.Position(beam.direction)), direction: beam.direction}, grid, visited, cache)
+		}
+	case '-':
+		if beam.direction == grids.North || beam.direction == grids.South {
+			// split E/W
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.East)), direction: grids.East}, grid, visited, cache)
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.West)), direction: grids.West}, grid, visited, cache)
+		} else {
+			// continue on
+			shootBeam(Beam{position: beam.position.Add(grids.Position(beam.direction)), direction: beam.direction}, grid, visited, cache)
+		}
+	case '/':
+		switch beam.direction {
+		case grids.East:
+			// turn north
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.North)), direction: grids.North}, grid, visited, cache)
+		case grids.West:
+			// turn south
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.South)), direction: grids.South}, grid, visited, cache)
+		case grids.North:
+			// turn east
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.East)), direction: grids.East}, grid, visited, cache)
+		case grids.South:
+			// turn west
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.West)), direction: grids.West}, grid, visited, cache)
+		}
+	case '\\':
+		switch beam.direction {
+		case grids.East:
+			// turn south
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.South)), direction: grids.South}, grid, visited, cache)
+		case grids.West:
+			// turn north
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.North)), direction: grids.North}, grid, visited, cache)
+		case grids.North:
+			// turn west
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.West)), direction: grids.West}, grid, visited, cache)
+		case grids.South:
+			// turn east
+			shootBeam(Beam{position: beam.position.Add(grids.Position(grids.East)), direction: grids.East}, grid, visited, cache)
+		}
+	default:
+		panic("WTF")
+	}
 }
 
 func (Solution) Part02(input string) string {
@@ -22,4 +113,9 @@ func (Solution) Part02(input string) string {
 	}
 
 	return "PENDING"
+}
+
+type Beam struct {
+	position  grids.Position
+	direction grids.Direction
 }
