@@ -63,7 +63,7 @@ type Beam struct {
 	direction grids.Direction
 }
 
-func initializeVisitedGrid(grid grids.Grid) grids.Grid {
+func initializeVisitedGrid(grid grids.Grid[rune]) grids.Grid[rune] {
 	visited := grid.Clone()
 	for y, row := range visited {
 		for x := range row {
@@ -73,7 +73,7 @@ func initializeVisitedGrid(grid grids.Grid) grids.Grid {
 	return visited
 }
 
-func countEnergizedTiles(grid grids.Grid) int {
+func countEnergizedTiles(grid grids.Grid[rune]) int {
 	numberOfEnergizedTiles := 0
 	for _, row := range grid {
 		for _, char := range row {
@@ -85,7 +85,7 @@ func countEnergizedTiles(grid grids.Grid) int {
 	return numberOfEnergizedTiles
 }
 
-func shootBeam(beam Beam, grid grids.Grid, visited grids.Grid, cache map[Beam]bool) {
+func shootBeam(beam Beam, grid grids.Grid[rune], visited grids.Grid[rune], cache map[Beam]bool) {
 	if remembered, ok := cache[beam]; ok && remembered {
 		// we hit a cycle and we're done with this beam
 		return

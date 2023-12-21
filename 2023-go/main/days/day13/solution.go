@@ -18,7 +18,7 @@ func (Solution) Part01(input string) string {
 	}
 
 	patterns := parsePatterns(lines)
-	reflections := util.Transform(patterns, func(pattern grids.Grid) *Reflection {
+	reflections := util.Transform(patterns, func(pattern grids.Grid[rune]) *Reflection {
 		return findReflections(pattern)[0]
 	})
 	reflectionScores := util.Transform(reflections, func(reflection *Reflection) int {
@@ -44,7 +44,7 @@ func (Solution) Part02(input string) string {
 	// causes a different reflection line to be valid.
 
 	patterns := parsePatterns(lines)
-	reflections := util.Transform(patterns, func(pattern grids.Grid) *Reflection {
+	reflections := util.Transform(patterns, func(pattern grids.Grid[rune]) *Reflection {
 		return findUnsmudgedReflection(pattern)
 	})
 	reflectionScores := util.Transform(reflections, func(reflection *Reflection) int {
@@ -63,10 +63,10 @@ type Reflection struct {
 	linesBeforeReflection int
 }
 
-func parsePatterns(lines []string) []grids.Grid {
-	patterns := make([]grids.Grid, 0)
+func parsePatterns(lines []string) []grids.Grid[rune] {
+	patterns := make([]grids.Grid[rune], 0)
 
-	var pattern grids.Grid
+	var pattern grids.Grid[rune]
 	for len(lines) > 0 {
 		pattern, lines = parsePattern(lines)
 		patterns = append(patterns, pattern)
@@ -74,7 +74,7 @@ func parsePatterns(lines []string) []grids.Grid {
 	return patterns
 }
 
-func parsePattern(lines []string) (grids.Grid, []string) {
+func parsePattern(lines []string) (grids.Grid[rune], []string) {
 	firstEmptyIndex := slices.Index(lines, "")
 	if firstEmptyIndex == -1 {
 		return grids.NewGrid(lines), []string{}
@@ -82,7 +82,7 @@ func parsePattern(lines []string) (grids.Grid, []string) {
 	return grids.NewGrid(lines[:firstEmptyIndex]), lines[firstEmptyIndex+1:]
 }
 
-func findReflections(pattern grids.Grid) []*Reflection {
+func findReflections(pattern grids.Grid[rune]) []*Reflection {
 	reflections := make([]*Reflection, 0)
 
 	for _, reflection := range findReflectionVerticals(pattern) {
@@ -95,7 +95,7 @@ func findReflections(pattern grids.Grid) []*Reflection {
 	return reflections
 }
 
-func findUnsmudgedReflection(pattern grids.Grid) *Reflection {
+func findUnsmudgedReflection(pattern grids.Grid[rune]) *Reflection {
 	smudgyReflection := findReflections(pattern)[0]
 
 	for y := 0; y < pattern.Height(); y++ {
@@ -120,7 +120,7 @@ func findUnsmudgedReflection(pattern grids.Grid) *Reflection {
 	return nil
 }
 
-func findReflectionVerticals(pattern grids.Grid) []*Reflection {
+func findReflectionVerticals(pattern grids.Grid[rune]) []*Reflection {
 	reflections := make([]*Reflection, 0)
 	for i := 1; i < pattern.Width(); i++ {
 		if string(pattern.ColAt(i-1)) == string(pattern.ColAt(i)) {
@@ -132,7 +132,7 @@ func findReflectionVerticals(pattern grids.Grid) []*Reflection {
 	return reflections
 }
 
-func findReflectionHorizontals(pattern grids.Grid) []*Reflection {
+func findReflectionHorizontals(pattern grids.Grid[rune]) []*Reflection {
 	reflections := make([]*Reflection, 0)
 	for i := 1; i < pattern.Height(); i++ {
 		if string(pattern.RowAt(i-1)) == string(pattern.RowAt(i)) {
@@ -144,7 +144,7 @@ func findReflectionHorizontals(pattern grids.Grid) []*Reflection {
 	return reflections
 }
 
-func reflectedAroundVertical(pattern grids.Grid, beforeIndex, afterIndex int) bool {
+func reflectedAroundVertical(pattern grids.Grid[rune], beforeIndex, afterIndex int) bool {
 	maxI := min(beforeIndex, pattern.Width()-afterIndex-1)
 
 	for i := 0; i <= maxI; i++ {
@@ -155,7 +155,7 @@ func reflectedAroundVertical(pattern grids.Grid, beforeIndex, afterIndex int) bo
 	return true
 }
 
-func reflectedAroundHorizontal(pattern grids.Grid, beforeIndex, afterIndex int) bool {
+func reflectedAroundHorizontal(pattern grids.Grid[rune], beforeIndex, afterIndex int) bool {
 	maxI := min(beforeIndex, pattern.Height()-afterIndex-1)
 
 	for i := 0; i <= maxI; i++ {

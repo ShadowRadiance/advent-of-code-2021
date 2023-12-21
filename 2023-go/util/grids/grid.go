@@ -7,9 +7,9 @@ import (
 	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
-type Grid [][]rune
+type Grid[T any] [][]T
 
-func NewGrid(lines []string) Grid {
+func NewGrid(lines []string) Grid[rune] {
 	lines = util.Filter(lines, func(s string) bool { return len(s) > 0 })
 	runeLines := make([][]rune, len(lines))
 
@@ -19,32 +19,51 @@ func NewGrid(lines []string) Grid {
 	return runeLines
 }
 
-func (g *Grid) At(x, y int) rune        { return (*g)[y][x] }
-func (g *Grid) AtPos(pos Position) rune { return g.At(pos.X, pos.Y) }
-func (g *Grid) Height() int             { return len(*g) }
-func (g *Grid) Width() int              { return len((*g)[0]) }
+func New[T any](height, width int) Grid[T] {
+	rows := make([][]T, height)
 
-func (g *Grid) RowAt(y int) []rune { return (*g)[y] }
-func (g *Grid) ColAt(x int) []rune {
-	col := make([]rune, g.Height())
+	for i := range rows {
+		rows[i] = make([]T, width)
+	}
+
+	return rows
+
+}
+
+func (g *Grid[T]) At(x, y int) T        { return (*g)[y][x] }
+func (g *Grid[T]) AtPos(pos Position) T { return g.At(pos.X, pos.Y) }
+func (g *Grid[T]) Height() int          { return len(*g) }
+func (g *Grid[T]) Width() int {
+	if g.Height() == 0 {
+		return 0
+	}
+	return len((*g)[0])
+}
+
+func (g *Grid[T]) RowAt(y int) []T { return (*g)[y] }
+func (g *Grid[T]) ColAt(x int) []T {
+	col := make([]T, g.Height())
 	for y := range *g {
 		col[y] = g.At(x, y)
 	}
 	return col
 }
 
-func (g *Grid) Dump() string {
+func (g *Grid[T]) Dump() string {
 	s := ""
-	for _, rs := range *g {
-		s += fmt.Sprintln(string(rs))
+	for _, row := range *g {
+		for _, item := range row {
+			s += fmt.Sprintf("%v", item)
+		}
+		s += "\n"
 	}
 	return s
 }
 
-func (g *Grid) Clone() Grid {
-	var newGrid Grid = make([][]rune, g.Height())
+func (g *Grid[T]) Clone() Grid[T] {
+	var newGrid Grid[T] = make([][]T, g.Height())
 	for row := 0; row < newGrid.Height(); row++ {
-		newGrid[row] = make([]rune, g.Width())
+		newGrid[row] = make([]T, g.Width())
 		for col := 0; col < newGrid.Width(); col++ {
 			newGrid.SetAt(col, row, g.At(col, row))
 		}
@@ -52,10 +71,10 @@ func (g *Grid) Clone() Grid {
 	return newGrid
 }
 
-func (g *Grid) InsertRow(y int, newRow []rune) {
+func (g *Grid[T]) InsertRow(y int, newRow []T) {
 	*g = slices.Insert(*g, y, newRow)
 }
-func (g *Grid) InsertCol(x int, newCol []rune) {
+func (g *Grid[T]) InsertCol(x int, newCol []T) {
 	// increase the size of all of the rows by 1
 	// move all the elements of each row at or above index x to the right
 	for rowIndex := range *g {
@@ -63,9 +82,9 @@ func (g *Grid) InsertCol(x int, newCol []rune) {
 	}
 }
 
-func (g *Grid) SetAt(x, y int, char rune) {
-	(*g)[y][x] = char
+func (g *Grid[T]) SetAt(x, y int, item T) {
+	(*g)[y][x] = item
 }
-func (g *Grid) SetAtPos(position Position, char rune) {
-	g.SetAt(position.X, position.Y, char)
+func (g *Grid[T]) SetAtPos(position Position, item T) {
+	g.SetAt(position.X, position.Y, item)
 }

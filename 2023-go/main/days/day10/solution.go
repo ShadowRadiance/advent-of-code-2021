@@ -147,7 +147,7 @@ func processInstruction(rover *Rover, instruction rune) {
 	rover.move(1)
 }
 
-func findStart(grid grids.Grid) grids.Position {
+func findStart(grid grids.Grid[rune]) grids.Position {
 	for y := 0; y < grid.Height(); y++ {
 		for x := 0; x < grid.Width(); x++ {
 			if grid.At(x, y) == 'S' {
@@ -158,7 +158,7 @@ func findStart(grid grids.Grid) grids.Position {
 	panic("Start not found!")
 }
 
-func allowableDirectionFrom(grid grids.Grid, start grids.Position) grids.Direction {
+func allowableDirectionFrom(grid grids.Grid[rune], start grids.Position) grids.Direction {
 	var newPos grids.Position
 	for _, direction := range []grids.Direction{grids.North, grids.East, grids.South, grids.West} {
 		newPos = start.Add(grids.Position(direction))
@@ -195,7 +195,7 @@ func connected(instruction rune, direction grids.Direction) bool {
 	}
 }
 
-// func displayGrid(grid grids.Grid, rover *Rover) {
+// func displayGrid(grid grids.Grid[rune, rover *Rover) {
 // 	grid2 := make([][]rune, grid.Height())
 // 	for row, runeLine := range grid {
 // 		grid2[row] = make([]rune, grid.Width())
@@ -214,7 +214,7 @@ func connected(instruction rune, direction grids.Direction) bool {
 // 	println(strings.Repeat("-", grid.Width()))
 // }
 
-func expandGrid(grid grids.Grid) grids.Grid {
+func expandGrid(grid grids.Grid[rune]) grids.Grid[rune] {
 	newGrid := make([][]rune, grid.Height()*3+2)
 	for row := range newGrid {
 		newGrid[row] = make([]rune, grid.Width()*3+2)
@@ -266,7 +266,7 @@ func expandGrid(grid grids.Grid) grids.Grid {
 	return newGrid
 }
 
-func floodFill(grid grids.Grid) grids.Grid {
+func floodFill(grid grids.Grid[rune]) grids.Grid[rune] {
 	start := grids.Position{}
 	sourceRune := grid.AtPos(start) // should be ' '
 	if sourceRune != 'O' {
@@ -275,7 +275,7 @@ func floodFill(grid grids.Grid) grids.Grid {
 	return grid
 }
 
-func dfs(grid grids.Grid, pos grids.Position, from, to rune) {
+func dfs(grid grids.Grid[rune], pos grids.Position, from, to rune) {
 	if !pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) || grid.AtPos(pos) != from {
 		return
 	}

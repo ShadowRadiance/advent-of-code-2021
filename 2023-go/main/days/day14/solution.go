@@ -34,7 +34,7 @@ func (s Solution) Part02(input string) string {
 	return strconv.Itoa(score(grid))
 }
 
-func spinCycle(grid grids.Grid, times int) {
+func spinCycle(grid grids.Grid[rune], times int) {
 	if times == 0 {
 		times = 1_000_000_000
 	}
@@ -67,7 +67,7 @@ func spinCycle(grid grids.Grid, times int) {
 	}
 }
 
-func tilt(grid grids.Grid, direction grids.Direction) {
+func tilt(grid grids.Grid[rune], direction grids.Direction) {
 	switch direction {
 	case grids.North:
 		for y := 0; y < grid.Height(); y++ {
@@ -109,7 +109,7 @@ func tilt(grid grids.Grid, direction grids.Direction) {
 	}
 }
 
-func moveRock(grid grids.Grid, position grids.Position, direction grids.Direction) {
+func moveRock(grid grids.Grid[rune], position grids.Position, direction grids.Direction) {
 	valid := func(pos grids.Position) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) &&
 			grid.AtPos(pos) != '#' &&
@@ -125,7 +125,7 @@ func moveRock(grid grids.Grid, position grids.Position, direction grids.Directio
 	}
 }
 
-func score(grid grids.Grid) int {
+func score(grid grids.Grid[rune]) int {
 	return util.Accumulate(util.TransformWithIndex(grid, func(row []rune, i int) int {
 		multiplier := grid.Height() - i
 		numRocks := strings.Count(string(row), "O")
