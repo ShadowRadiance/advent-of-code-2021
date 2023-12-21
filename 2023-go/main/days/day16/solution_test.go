@@ -48,7 +48,7 @@ func TestSolution_Part02(t *testing.T) {
 				.|....-|.\
 				..//.|....
 			`),
-			Expected: "PENDING",
+			Expected: "51",
 		},
 	}
 	for _, example := range examples {

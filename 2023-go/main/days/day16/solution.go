@@ -16,25 +16,73 @@ func (Solution) Part01(input string) string {
 	}
 
 	grid := grids.NewGrid(lines)
+	visited := initializeVisitedGrid(grid)
+	cache := map[Beam]bool{}
+	beam := Beam{position: grids.Position{}, direction: grids.East}
+	shootBeam(beam, grid, visited, cache)
+
+	numberOfEnergizedTiles := countEnergizedTiles(visited)
+	return strconv.Itoa(numberOfEnergizedTiles)
+}
+
+func (Solution) Part02(input string) string {
+	lines := strings.Split(strings.TrimSpace(input), "\n")
+	if len(lines) == 0 {
+		return "NO DATA"
+	}
+
+	grid := grids.NewGrid(lines)
+
+	highestNumberOfEnergizedTiles := 0
+
+	entryBeams := make([]Beam, 0)
+	for x := 0; x < grid.Width(); x++ {
+		entryBeams = append(entryBeams, Beam{position: grids.Position{X: x, Y: 0}, direction: grids.South})
+		entryBeams = append(entryBeams, Beam{position: grids.Position{X: x, Y: grid.Height() - 1}, direction: grids.North})
+	}
+	for y := 0; y < grid.Height(); y++ {
+		entryBeams = append(entryBeams, Beam{position: grids.Position{X: 0, Y: y}, direction: grids.East})
+		entryBeams = append(entryBeams, Beam{position: grids.Position{X: grid.Width() - 1, Y: y}, direction: grids.West})
+	}
+
+	for _, beam := range entryBeams {
+		visited := initializeVisitedGrid(grid)
+		cache := map[Beam]bool{}
+		shootBeam(beam, grid, visited, cache)
+		numberOfEnergizedTiles := countEnergizedTiles(visited)
+		if numberOfEnergizedTiles > highestNumberOfEnergizedTiles {
+			highestNumberOfEnergizedTiles = numberOfEnergizedTiles
+		}
+	}
+
+	return strconv.Itoa(highestNumberOfEnergizedTiles)
+}
+
+type Beam struct {
+	position  grids.Position
+	direction grids.Direction
+}
+
+func initializeVisitedGrid(grid grids.Grid) grids.Grid {
 	visited := grid.Clone()
 	for y, row := range visited {
 		for x := range row {
 			visited.SetAt(x, y, '.')
 		}
 	}
-	cache := map[Beam]bool{}
-	beam := Beam{position: grids.Position{}, direction: grids.East}
-	shootBeam(beam, grid, visited, cache)
+	return visited
+}
 
+func countEnergizedTiles(grid grids.Grid) int {
 	numberOfEnergizedTiles := 0
-	for _, row := range visited {
+	for _, row := range grid {
 		for _, char := range row {
 			if char == '#' {
 				numberOfEnergizedTiles++
 			}
 		}
 	}
-	return strconv.Itoa(numberOfEnergizedTiles)
+	return numberOfEnergizedTiles
 }
 
 func shootBeam(beam Beam, grid grids.Grid, visited grids.Grid, cache map[Beam]bool) {
@@ -104,18 +152,4 @@ func shootBeam(beam Beam, grid grids.Grid, visited grids.Grid, cache map[Beam]bo
 	default:
 		panic("WTF")
 	}
-}
-
-func (Solution) Part02(input string) string {
-	lines := strings.Split(strings.TrimSpace(input), "\n")
-	if len(lines) == 0 {
-		return "NO DATA"
-	}
-
-	return "PENDING"
-}
-
-type Beam struct {
-	position  grids.Position
-	direction grids.Direction
 }
