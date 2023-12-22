@@ -44,8 +44,8 @@ func initializeGrid(lines []string) grids.Grid[int] {
 }
 
 type State struct {
-	pos      grids.Position
-	dir      grids.Direction
+	pos      grids.Position[int]
+	dir      grids.Direction[int]
 	steps    int
 	heatLoss int
 }
@@ -56,15 +56,15 @@ func ByHeatLoss(aI, bI interface{}) int {
 	return a.heatLoss - b.heatLoss
 }
 
-func dirToMHLTIndex(direction grids.Direction) int {
+func dirToMHLTIndex(direction grids.Direction[int]) int {
 	switch direction {
-	case grids.North:
+	case grids.North[int]():
 		return 0
-	case grids.East:
+	case grids.East[int]():
 		return 1
-	case grids.South:
+	case grids.South[int]():
 		return 2
-	case grids.West:
+	case grids.West[int]():
 		return 3
 	default:
 		panic("Bad direction")
@@ -75,10 +75,10 @@ func leastHeatLoss1(grid grids.Grid[int]) int {
 	const MaxSteps = 3
 	type Best = [4][MaxSteps + 1]int
 
-	valid := func(pos grids.Position) bool {
+	valid := func(pos grids.Position[int]) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1)
 	}
-	lossAt := func(pos grids.Position) int {
+	lossAt := func(pos grids.Position[int]) int {
 		return grid.AtPos(pos)
 	}
 
@@ -95,7 +95,7 @@ func leastHeatLoss1(grid grids.Grid[int]) int {
 	}
 
 	q := priorityqueue.NewWith(ByHeatLoss)
-	dest := grids.Position{X: grid.Width() - 1, Y: grid.Height() - 1}
+	dest := grids.Position[int]{X: grid.Width() - 1, Y: grid.Height() - 1}
 	pushIfBetter := func(s State) {
 		if mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] > s.heatLoss {
 			mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] = s.heatLoss
@@ -103,9 +103,9 @@ func leastHeatLoss1(grid grids.Grid[int]) int {
 		}
 	}
 	// known start states
-	startPos := grids.Position{X: 0, Y: 0}
-	pushIfBetter(State{pos: startPos, dir: grids.East, steps: 0, heatLoss: 0})
-	pushIfBetter(State{pos: startPos, dir: grids.South, steps: 0, heatLoss: 0})
+	startPos := grids.Position[int]{X: 0, Y: 0}
+	pushIfBetter(State{pos: startPos, dir: grids.East[int](), steps: 0, heatLoss: 0})
+	pushIfBetter(State{pos: startPos, dir: grids.South[int](), steps: 0, heatLoss: 0})
 
 	for !q.Empty() {
 		sI, _ := q.Peek()
@@ -151,10 +151,10 @@ func leastHeatLoss2(grid grids.Grid[int]) int {
 	const MaxSteps = 10
 	type Best = [4][MaxSteps + 1]int
 
-	valid := func(pos grids.Position) bool {
+	valid := func(pos grids.Position[int]) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1)
 	}
-	lossAt := func(pos grids.Position) int {
+	lossAt := func(pos grids.Position[int]) int {
 		return grid.AtPos(pos)
 	}
 
@@ -171,7 +171,7 @@ func leastHeatLoss2(grid grids.Grid[int]) int {
 	}
 
 	q := priorityqueue.NewWith(ByHeatLoss)
-	dest := grids.Position{X: grid.Width() - 1, Y: grid.Height() - 1}
+	dest := grids.Position[int]{X: grid.Width() - 1, Y: grid.Height() - 1}
 	pushIfBetter := func(s State) {
 		if mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] > s.heatLoss {
 			mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] = s.heatLoss
@@ -179,9 +179,9 @@ func leastHeatLoss2(grid grids.Grid[int]) int {
 		}
 	}
 	// known start states
-	startPos := grids.Position{X: 0, Y: 0}
-	pushIfBetter(State{pos: startPos, dir: grids.East, steps: 0, heatLoss: 0})
-	pushIfBetter(State{pos: startPos, dir: grids.South, steps: 0, heatLoss: 0})
+	startPos := grids.Position[int]{X: 0, Y: 0}
+	pushIfBetter(State{pos: startPos, dir: grids.East[int](), steps: 0, heatLoss: 0})
+	pushIfBetter(State{pos: startPos, dir: grids.South[int](), steps: 0, heatLoss: 0})
 
 	for !q.Empty() {
 		sI, _ := q.Peek()

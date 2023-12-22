@@ -3,23 +3,23 @@ package day10
 import "github.com/shadowradiance/advent-of-code/2023-go/util/grids"
 
 type Rover struct {
-	pos    grids.Position
-	facing grids.Direction
+	pos    grids.Position[int]
+	facing grids.Direction[int]
 }
 
 func (rover *Rover) move(n int) {
-	rover.pos = rover.pos.Add(grids.Position(rover.facing).ScalarProduct(n))
+	rover.pos = rover.pos.Add(rover.facing.ScalarProduct(n))
 }
 
 func (rover *Rover) arrow() rune {
 	switch rover.facing {
-	case grids.North:
+	case grids.North[int]():
 		return '↑'
-	case grids.South:
+	case grids.South[int]():
 		return '↓'
-	case grids.East:
+	case grids.East[int]():
 		return '→'
-	case grids.West:
+	case grids.West[int]():
 		return '←'
 	default:
 		return '•'

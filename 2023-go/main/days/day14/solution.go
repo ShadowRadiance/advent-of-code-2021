@@ -19,7 +19,7 @@ func (Solution) Part01(input string) string {
 	}
 
 	grid := grids.NewGrid(lines)
-	tilt(grid, grids.North)
+	tilt(grid, grids.North[int]())
 	return strconv.Itoa(score(grid))
 }
 
@@ -44,10 +44,10 @@ func spinCycle(grid grids.Grid[rune], times int) {
 	cyclesCompleted := 0
 	cyclingSince := 0
 	for i := 1; i <= times; i++ {
-		tilt(grid, grids.North)
-		tilt(grid, grids.West)
-		tilt(grid, grids.South)
-		tilt(grid, grids.East)
+		tilt(grid, grids.North[int]())
+		tilt(grid, grids.West[int]())
+		tilt(grid, grids.South[int]())
+		tilt(grid, grids.East[int]())
 		if when, seen := cache[grid.Dump()]; seen {
 			cyclesCompleted = i
 			cyclingSince = when
@@ -60,47 +60,47 @@ func spinCycle(grid grids.Grid[rune], times int) {
 	cyclesToEmulate := times - cyclesCompleted
 	cycleOffsetAtEnd := cyclesToEmulate % cycleLength
 	for i := 0; i < cycleOffsetAtEnd; i++ {
-		tilt(grid, grids.North)
-		tilt(grid, grids.West)
-		tilt(grid, grids.South)
-		tilt(grid, grids.East)
+		tilt(grid, grids.North[int]())
+		tilt(grid, grids.West[int]())
+		tilt(grid, grids.South[int]())
+		tilt(grid, grids.East[int]())
 	}
 }
 
-func tilt(grid grids.Grid[rune], direction grids.Direction) {
+func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
 	switch direction {
-	case grids.North:
+	case grids.North[int]():
 		for y := 0; y < grid.Height(); y++ {
 			for x := 0; x < grid.Width(); x++ {
-				pos := grids.Position{X: x, Y: y}
+				pos := grids.Position[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
 			}
 		}
-	case grids.South: // reverse Y
+	case grids.South[int](): // reverse Y
 		for y := grid.Height() - 1; y >= 0; y-- {
 			for x := 0; x < grid.Width(); x++ {
-				pos := grids.Position{X: x, Y: y}
+				pos := grids.Position[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
 			}
 		}
-	case grids.West:
+	case grids.West[int]():
 		for x := 0; x < grid.Width(); x++ {
 			for y := 0; y < grid.Height(); y++ {
-				pos := grids.Position{X: x, Y: y}
+				pos := grids.Position[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
 			}
 		}
-	case grids.East:
+	case grids.East[int]():
 		// reverse X
 		for x := grid.Width() - 1; x >= 0; x-- {
 			for y := 0; y < grid.Height(); y++ {
-				pos := grids.Position{X: x, Y: y}
+				pos := grids.Position[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
@@ -109,19 +109,19 @@ func tilt(grid grids.Grid[rune], direction grids.Direction) {
 	}
 }
 
-func moveRock(grid grids.Grid[rune], position grids.Position, direction grids.Direction) {
-	valid := func(pos grids.Position) bool {
+func moveRock(grid grids.Grid[rune], position grids.Position[int], direction grids.Direction[int]) {
+	valid := func(pos grids.Position[int]) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) &&
 			grid.AtPos(pos) != '#' &&
 			grid.AtPos(pos) != 'O'
 	}
 
-	newPosition := position.Add(grids.Position(direction))
+	newPosition := position.Add(direction)
 	for valid(newPosition) {
 		grid.SetAtPos(position, '.')
 		grid.SetAtPos(newPosition, 'O')
 		position = newPosition
-		newPosition = position.Add(grids.Position(direction))
+		newPosition = position.Add(direction)
 	}
 }
 

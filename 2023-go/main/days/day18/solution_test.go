@@ -56,7 +56,7 @@ func TestSolution_Part02(t *testing.T) {
 				L 2 (#015232)
 				U 2 (#7a21e3)
 			`),
-			Expected: "PENDING",
+			Expected: "952408144115",
 		},
 	}
 	for _, example := range examples {

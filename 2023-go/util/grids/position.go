@@ -1,19 +1,24 @@
 package grids
 
-import "math"
+import (
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
+	"github.com/shadowradiance/advent-of-code/2023-go/util/constraints"
+)
 
-type Position = Vector2D
+type Position[T constraints.Signed] Vector2D[T]
 
-func (v Position) InBounds(x1, y1, x2, y2 int) bool {
+func (v Position[T]) InBounds(x1, y1, x2, y2 T) bool {
 	return v.X >= x1 && v.X <= x2 && v.Y >= y1 && v.Y <= y2
 }
 
-func (v Position) OutOfBounds(x1, y1, x2, y2 int) bool {
+func (v Position[T]) OutOfBounds(x1, y1, x2, y2 T) bool {
 	return !v.InBounds(x1, y1, x2, y2)
 }
 
-func (v Position) ManhattanDistance(otherPos Position) int {
-	return int(
-		math.Abs(float64(v.X-otherPos.X)) +
-			math.Abs(float64(v.Y-otherPos.Y)))
+func (v Position[T]) ManhattanDistance(otherPos Position[T]) T {
+	return T(util.Abs(v.X-otherPos.X) + util.Abs(v.Y-otherPos.Y))
+}
+
+func (v Position[T]) Add(dir Direction[T]) Position[T] {
+	return Position[T](Vector2D[T](v).Add(Vector2D[T](dir)))
 }

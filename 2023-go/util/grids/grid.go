@@ -30,9 +30,9 @@ func New[T any](height, width int) Grid[T] {
 
 }
 
-func (g *Grid[T]) At(x, y int) T        { return (*g)[y][x] }
-func (g *Grid[T]) AtPos(pos Position) T { return g.At(pos.X, pos.Y) }
-func (g *Grid[T]) Height() int          { return len(*g) }
+func (g *Grid[T]) At(x, y int) T             { return (*g)[y][x] }
+func (g *Grid[T]) AtPos(pos Position[int]) T { return g.At(pos.X, pos.Y) }
+func (g *Grid[T]) Height() int               { return len(*g) }
 func (g *Grid[T]) Width() int {
 	if g.Height() == 0 {
 		return 0
@@ -85,6 +85,14 @@ func (g *Grid[T]) InsertCol(x int, newCol []T) {
 func (g *Grid[T]) SetAt(x, y int, item T) {
 	(*g)[y][x] = item
 }
-func (g *Grid[T]) SetAtPos(position Position, item T) {
+func (g *Grid[T]) SetAtPos(position Position[int], item T) {
 	g.SetAt(position.X, position.Y, item)
+}
+
+func (g *Grid[T]) Clear(item T) {
+	for y, items := range *g {
+		for x := range items {
+			g.SetAt(x, y, item)
+		}
+	}
 }

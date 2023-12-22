@@ -1,5 +1,7 @@
 package util
 
+import "github.com/shadowradiance/advent-of-code/2023-go/util/constraints"
+
 func Filter[T any](ss []T, test func(T) bool) (ret []T) {
 	for _, item := range ss {
 		if test(item) {
@@ -63,4 +65,11 @@ func None[T any](values []T, predicate func(value T) bool) bool {
 		}
 	}
 	return true
+}
+
+func Abs[T constraints.Signed](value T) T {
+	if value < 0 {
+		return -value
+	}
+	return value
 }
