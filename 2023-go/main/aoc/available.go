@@ -19,6 +19,7 @@ import (
 	"github.com/shadowradiance/advent-of-code/2023-go/days/day15"
 	"github.com/shadowradiance/advent-of-code/2023-go/days/day16"
 	"github.com/shadowradiance/advent-of-code/2023-go/days/day17"
+	"github.com/shadowradiance/advent-of-code/2023-go/days/day18"
 )
 
 func Available() []days.DayInterface {
@@ -40,5 +41,6 @@ func Available() []days.DayInterface {
 		day15.Solution{},
 		day16.Solution{},
 		day17.Solution{},
+		day18.Solution{},
 	}
 }
