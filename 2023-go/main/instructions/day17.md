@@ -111,3 +111,7 @@ Sadly, an ultra crucible would need to take an unfortunate path like this one:
 This route causes the ultra crucible to incur the minimum possible heat loss of `71`.
 
 Directing the ultra crucible from the lava pool to the machine parts factory, what is the least heat loss it can incur?
+
+Your puzzle answer was 1165.
+
+Both parts of this puzzle are complete! They provide two gold stars: **

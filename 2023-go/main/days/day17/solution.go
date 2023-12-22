@@ -20,7 +20,7 @@ func (Solution) Part01(input string) string {
 	}
 
 	grid := initializeGrid(lines)
-	return strconv.Itoa(leastHeatLoss(grid))
+	return strconv.Itoa(leastHeatLoss1(grid))
 }
 
 func (Solution) Part02(input string) string {
@@ -29,7 +29,8 @@ func (Solution) Part02(input string) string {
 		return "NO DATA"
 	}
 
-	return "PENDING"
+	grid := initializeGrid(lines)
+	return strconv.Itoa(leastHeatLoss2(grid))
 }
 
 func initializeGrid(lines []string) grids.Grid[int] {
@@ -41,8 +42,6 @@ func initializeGrid(lines []string) grids.Grid[int] {
 	}
 	return grid
 }
-
-const MaxSteps = 3
 
 type State struct {
 	pos      grids.Position
@@ -56,8 +55,6 @@ func ByHeatLoss(aI, bI interface{}) int {
 	b := bI.(State)
 	return a.heatLoss - b.heatLoss
 }
-
-type Best = [4][MaxSteps + 1]int
 
 func dirToMHLTIndex(direction grids.Direction) int {
 	switch direction {
@@ -74,7 +71,10 @@ func dirToMHLTIndex(direction grids.Direction) int {
 	}
 }
 
-func leastHeatLoss(grid grids.Grid[int]) int {
+func leastHeatLoss1(grid grids.Grid[int]) int {
+	const MaxSteps = 3
+	type Best = [4][MaxSteps + 1]int
+
 	valid := func(pos grids.Position) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1)
 	}
@@ -82,7 +82,18 @@ func leastHeatLoss(grid grids.Grid[int]) int {
 		return grid.AtPos(pos)
 	}
 
-	mhlt := buildMinHeatLossTracker(grid)
+	mhlt := make([][]Best, grid.Height())
+	for y := range mhlt {
+		mhlt[y] = make([]Best, grid.Width())
+		for x := range mhlt[y] {
+			for b := range mhlt[y][x] {
+				for a := range mhlt[y][x][b] {
+					mhlt[y][x][b][a] = math.MaxInt64
+				}
+			}
+		}
+	}
+
 	q := priorityqueue.NewWith(ByHeatLoss)
 	dest := grids.Position{X: grid.Width() - 1, Y: grid.Height() - 1}
 	pushIfBetter := func(s State) {
@@ -136,8 +147,18 @@ func leastHeatLoss(grid grids.Grid[int]) int {
 	panic("Cannot get here")
 }
 
-func buildMinHeatLossTracker(grid grids.Grid[int]) (mhlt [][]Best) {
-	mhlt = make([][]Best, grid.Height())
+func leastHeatLoss2(grid grids.Grid[int]) int {
+	const MaxSteps = 10
+	type Best = [4][MaxSteps + 1]int
+
+	valid := func(pos grids.Position) bool {
+		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1)
+	}
+	lossAt := func(pos grids.Position) int {
+		return grid.AtPos(pos)
+	}
+
+	mhlt := make([][]Best, grid.Height())
 	for y := range mhlt {
 		mhlt[y] = make([]Best, grid.Width())
 		for x := range mhlt[y] {
@@ -148,5 +169,61 @@ func buildMinHeatLossTracker(grid grids.Grid[int]) (mhlt [][]Best) {
 			}
 		}
 	}
-	return
+
+	q := priorityqueue.NewWith(ByHeatLoss)
+	dest := grids.Position{X: grid.Width() - 1, Y: grid.Height() - 1}
+	pushIfBetter := func(s State) {
+		if mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] > s.heatLoss {
+			mhlt[s.pos.Y][s.pos.X][dirToMHLTIndex(s.dir)][s.steps] = s.heatLoss
+			q.Enqueue(s)
+		}
+	}
+	// known start states
+	startPos := grids.Position{X: 0, Y: 0}
+	pushIfBetter(State{pos: startPos, dir: grids.East, steps: 0, heatLoss: 0})
+	pushIfBetter(State{pos: startPos, dir: grids.South, steps: 0, heatLoss: 0})
+
+	for !q.Empty() {
+		sI, _ := q.Peek()
+		s := sI.(State)
+		if s.pos == dest {
+			return s.heatLoss
+		}
+		_, _ = q.Dequeue()
+
+		forwardPos := s.pos.Add(s.dir)
+		if s.steps < 10 && valid(forwardPos) {
+			pushIfBetter(State{
+				pos:      forwardPos,
+				dir:      s.dir,
+				steps:    s.steps + 1,
+				heatLoss: s.heatLoss + lossAt(forwardPos),
+			})
+		}
+		if s.steps >= 4 {
+			leftPos := s.pos.Add(s.dir.RotateLeft())
+			leftPos4 := s.pos.Add(s.dir.RotateLeft().ScalarProduct(4))
+			if valid(leftPos4) {
+				pushIfBetter(State{
+					pos:      leftPos,
+					dir:      s.dir.RotateLeft(),
+					steps:    1,
+					heatLoss: s.heatLoss + lossAt(leftPos),
+				})
+			}
+			rightPos := s.pos.Add(s.dir.RotateRight())
+			rightPos4 := s.pos.Add(s.dir.RotateRight().ScalarProduct(4))
+			if valid(rightPos4) {
+				pushIfBetter(State{
+					pos:      rightPos,
+					dir:      s.dir.RotateRight(),
+					steps:    1,
+					heatLoss: s.heatLoss + lossAt(rightPos),
+				})
+			}
+
+		}
+	}
+
+	panic("Cannot get here")
 }
