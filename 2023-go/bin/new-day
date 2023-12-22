@@ -48,3 +48,8 @@ then
 else
   curl -o "$dataFile" "https://adventofcode.com/2023/day/$day/input" --cookie "session=$SESSION"
 fi
+
+# open main/aoc/available.go
+  # insert '	"github.com/shadowradiance/advent-of-code/2023-go/days/day19"' into imports
+  # insert '		$dayStr.Solution{},' into `return []days.DayInterface{...}`
+# close/save file
