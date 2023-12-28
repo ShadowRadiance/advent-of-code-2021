@@ -107,12 +107,12 @@ func TestSolution_Part02(t *testing.T) {
 
 func TestSplitIntervals(t *testing.T) {
 	seedInterval := Interval{
-		start: 82,
-		final: 92,
+		Start: 82,
+		Final: 92,
 	}
 	targetInterval := Interval{
-		start: 46,
-		final: 56,
+		Start: 46,
+		Final: 56,
 	}
 	translator := Map{
 		name: "whatever",
@@ -128,14 +128,14 @@ func TestSplitIntervals(t *testing.T) {
 	if len(result) != 2 {
 		t.Errorf("Expected 2 elements")
 	}
-	result1 := result[Interval{82, 91}]
-	expected1 := Interval{46, 55}
+	result1 := result[Interval{Start: 82, Final: 91}]
+	expected1 := Interval{Start: 46, Final: 55}
 	if result1 != expected1 {
 		t.Errorf("Expected 1 elements to be (82,91) => (46,55)")
 	}
 
-	result2 := result[Interval{92, 92}]
-	expected2 := Interval{60, 60}
+	result2 := result[Interval{Start: 92, Final: 92}]
+	expected2 := Interval{Start: 60, Final: 60}
 	if result2 != expected2 {
 		t.Errorf("Expected 1 elements to be (92,92) => (56, 56)")
 	}

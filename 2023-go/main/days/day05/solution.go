@@ -9,6 +9,8 @@ import (
 	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
+type Interval = util.Interval
+
 type Solution struct{}
 
 func (Solution) Part01(input string) string {
@@ -88,8 +90,8 @@ func (Solution) Part02(input string) string {
 
 	smallestLocation := math.MaxInt
 	for _, iLocation := range ranges {
-		if iLocation.start < smallestLocation {
-			smallestLocation = iLocation.start
+		if iLocation.Start < smallestLocation {
+			smallestLocation = iLocation.Start
 		}
 	}
 
@@ -125,10 +127,10 @@ func applyMapToRanges(translator Map, ranges map[Interval]Interval) {
 func transformRange(interval Interval, m Map) (newInterval Interval) {
 	// precondition: sub-range must fit within single element of Map.mappings
 	for _, mapping := range m.mappings {
-		if interval.start >= mapping.src && interval.final <= mapping.src+mapping.len-1 {
+		if interval.Start >= mapping.src && interval.Final <= mapping.src+mapping.len-1 {
 			change := mapping.dst - mapping.src
-			newInterval.start = interval.start + change
-			newInterval.final = interval.final + change
+			newInterval.Start = interval.Start + change
+			newInterval.Final = interval.Final + change
 			return
 		}
 	}
@@ -155,14 +157,14 @@ func splitIntervals(seedInterval Interval, targetInterval Interval, translator M
 
 	// targetInterval is before all mappings
 	// tiS-tiF < kS-kF...
-	if targetInterval.final < intervalMappingsKeys[0].start {
+	if targetInterval.Final < intervalMappingsKeys[0].Start {
 		result[seedInterval] = targetInterval
 		return result
 	}
 
 	// targetInterval is after all mappings
 	// ...kS-kF < tiS-tiF
-	if targetInterval.start > intervalMappingsKeys[len(intervalMappingsKeys)-1].final {
+	if targetInterval.Start > intervalMappingsKeys[len(intervalMappingsKeys)-1].Final {
 		result[seedInterval] = targetInterval
 		return result
 	}
@@ -170,57 +172,57 @@ func splitIntervals(seedInterval Interval, targetInterval Interval, translator M
 	// target interval is completely inside a mapping
 	// ...kS < tiS-tiF < kF...
 	for _, key := range intervalMappingsKeys {
-		if targetInterval.start >= key.start && targetInterval.final <= key.final {
+		if targetInterval.Start >= key.Start && targetInterval.Final <= key.Final {
 			result[seedInterval] = transformRange(targetInterval, translator)
 			return result
 		}
 	}
 
-	target := Interval{start: targetInterval.start, final: targetInterval.final}
-	seed := Interval{start: seedInterval.start, final: seedInterval.final}
+	target := Interval{Start: targetInterval.Start, Final: targetInterval.Final}
+	seed := Interval{Start: seedInterval.Start, Final: seedInterval.Final}
 	for _, key := range intervalMappingsKeys {
 		// kS-KF < [tS-tF]
-		if key.final < target.start {
+		if key.Final < target.Start {
 			continue // target not affected by this key
 		}
 		// [tS-tF] < kS-kF
-		if key.start > target.final {
+		if key.Start > target.Final {
 			continue // target not affected by this key
 		}
 		// tS < kS <= tF <= kF
 		// tS < kS <= kF <= tF
 		// break off "tS...kS-1" as a new interval (leaving [ts=ks...tf]<=kf) or [ts=ks...kf<tf]
-		if target.start < key.start {
-			newTarget := Interval{target.start, key.start - 1}
-			newSeed := Interval{seed.start, seed.start + newTarget.length() - 1}
+		if target.Start < key.Start {
+			newTarget := Interval{Start: target.Start, Final: key.Start - 1}
+			newSeed := Interval{Start: seed.Start, Final: seed.Start + newTarget.Length() - 1}
 			result[newSeed] = transformRange(newTarget, translator)
 			// remove used portion of interval & seed
-			target.start += newTarget.length()
-			seed.start += newTarget.length()
+			target.Start += newTarget.Length()
+			seed.Start += newTarget.Length()
 		}
 		// [tS=kS <= tF] <= kF
 		// [tS=kS <= kF < tF]
-		if target.start == key.start {
-			if target.final <= key.final {
+		if target.Start == key.Start {
+			if target.Final <= key.Final {
 				// [tS=kS <= tF] <= kF
 				// done with target "tS...tF"
 				result[seed] = transformRange(target, translator)
 				return result
-			} else { // key.final < target.final
+			} else { // key.Final < target.Final
 				// [tS=kS <= kF < tF]
 				// break off "tS...kF" as a new interval (leaving ts...tf which might cross another key)
-				newTarget := Interval{target.start, key.final}
-				newSeed := Interval{seed.start, seed.start + newTarget.length() - 1}
+				newTarget := Interval{Start: target.Start, Final: key.Final}
+				newSeed := Interval{Start: seed.Start, Final: seed.Start + newTarget.Length() - 1}
 				result[newSeed] = transformRange(newTarget, translator)
 				// remove used portion of interval & seed
-				target.start += newTarget.length()
-				seed.start += newTarget.length()
+				target.Start += newTarget.Length()
+				seed.Start += newTarget.Length()
 				continue // done with this key
 			}
 		}
 		// kS < tS < kF < tF
-		if target.start > key.start {
-			if target.final <= key.final {
+		if target.Start > key.Start {
+			if target.Final <= key.Final {
 				// [kS < tS <= tF] <= kF
 				// done with target "tS...tF"
 				result[seed] = transformRange(target, translator)
@@ -228,18 +230,18 @@ func splitIntervals(seedInterval Interval, targetInterval Interval, translator M
 			} else {
 				// kS < [tS <= kF < tF]
 				// break off "tS...kF" as a new interval (leaving ts...tf which might cross another key)
-				newTarget := Interval{target.start, key.final}
-				newSeed := Interval{seed.start, seed.start + newTarget.length() - 1}
+				newTarget := Interval{Start: target.Start, Final: key.Final}
+				newSeed := Interval{Start: seed.Start, Final: seed.Start + newTarget.Length() - 1}
 				result[newSeed] = transformRange(newTarget, translator)
 				// remove used portion of interval & seed
-				target.start += newTarget.length()
-				seed.start += newTarget.length()
+				target.Start += newTarget.Length()
+				seed.Start += newTarget.Length()
 				continue // done with this key
 			}
 		}
 	}
 	// if there is any target left, add it
-	if !target.invalid() {
+	if !target.Invalid() {
 		result[seed] = target
 	}
 
@@ -268,7 +270,7 @@ func (m Mapping) dstEnd() int {
 
 func (m Mapping) toIntervalMapping() map[Interval]Interval {
 	return map[Interval]Interval{
-		{start: m.src, final: m.srcEnd()}: {start: m.dst, final: m.dstEnd()},
+		{Start: m.src, Final: m.srcEnd()}: {Start: m.dst, Final: m.dstEnd()},
 	}
 }
 
@@ -282,7 +284,7 @@ type ByStart []Interval
 
 func (a ByStart) Len() int           { return len(a) }
 func (a ByStart) Swap(i, j int)      { a[i], a[j] = a[j], a[i] }
-func (a ByStart) Less(i, j int) bool { return a[i].start < a[j].start }
+func (a ByStart) Less(i, j int) bool { return a[i].Start < a[j].Start }
 
 type Map struct {
 	name     string
@@ -317,27 +319,14 @@ func parseMapping(line string) Mapping {
 	return Mapping{integers[0], integers[1], integers[2]}
 }
 
-type Interval struct {
-	start int
-	final int
-}
-
-func (i Interval) length() int {
-	return i.final - i.start + 1
-}
-
-func (i Interval) invalid() bool {
-	return i.final < i.start
-}
-
 func parseSeedIntervals(lines []string) (seedIntervals []Interval, remainingLines []string) {
 	numbers := util.MapStringsToIntegers(strings.Split(lines[0][7:], " "))
 	chunks := util.ChunkIntSlice(numbers, 2)
 
 	for _, chunk := range chunks {
 		seedIntervals = append(seedIntervals, Interval{
-			start: chunk[0],
-			final: chunk[0] + chunk[1] - 1,
+			Start: chunk[0],
+			Final: chunk[0] + chunk[1] - 1,
 		})
 	}
 

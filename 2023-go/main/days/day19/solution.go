@@ -10,72 +10,132 @@ import (
 type Solution struct{}
 
 func (Solution) Part01(input string) string {
-	lines := strings.Split(strings.TrimSpace(input), "\n")
-	if len(lines) == 0 {
-		return "NO DATA"
-	}
+	sections := strings.Split(strings.TrimSpace(input), "\n\n")
+	workflows := parseWorkflows(strings.Split(sections[0], "\n"))
+	parts := parseParts(strings.Split(sections[1], "\n"))
 
-	workflows, remainingLines := parseWorkflows(lines)
-	parts := parseParts(remainingLines)
-
-	accepted := make([]Part, 0)
-	rejected := make([]Part, 0)
-
+	sum := 0
 	for _, part := range parts {
-		result := part.runThroughWorkflows(workflows, "in")
-		switch result {
-		case "A":
-			accepted = append(accepted, part)
-		case "R":
-			rejected = append(rejected, part)
-		default:
-			panic([]string{"WTF Megan!", result})
+		if accept(part, workflows, "in") {
+			sum += part["x"] + part["m"] + part["a"] + part["s"]
 		}
 	}
-
-	ratings := util.Transform(accepted, func(item Part) int { return item.x + item.m + item.a + item.s })
-	sum := util.Accumulate(ratings, func(total int, next int) int { return total + next })
 	return strconv.Itoa(sum)
 }
 
 func (Solution) Part02(input string) string {
-	lines := strings.Split(strings.TrimSpace(input), "\n")
-	if len(lines) == 0 {
-		return "NO DATA"
+	sections := strings.Split(strings.TrimSpace(input), "\n\n")
+	workflows := parseWorkflows(strings.Split(sections[0], "\n"))
+
+	intervals := map[string]util.Interval{
+		"x": {1, 4000},
+		"m": {1, 4000},
+		"a": {1, 4000},
+		"s": {1, 4000},
 	}
 
-	return "PENDING"
+	total := count(workflows, intervals, "in")
+	return strconv.Itoa(total)
 }
 
-type Part struct {
-	x, m, a, s int
-}
+// vvvvvvvvvvvvvvvvvvvvvvvv PART 2 vvvvvvvvvvvvvvvvvvvvvvvv //
 
-type Rule = func(part Part) string
-type Workflow = []Rule
-type Workflows = map[string]Workflow
+type Interval = util.Interval
+type Intervals = map[string]util.Interval
 
-func parseWorkflows(lines []string) (Workflows, []string) {
-	workflows := make(Workflows)
+func count(workflows Workflows, intervals Intervals, name string) int {
+	if name == "R" {
+		return 0
+	}
+	if name == "A" {
+		product := 1
+		for _, v := range intervals {
+			product *= v.Length()
+		}
+		return product
+	}
 
-	last := 0
-	for i, line := range lines {
-		if len(line) == 0 {
-			last = i
+	total := 0
+
+	workflow := workflows[name]
+	brokeOut := false
+	for _, rule := range workflow.rules {
+		var tHalf, fHalf Interval
+		// split the interval into 2:
+		if rule.comparison == "<" {
+			tHalf = Interval{Start: intervals[rule.attribute].Start, Final: rule.compareValue - 1}
+			fHalf = Interval{Start: rule.compareValue, Final: intervals[rule.attribute].Final}
+		} else {
+			fHalf = Interval{Start: intervals[rule.attribute].Start, Final: rule.compareValue}
+			tHalf = Interval{Start: rule.compareValue + 1, Final: intervals[rule.attribute].Final}
+		}
+		if !tHalf.Invalid() {
+			newIntervals := copyIntervals(intervals)
+			newIntervals[rule.attribute] = tHalf
+			total += count(workflows, newIntervals, rule.target)
+		}
+		if !fHalf.Invalid() {
+			newIntervals := copyIntervals(intervals)
+			newIntervals[rule.attribute] = fHalf
+			intervals = newIntervals // set up for next rule check
+		} else {
+			// false half was empty
+			brokeOut = true
 			break
 		}
-		matches := reWorkflow.FindStringSubmatch(line)
-		name := matches[1]
-		workflow := parseWorkflow(matches[2])
-		workflows[name] = workflow
 	}
-	return workflows, lines[last+1:]
+	if !brokeOut {
+		// ran out of rules - use fallback
+		total += count(workflows, intervals, workflow.fallback)
+	}
+
+	return total
+}
+
+func copyIntervals(intervals Intervals) Intervals {
+	newIntervals := Intervals{}
+	for key, interval := range intervals {
+		newIntervals[key] = interval
+	}
+	return newIntervals
+}
+
+// ^^^^^^^^^^^^^^^^^^^^^^^^ PART 2 ^^^^^^^^^^^^^^^^^^^^^^^^ //
+
+type Part = map[string]int
+
+var comps = map[string]func(int, int) bool{
+	"<": func(a, b int) bool { return a < b },
+	">": func(a, b int) bool { return a > b },
+}
+
+type Rule struct {
+	attribute    string
+	comparison   string
+	compareValue int
+	target       string
+}
+type Workflow struct {
+	rules    []Rule
+	fallback string
+}
+type Workflows = map[string]Workflow
+
+func parseWorkflows(lines []string) (workflows Workflows) {
+	workflows = make(Workflows)
+
+	for _, line := range lines {
+		matches := reWorkflow.FindStringSubmatch(line)
+		workflows[matches[1]] = parseWorkflow(matches[2])
+	}
+	return workflows
 }
 
 func parseWorkflow(line string) (workflow Workflow) {
 	ruleStrings := strings.Split(line, ",")
-	for _, ruleString := range ruleStrings {
-		workflow = append(workflow, parseRule(ruleString))
+	workflow = Workflow{fallback: ruleStrings[len(ruleStrings)-1], rules: make([]Rule, 0)}
+	for _, ruleString := range ruleStrings[:len(ruleStrings)-1] {
+		workflow.rules = append(workflow.rules, parseRule(ruleString))
 	}
 	return
 }
@@ -85,45 +145,15 @@ var reWorkflow = regexp.MustCompile(`(\w+)\{([^}]+)}`)
 
 func parseRule(str string) Rule {
 	chunks := strings.Split(str, ":")
-	if len(chunks) == 1 {
-		return func(part Part) string {
-			return chunks[0]
-		}
-	}
 	comparisonString := chunks[0]
 	targetString := chunks[1]
 	matches := reComparison.FindStringSubmatch(comparisonString)
-	attribute := matches[1]
-	comparator := matches[2]
-	comparedValue := util.ConvertNumeric(matches[3])
 
-	var reader func(Part) int
-	switch attribute {
-	case "x":
-		reader = func(part Part) int { return part.x }
-	case "m":
-		reader = func(part Part) int { return part.m }
-	case "a":
-		reader = func(part Part) int { return part.a }
-	case "s":
-		reader = func(part Part) int { return part.s }
-	}
-
-	var comparison func(int) bool
-	switch comparator {
-	case "<":
-		comparison = func(i int) bool { return i < comparedValue }
-	case ">":
-		comparison = func(i int) bool { return i > comparedValue }
-	default:
-		panic([]string{"DAMMIT WTF", comparator})
-	}
-
-	return func(part Part) string {
-		if comparison(reader(part)) {
-			return targetString
-		}
-		return ""
+	return Rule{
+		attribute:    matches[1],
+		comparison:   matches[2],
+		compareValue: util.ConvertNumeric(matches[3]),
+		target:       targetString,
 	}
 }
 
@@ -136,43 +166,28 @@ func parseParts(lines []string) (parts []Part) {
 
 func parsePart(line string) (part Part) {
 	// strip off the {}
-	line = line[1 : len(line)-1]
-	chunks := strings.Split(line, ",")
-	for _, chunk := range chunks {
-		subChunks := strings.Split(chunk, "=")
-		switch subChunks[0] {
-		case "x":
-			part.x = util.ConvertNumeric(subChunks[1])
-		case "m":
-			part.m = util.ConvertNumeric(subChunks[1])
-		case "a":
-			part.a = util.ConvertNumeric(subChunks[1])
-		case "s":
-			part.s = util.ConvertNumeric(subChunks[1])
-		default:
-			panic([]string{"DAMMIT WTF", chunk})
-		}
+	pairs := strings.Split(line[1:len(line)-1], ",")
+	part = make(Part)
+	for _, pair := range pairs {
+		chunks := strings.Split(pair, "=")
+		part[chunks[0]] = util.ConvertNumeric(chunks[1])
 	}
 	return
 }
 
-func (part Part) runThroughWorkflows(flows Workflows, name string) (target string) {
-	flow := flows[name]
-
-	target = part.runThroughWorkflow(flow)
-	switch target {
-	case "A", "R":
-		return
-	default:
-		return part.runThroughWorkflows(flows, target)
+func accept(part Part, flows Workflows, name string) bool {
+	if name == "R" {
+		return false
 	}
-}
+	if name == "A" {
+		return true
+	}
 
-func (part Part) runThroughWorkflow(flow Workflow) string {
-	for _, rule := range flow {
-		if result := rule(part); result != "" {
-			return result
+	flow := flows[name]
+	for _, rule := range flow.rules {
+		if comps[rule.comparison](part[rule.attribute], rule.compareValue) {
+			return accept(part, flows, rule.target)
 		}
 	}
-	panic("Processed all rules, but no target acquired")
+	return accept(part, flows, flow.fallback)
 }
