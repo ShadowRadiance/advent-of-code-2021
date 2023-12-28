@@ -62,7 +62,7 @@ func TestSolution_Part02(t *testing.T) {
 				{x=2461,m=1339,a=466,s=291}
 				{x=2127,m=1623,a=2188,s=1013}
 			`),
-			Expected: "PENDING",
+			Expected: "167409079868000",
 		},
 	}
 	for _, example := range examples {
