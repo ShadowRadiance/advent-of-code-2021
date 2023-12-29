@@ -1,49 +1,92 @@
 package day20
 
 import (
-	"strings"
-	// "fmt"
 	"github.com/davecgh/go-spew/spew"
+	"github.com/emirpasic/gods/queues"
+	aq "github.com/emirpasic/gods/queues/arrayqueue"
 	"regexp"
+	"strconv"
+	"strings"
 )
 
 type Solution struct{}
 
-type Module interface {
-	Name() string
-	Inputs() []string
-	Outputs() []string
-	SetInputs([]string)
+type HiLo int
+
+const (
+	Lo HiLo = iota
+	Hi
+)
+
+type Pulse struct {
+	from  string
+	to    string
+	level HiLo
 }
 
-type ModuleData struct {
-	name    string
-	inputs  []string
-	outputs []string
+func (p Pulse) destructure() (string, string, HiLo) { return p.from, p.to, p.level }
+func dequeue(q queues.Queue) (Pulse, bool) {
+	p, ok := q.Dequeue()
+	return p.(Pulse), ok
 }
 
 type FlipFlop struct {
-	ModuleData
-	state bool
+	name    string
+	state   HiLo
+	outputs []string
 }
-
 type Conjunction struct {
-	ModuleData
-	lastInputLevels []bool
+	// remember to initialize prevStates for ALL inputs
+	name       string
+	prevStates map[string]HiLo
+	outputs    []string
+}
+type Broadcast struct {
+	name    string
+	outputs []string
+}
+type Dummy struct {
+	name string
 }
 
-type Broadcaster struct {
-	ModuleData
+func (m FlipFlop) receive(pulse Pulse) (pulses []Pulse) {
+	if pulse.level == Lo {
+		if m.state == Hi {
+			m.state = Lo
+		} else {
+			m.state = Hi
+		}
+		for _, output := range m.outputs {
+			pulses = append(pulses, Pulse{from: m.name, to: output, level: m.state})
+		}
+	}
+	return
 }
+func (m Conjunction) receive(pulse Pulse) (pulses []Pulse) {
+	from, _, level := pulse.destructure()
+	m.prevStates[from] = level
 
-type Output struct {
-	ModuleData
+	outputLevel := Lo
+	for _, v := range m.prevStates {
+		if v == Lo {
+			outputLevel = Hi
+			break
+		}
+	}
+	for _, output := range m.outputs {
+		pulses = append(pulses, Pulse{from: m.name, to: output, level: outputLevel})
+	}
+	return
 }
-
-func (data *ModuleData) Name() string              { return data.name }
-func (data *ModuleData) Inputs() []string          { return data.inputs }
-func (data *ModuleData) Outputs() []string         { return data.outputs }
-func (data *ModuleData) SetInputs(inputs []string) { (*data).inputs = inputs }
+func (m Broadcast) receive(pulse Pulse) (pulses []Pulse) {
+	for _, output := range m.outputs {
+		pulses = append(pulses, Pulse{from: m.name, to: output, level: pulse.level})
+	}
+	return
+}
+func (m Dummy) receive(_ Pulse) (pulses []Pulse) {
+	return
+}
 
 func (Solution) Part01(input string) string {
 	lines := strings.Split(strings.TrimSpace(input), "\n")
@@ -51,10 +94,20 @@ func (Solution) Part01(input string) string {
 		return "NO DATA"
 	}
 
-	var modules = parseModules(lines)
+	modules := parseModules(lines)
+	pulses := aq.New()
+	pulses.Enqueue(Pulse{from: "button", to: "broadcaster", level: Lo})
+
+	count := 0
+	//for pulse, ok := dequeue(pulses); ok; count++ {
+	//	from, to, level := pulse.destructure()
+	//	toModule := modules[to]
+	//
+	//}
+
 	spew.Dump(modules)
 
-	return "PENDING"
+	return strconv.Itoa(count)
 }
 
 func (Solution) Part02(input string) string {
@@ -66,52 +119,74 @@ func (Solution) Part02(input string) string {
 	return "PENDING"
 }
 
-func parseModules(lines []string) map[string]Module {
-	modules := map[string]Module{}
+var (
+	reLine = regexp.MustCompile(`([%&]?)(\w+) -> (.*)`)
+)
+
+func parseModules(lines []string) map[string]interface{} {
+	modules := map[string]interface{}{}
+	outputNames := map[string]bool{}
 
 	for _, line := range lines {
-		module := parseModule(line)
-		modules[module.Name()] = module
-	}
+		matches := reLine.FindStringSubmatch(line)
+		typeName, name, outputsStr := matches[1], matches[2], matches[3]
+		outputs := strings.Split(outputsStr, ", ")
+		for _, output := range outputs {
+			outputNames[output] = true
+		}
 
-	for _, module := range modules {
-		for _, output := range module.Outputs() {
-      if _, ok := modules[output]; !ok {
-        modules[output] = &Output{ModuleData{name: output, outputs: make([]string,0), inputs: make([]string, 0)}}
-      }
-    }
-  }
-
-	for name, module := range modules {
-		for _, output := range module.Outputs() {
-			modules[output].SetInputs(append(modules[output].Inputs(), name))
+		switch typeName {
+		case "%":
+			modules[name] = FlipFlop{
+				name:    name,
+				state:   Lo,
+				outputs: outputs,
+			}
+		case "&":
+			modules[name] = Conjunction{
+				name:       name,
+				prevStates: make(map[string]HiLo),
+				outputs:    outputs,
+			}
+		default:
+			modules[name] = Broadcast{
+				name:    name,
+				outputs: outputs,
+			}
 		}
 	}
+
+	// there may be outputs that were Dummies
+	for name := range outputNames {
+		if _, ok := modules[name]; !ok {
+			modules[name] = Dummy{name: name}
+		}
+	}
+
+	// initialize the inputs on conjunctions
+	for _, m := range modules {
+		if b, ok := m.(Broadcast); ok {
+			for _, output := range b.outputs {
+				if conj, ok := modules[output].(Conjunction); ok {
+					conj.prevStates[b.name] = Lo
+				}
+			}
+		}
+		if f, ok := m.(FlipFlop); ok {
+			for _, output := range f.outputs {
+				if conj, ok := modules[output].(Conjunction); ok {
+					conj.prevStates[f.name] = Lo
+				}
+			}
+		}
+		if c, ok := m.(Conjunction); ok {
+			for _, output := range c.outputs {
+				if conj, ok := modules[output].(Conjunction); ok {
+					conj.prevStates[c.name] = Lo
+				}
+			}
+		}
+	}
+
 	return modules
-}
-
-func parseModule(line string) Module {
-	var module Module
-
-	re := regexp.MustCompile(`([%&]?)(\w+) -> (.*)`)
-	matches := re.FindStringSubmatch(line)
-
-	typeName, name, outputsStr := matches[1], matches[2], matches[3]
-	outputs := strings.Split(outputsStr, ", ")
-	moduleData := ModuleData{
-		name:    name,
-		outputs: outputs,
-    inputs: make([]string, 0),
-	}
-
-	switch typeName {
-	case "%":
-		module = &FlipFlop{moduleData, false}
-	case "&":
-		module = &Conjunction{moduleData, make([]bool, 0)}
-	default:
-		module = &Broadcaster{moduleData}
-	}
-
-	return module
 }

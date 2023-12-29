@@ -8,16 +8,16 @@ import (
 
 func TestSolution_Part01(t *testing.T) {
 	examples := []util.TestExample{
-		// {
-		// 	Input: heredoc.Doc(`
-  //       broadcaster -> a, b, c
-  //       %a -> b
-  //       %b -> c
-  //       %c -> inv
-  //       &inv -> a
-  //     `),
-		// 	Expected: "32000000",
-		// },
+		{
+			Input: heredoc.Doc(`
+				broadcaster -> a, b, c
+				%a -> b
+				%b -> c
+				%c -> inv
+				&inv -> a
+      		`),
+			Expected: "32000000",
+		},
 		{
 			Input: heredoc.Doc(`
         broadcaster -> a
