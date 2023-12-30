@@ -73,3 +73,10 @@ func Abs[T constraints.Signed](value T) T {
 	}
 	return value
 }
+
+func MapValues[M ~map[K]V, K comparable, V any](m M) (values []V) {
+	for _, v := range m {
+		values = append(values, v)
+	}
+	return
+}
