@@ -2,8 +2,8 @@ package day20
 
 import (
 	"fmt"
-	"github.com/davecgh/go-spew/spew"
 	aq "github.com/emirpasic/gods/queues/arrayqueue"
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"regexp"
 	"strconv"
 	"strings"
@@ -76,7 +76,6 @@ func (Solution) Part01(input string) string {
 
 	counts := map[string]int{"lo": 0, "hi": 0}
 	modules, broadcastTargets := parseModules(lines)
-	spew.Dump(modules)
 
 	for i := 0; i < 1000; i++ {
 		counts["lo"]++ // the initial button press to the broadcaster
@@ -106,14 +105,84 @@ func (Solution) Part02(input string) string {
 		return "NO DATA"
 	}
 
-	return "PENDING"
+	modules, broadcastTargets := parseModules(lines)
+
+	// TRUTH: There is only one "rx", we want to know when it gets a lo signal
+	buttonPresses := 0
+	//rxModule := modules["rx"]
+	// ASSUMPTION 1: There is only one thing that feeds into "rx" and it is a conjunction (&)
+	var feederModules []string
+	for name, module := range modules {
+		for _, target := range module.outputs {
+			if target == "rx" {
+				feederModules = append(feederModules, name)
+			}
+		}
+	}
+	if len(feederModules) != 1 {
+		panic("Assumption 1 failed: more (or fewer) than one module feeds into rx")
+	}
+	feederModule := feederModules[0]
+	if modules[feederModule].kind != "&" {
+		panic("Assumption 1 failed: feeder module is not a conjunction")
+	}
+
+	// ASSUMPTION 2: Since that is a & (conjunction), i.e. it only outputs lo when all inputs are hi,
+	//               the things that send to the & will each send hi on independent cycles,
+	//               thus the LCM of those cycles is how many presses it will take.
+
+	seenSendHiToFeeder := map[string]int{}
+	for name, module := range modules {
+		for _, target := range module.outputs {
+			if target == feederModule {
+				seenSendHiToFeeder[name] = 0
+			}
+		}
+	}
+
+	cycleLengthBySender := map[string]int{}
+	for {
+		buttonPresses++
+		pulses := aq.New()
+		for _, target := range broadcastTargets {
+			pulses.Enqueue(Pulse{from: "broadcaster", target: target, level: "lo"})
+		}
+		for !pulses.Empty() {
+			p, _ := pulses.Dequeue()
+			pulse := p.(Pulse)
+			if module, ok := modules[pulse.target]; ok {
+				if module.name == feederModule && pulse.level == "hi" {
+					seenSendHiToFeeder[pulse.from]++
+					if _, ok := cycleLengthBySender[pulse.from]; !ok {
+						cycleLengthBySender[pulse.from] = buttonPresses
+					} else {
+						if buttonPresses != seenSendHiToFeeder[pulse.from]*cycleLengthBySender[pulse.from] {
+							panic("Assumption 2 failed: sender not on a cycle")
+						}
+					}
+					if util.All(util.MapValues(seenSendHiToFeeder), func(value int) bool { return value > 0 }) {
+						lcm := 1
+						for _, cycleLength := range cycleLengthBySender {
+							lcm = util.LowestCommonMultiple(lcm, cycleLength)
+						}
+						return strconv.Itoa(lcm)
+					}
+				}
+
+				newPulses := module.receive(pulse)
+				for _, newPulse := range newPulses {
+					pulses.Enqueue(newPulse)
+				}
+			}
+		}
+	}
 }
 
 var (
 	reLine = regexp.MustCompile(`([%&]?)(\w+) -> (.*)`)
 )
 
-func parseModules(lines []string) (modules map[string]*Module, broadcast_targets []string) {
+func parseModules(lines []string) (modules map[string]*Module, broadcastTargets []string) {
 	modules = map[string]*Module{}
 
 	for _, line := range lines {
@@ -121,7 +190,7 @@ func parseModules(lines []string) (modules map[string]*Module, broadcast_targets
 		typeName, name, outputsStr := matches[1], matches[2], matches[3]
 		outputs := strings.Split(outputsStr, ", ")
 		if name == "broadcaster" {
-			broadcast_targets = outputs
+			broadcastTargets = outputs
 		} else {
 			modules[name] = &Module{
 				name:       name,

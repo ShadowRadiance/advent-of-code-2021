@@ -8,16 +8,16 @@ import (
 
 func TestSolution_Part01(t *testing.T) {
 	examples := []util.TestExample{
-		//{
-		//	Input: heredoc.Doc(`
-		//		broadcaster -> a, b, c
-		//		%a -> b
-		//		%b -> c
-		//		%c -> inv
-		//		&inv -> a
-		//	`),
-		//	Expected: "32000000",
-		//},
+		{
+			Input: heredoc.Doc(`
+				broadcaster -> a, b, c
+				%a -> b
+				%b -> c
+				%c -> inv
+				&inv -> a
+			`),
+			Expected: "32000000",
+		},
 		{
 			Input: heredoc.Doc(`
 				broadcaster -> a
@@ -37,16 +37,4 @@ func TestSolution_Part01(t *testing.T) {
 	}
 }
 func TestSolution_Part02(t *testing.T) {
-	examples := []util.TestExample{
-		{
-			Input:    heredoc.Doc(``),
-			Expected: "PENDING",
-		},
-	}
-	for _, example := range examples {
-		actual := Solution{}.Part02(example.Input)
-		if example.Expected != actual {
-			t.Errorf("Expected: %v, got: %v", example.Expected, actual)
-		}
-	}
 }
