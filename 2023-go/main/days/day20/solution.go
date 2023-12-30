@@ -1,8 +1,8 @@
 package day20
 
 import (
+	"fmt"
 	"github.com/davecgh/go-spew/spew"
-	"github.com/emirpasic/gods/queues"
 	aq "github.com/emirpasic/gods/queues/arrayqueue"
 	"regexp"
 	"strconv"
@@ -11,80 +11,60 @@ import (
 
 type Solution struct{}
 
-type HiLo int
-
-const (
-	Lo HiLo = iota
-	Hi
-)
-
 type Pulse struct {
-	from  string
-	to    string
-	level HiLo
+	from   string
+	target string
+	level  string
 }
 
-func (p Pulse) destructure() (string, string, HiLo) { return p.from, p.to, p.level }
-func dequeue(q queues.Queue) (Pulse, bool) {
-	p, ok := q.Dequeue()
-	return p.(Pulse), ok
-}
+func (p Pulse) destructure() (string, string, string) { return p.from, p.target, p.level }
 
-type FlipFlop struct {
-	name    string
-	state   HiLo
-	outputs []string
-}
-type Conjunction struct {
-	// remember to initialize prevStates for ALL inputs
+type Module struct {
 	name       string
-	prevStates map[string]HiLo
+	kind       string
 	outputs    []string
-}
-type Broadcast struct {
-	name    string
-	outputs []string
-}
-type Dummy struct {
-	name string
+	flipState  string
+	conjMemory map[string]string
 }
 
-func (m FlipFlop) receive(pulse Pulse) (pulses []Pulse) {
-	if pulse.level == Lo {
-		if m.state == Hi {
-			m.state = Lo
+func (m *Module) serialize() string {
+	memory := ""
+	if m.kind == "%" {
+		memory = m.flipState
+	} else if m.kind == "&" {
+		for name, state := range m.conjMemory {
+			memory += fmt.Sprintf("[%s=%s]", name, state)
+		}
+	}
+	return fmt.Sprintf("{%s:%s[%s]:%s}", m.kind, m.name, strings.Join(m.outputs, ","), memory)
+}
+
+func (m *Module) receive(pulse Pulse) (pulses []Pulse) {
+	var outgoing string
+	if m.kind == "%" {
+		if pulse.level == "hi" {
+			return
+		}
+		if m.flipState == "on" {
+			m.flipState = "off"
+			outgoing = "lo"
 		} else {
-			m.state = Hi
+			m.flipState = "on"
+			outgoing = "hi"
 		}
-		for _, output := range m.outputs {
-			pulses = append(pulses, Pulse{from: m.name, to: output, level: m.state})
-		}
-	}
-	return
-}
-func (m Conjunction) receive(pulse Pulse) (pulses []Pulse) {
-	from, _, level := pulse.destructure()
-	m.prevStates[from] = level
-
-	outputLevel := Lo
-	for _, v := range m.prevStates {
-		if v == Lo {
-			outputLevel = Hi
-			break
+	} else { // m.kind == "&"
+		m.conjMemory[pulse.from] = pulse.level
+		outgoing = "lo"
+		for _, level := range m.conjMemory {
+			if level == "lo" {
+				outgoing = "hi"
+				break
+			}
 		}
 	}
 	for _, output := range m.outputs {
-		pulses = append(pulses, Pulse{from: m.name, to: output, level: outputLevel})
+		pulses = append(pulses, Pulse{m.name, output, outgoing})
 	}
-	return
-}
-func (m Broadcast) receive(pulse Pulse) (pulses []Pulse) {
-	for _, output := range m.outputs {
-		pulses = append(pulses, Pulse{from: m.name, to: output, level: pulse.level})
-	}
-	return
-}
-func (m Dummy) receive(_ Pulse) (pulses []Pulse) {
 	return
 }
 
@@ -94,20 +74,30 @@ func (Solution) Part01(input string) string {
 		return "NO DATA"
 	}
 
-	modules := parseModules(lines)
-	pulses := aq.New()
-	pulses.Enqueue(Pulse{from: "button", to: "broadcaster", level: Lo})
-
-	count := 0
-	//for pulse, ok := dequeue(pulses); ok; count++ {
-	//	from, to, level := pulse.destructure()
-	//	toModule := modules[to]
-	//
-	//}
-
+	counts := map[string]int{"lo": 0, "hi": 0}
+	modules, broadcastTargets := parseModules(lines)
 	spew.Dump(modules)
 
-	return strconv.Itoa(count)
+	for i := 0; i < 1000; i++ {
+		counts["lo"]++ // the initial button press to the broadcaster
+		pulses := aq.New()
+		for _, target := range broadcastTargets {
+			pulses.Enqueue(Pulse{from: "broadcaster", target: target, level: "lo"})
+		}
+		for !pulses.Empty() {
+			p, _ := pulses.Dequeue()
+			pulse := p.(Pulse)
+			counts[pulse.level]++
+			if module, ok := modules[pulse.target]; ok {
+				newPulses := module.receive(pulse)
+				for _, newPulse := range newPulses {
+					pulses.Enqueue(newPulse)
+				}
+			}
+		}
+	}
+
+	return strconv.Itoa(counts["hi"] * counts["lo"])
 }
 
 func (Solution) Part02(input string) string {
@@ -123,70 +113,36 @@ var (
 	reLine = regexp.MustCompile(`([%&]?)(\w+) -> (.*)`)
 )
 
-func parseModules(lines []string) map[string]interface{} {
-	modules := map[string]interface{}{}
-	outputNames := map[string]bool{}
+func parseModules(lines []string) (modules map[string]*Module, broadcast_targets []string) {
+	modules = map[string]*Module{}
 
 	for _, line := range lines {
 		matches := reLine.FindStringSubmatch(line)
 		typeName, name, outputsStr := matches[1], matches[2], matches[3]
 		outputs := strings.Split(outputsStr, ", ")
-		for _, output := range outputs {
-			outputNames[output] = true
-		}
-
-		switch typeName {
-		case "%":
-			modules[name] = FlipFlop{
-				name:    name,
-				state:   Lo,
-				outputs: outputs,
-			}
-		case "&":
-			modules[name] = Conjunction{
+		if name == "broadcaster" {
+			broadcast_targets = outputs
+		} else {
+			modules[name] = &Module{
 				name:       name,
-				prevStates: make(map[string]HiLo),
+				kind:       typeName,
 				outputs:    outputs,
-			}
-		default:
-			modules[name] = Broadcast{
-				name:    name,
-				outputs: outputs,
+				flipState:  "off",
+				conjMemory: map[string]string{},
 			}
 		}
 	}
 
-	// there may be outputs that were Dummies
-	for name := range outputNames {
-		if _, ok := modules[name]; !ok {
-			modules[name] = Dummy{name: name}
-		}
-	}
-
-	// initialize the inputs on conjunctions
-	for _, m := range modules {
-		if b, ok := m.(Broadcast); ok {
-			for _, output := range b.outputs {
-				if conj, ok := modules[output].(Conjunction); ok {
-					conj.prevStates[b.name] = Lo
-				}
-			}
-		}
-		if f, ok := m.(FlipFlop); ok {
-			for _, output := range f.outputs {
-				if conj, ok := modules[output].(Conjunction); ok {
-					conj.prevStates[f.name] = Lo
-				}
-			}
-		}
-		if c, ok := m.(Conjunction); ok {
-			for _, output := range c.outputs {
-				if conj, ok := modules[output].(Conjunction); ok {
-					conj.prevStates[c.name] = Lo
+	// initialize the prevStates on conjunctions
+	for name, module := range modules {
+		for _, output := range module.outputs {
+			if targetModule, ok := modules[output]; ok {
+				if targetModule.kind == "&" {
+					targetModule.conjMemory[name] = "lo"
 				}
 			}
 		}
 	}
 
-	return modules
+	return
 }
