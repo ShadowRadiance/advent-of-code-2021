@@ -171,3 +171,7 @@ Here are the number of reachable garden plots in this new infinite version of th
 - In exactly 5000 steps, he can reach `16733044` garden plots.
 
 However, the step count the Elf needs is much larger! Starting from the garden plot marked `S` on your infinite map, **how many garden plots could the Elf reach in exactly `26501365` steps**?
+
+Your puzzle answer was 616951804315987.
+
+Both parts of this puzzle are complete! They provide two gold stars: **

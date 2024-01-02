@@ -1,6 +1,9 @@
 package day21
 
 import (
+	"fmt"
+	"os"
+	"path"
 	"testing"
 
 	"github.com/MakeNowJust/heredoc"
@@ -34,36 +37,22 @@ func TestSolution_Part01(t *testing.T) {
 		}
 	}
 }
-func TestSolution_Part02(t *testing.T) {
-	input := heredoc.Doc(`
-		...........
-		.....###.#.
-		.###.##..#.
-		..#.#...#..
-		....#.#....
-		.##..S####.
-		.##..#...#.
-		.......##..
-		.##.#.####.
-		.##..##.##.
-		...........
-	`)
 
-	expected := map[int]string{
-		6:    "16",
-		10:   "50",
-		50:   "1594",
-		100:  "6536",
-		500:  "167004",
-		1000: "668697",
-		5000: "16733044",
+func readData(day int) string {
+	// load input file based on day and part
+	filename := fmt.Sprintf("day%02d.txt", day)
+	if data, err := os.ReadFile(path.Join("..", "..", "data", filename)); err != nil {
+		panic(err)
+	} else {
+		return string(data)
 	}
+}
 
-	for steps, result := range expected {
-		actual := Solution{steps: steps}.Part02(input)
-		if result != actual {
-			t.Errorf("Expected: %v, got: %v", result, actual)
-		}
+func TestSolution_Part02(t *testing.T) {
+	actual := Solution{}.Part02(readData(21))
+	expected := "616951804315987"
+	if expected != actual {
+		t.Errorf("Expected: %v, got: %v", expected, actual)
 	}
 
 }

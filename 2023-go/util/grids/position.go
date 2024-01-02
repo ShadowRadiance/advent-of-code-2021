@@ -22,3 +22,21 @@ func (v Position[T]) ManhattanDistance(otherPos Position[T]) T {
 func (v Position[T]) Add(dir Direction[T]) Position[T] {
 	return Position[T](Vector2D[T](v).Add(Vector2D[T](dir)))
 }
+
+func (v Position[T]) Mod(width T, height T) Position[T] {
+	newX, newY := v.X, v.Y
+	for newX < 0 {
+		newX = width + newX
+	}
+	for newY < 0 {
+		newY = height + newY
+	}
+	for newX >= width {
+		newX -= width
+	}
+	for newY >= height {
+		newY -= height
+	}
+
+	return Position[T]{X: newX, Y: newY}
+}
