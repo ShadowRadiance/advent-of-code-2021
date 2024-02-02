@@ -58,6 +58,14 @@ func (b *Brick) hiY() int { return b.y2 }
 func (b *Brick) loZ() int { return b.z1 }
 func (b *Brick) hiZ() int { return b.z2 }
 
+func (b *Brick) String() string {
+	return fmt.Sprintf(
+		"'%s' (%d,%d,%d-%d,%d,%d) supporting: [%s] supportedBy: [%s]",
+		b.name, b.x1, b.y1, b.z1, b.x2, b.y2, b.z2,
+		strings.Join(util.Transform(b.supporting, func(sB *Brick) string { return sB.name }), " "),
+		strings.Join(util.Transform(b.supportedBy, func(sB *Brick) string { return sB.name }), " "))
+}
+
 func (b *Brick) overlapping(bricks []*Brick) (supporters []*Brick) {
 	// reduce the list of what we have to check for overlapping!
 	for _, other := range bricks {
@@ -110,11 +118,13 @@ func settle(bricks []*Brick) {
 		testBrick := *brick
 		testBrick.z1, testBrick.z2 = testBrick.z1-1, testBrick.z2-1
 		// reduce the list of what we have to check for overlapping!
+		// test runs ok, but real data is SUPER SLOW
 		overlapping := testBrick.overlapping(bricks)
 		for len(overlapping) == 0 {
 			brick.z1, brick.z2 = testBrick.z1, testBrick.z2
 			testBrick.z1, testBrick.z2 = testBrick.z1-1, testBrick.z2-1
 			// reduce the list of what we have to check for overlapping!
+			// test runs ok, but real data is SUPER SLOW
 			overlapping = testBrick.overlapping(bricks)
 		}
 		brick.supportedBy = overlapping
