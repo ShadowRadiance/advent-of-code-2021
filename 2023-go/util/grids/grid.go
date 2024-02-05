@@ -53,7 +53,12 @@ func (g *Grid[T]) Dump() string {
 	s := ""
 	for _, row := range *g {
 		for _, item := range row {
-			s += fmt.Sprintf("%v", item)
+			if maybeChar, ok := any(item).(rune); ok {
+				s += fmt.Sprintf("%c ", maybeChar)
+			} else {
+				s += fmt.Sprintf("%v ", item)
+			}
+
 		}
 		s += "\n"
 	}
