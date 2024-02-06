@@ -15,7 +15,7 @@ type Solution struct {
 }
 
 type Grid = grids.Grid[rune]
-type Position = grids.Position[int]
+type Position = grids.Vector2D[int]
 
 func (s Solution) Part01(input string) string {
 	lines := strings.Split(strings.TrimSpace(input), "\n")

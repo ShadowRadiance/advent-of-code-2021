@@ -1,8 +1,11 @@
 package util
 
 import (
+	"math"
 	"slices"
 	"strconv"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util/constraints"
 )
 
 const NumberChars = "1234567890"
@@ -43,7 +46,22 @@ func ChunkIntSlice(slice []int, chunkSize int) [][]int {
 	return chunks
 }
 
-func GreatestCommonDivisor(a, b int) int {
+func GreatestCommonDivisor(a, b interface{}) interface{} {
+	switch a.(type) {
+	case int, int64, int32, int16, int8:
+		a64, _ := a.(int64)
+		b64, _ := b.(int64)
+		return GreatestCommonDivisorI(a64, b64)
+	case float64, float32:
+		a64, _ := a.(float64)
+		b64, _ := b.(float64)
+		return GreatestCommonDivisorF(a64, b64)
+	default:
+		panic("Cannot call GCD on a non numeric value")
+	}
+}
+
+func GreatestCommonDivisorI[T constraints.Integral](a, b T) T {
 	for b != 0 {
 		t := b
 		b = a % b
@@ -51,9 +69,38 @@ func GreatestCommonDivisor(a, b int) int {
 	}
 	return a
 }
+func GreatestCommonDivisorF[T constraints.Floating](a, b T) T {
+	for b != 0 {
+		t := b
+		b = T(math.Mod(float64(a), float64(b)))
+		a = t
+	}
+	return a
+}
 
-func LowestCommonMultiple(a, b int) int {
-	result := a * b / GreatestCommonDivisor(a, b)
+func LowestCommonMultiple(a, b interface{}) interface{} {
+	switch a.(type) {
+	case int, int64, int32, int16, int8:
+		a64, _ := a.(int64)
+		b64, _ := b.(int64)
+		return LowestCommonMultipleI(a64, b64)
+	case float64, float32:
+		a64, _ := a.(float64)
+		b64, _ := b.(float64)
+		return LowestCommonMultipleF(a64, b64)
+	default:
+		panic("Cannot call GCD on a non numeric value")
+	}
+}
+
+func LowestCommonMultipleI[T constraints.Integral](a, b T) T {
+	result := a * b / GreatestCommonDivisorI(a, b)
+
+	return result
+}
+
+func LowestCommonMultipleF[T constraints.Floating](a, b T) T {
+	result := a * b / GreatestCommonDivisorF(a, b)
 
 	return result
 }
@@ -65,9 +112,9 @@ func LowestCommonMultipleSlice(numbers []int) int {
 	case 1:
 		return numbers[0]
 	case 2:
-		return LowestCommonMultiple(numbers[0], numbers[1])
+		return LowestCommonMultipleI(numbers[0], numbers[1])
 	default:
-		return LowestCommonMultiple(numbers[0], LowestCommonMultipleSlice(numbers[1:]))
+		return LowestCommonMultipleI(numbers[0], LowestCommonMultipleSlice(numbers[1:]))
 	}
 }
 

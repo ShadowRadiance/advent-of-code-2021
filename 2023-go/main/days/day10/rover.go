@@ -3,8 +3,8 @@ package day10
 import "github.com/shadowradiance/advent-of-code/2023-go/util/grids"
 
 type Rover struct {
-	pos    grids.Position[int]
-	facing grids.Direction[int]
+	pos    grids.Vector2D[int]
+	facing grids.Vector2D[int]
 }
 
 func (rover *Rover) move(n int) {

@@ -147,20 +147,20 @@ func processInstruction(rover *Rover, instruction rune) {
 	rover.move(1)
 }
 
-func findStart(grid grids.Grid[rune]) grids.Position[int] {
+func findStart(grid grids.Grid[rune]) grids.Vector2D[int] {
 	for y := 0; y < grid.Height(); y++ {
 		for x := 0; x < grid.Width(); x++ {
 			if grid.At(x, y) == 'S' {
-				return grids.Position[int]{X: x, Y: y}
+				return grids.Vector2D[int]{X: x, Y: y}
 			}
 		}
 	}
 	panic("Start not found!")
 }
 
-func allowableDirectionFrom(grid grids.Grid[rune], start grids.Position[int]) grids.Direction[int] {
-	var newPos grids.Position[int]
-	for _, direction := range []grids.Direction[int]{grids.North[int](), grids.East[int](), grids.South[int](), grids.West[int]()} {
+func allowableDirectionFrom(grid grids.Grid[rune], start grids.Vector2D[int]) grids.Vector2D[int] {
+	var newPos grids.Vector2D[int]
+	for _, direction := range []grids.Vector2D[int]{grids.North[int](), grids.East[int](), grids.South[int](), grids.West[int]()} {
 		newPos = start.Add(direction)
 		if newPos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) {
 			instruction := grid.AtPos(newPos)
@@ -172,7 +172,7 @@ func allowableDirectionFrom(grid grids.Grid[rune], start grids.Position[int]) gr
 	panic("No allowable directions from position!")
 }
 
-func connected(instruction rune, direction grids.Direction[int]) bool {
+func connected(instruction rune, direction grids.Vector2D[int]) bool {
 	switch instruction {
 	case '|':
 		return direction == grids.North[int]() || direction == grids.South[int]()
@@ -267,7 +267,7 @@ func expandGrid(grid grids.Grid[rune]) grids.Grid[rune] {
 }
 
 func floodFill(grid grids.Grid[rune]) grids.Grid[rune] {
-	start := grids.Position[int]{}
+	start := grids.Vector2D[int]{}
 	sourceRune := grid.AtPos(start) // should be ' '
 	if sourceRune != 'O' {
 		dfs(grid, start, sourceRune, 'O')
@@ -275,7 +275,7 @@ func floodFill(grid grids.Grid[rune]) grids.Grid[rune] {
 	return grid
 }
 
-func dfs(grid grids.Grid[rune], pos grids.Position[int], from, to rune) {
+func dfs(grid grids.Grid[rune], pos grids.Vector2D[int], from, to rune) {
 	if !pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) || grid.AtPos(pos) != from {
 		return
 	}

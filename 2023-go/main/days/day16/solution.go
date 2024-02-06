@@ -18,7 +18,7 @@ func (Solution) Part01(input string) string {
 	grid := grids.NewGrid(lines)
 	visited := initializeVisitedGrid(grid)
 	cache := map[Beam]bool{}
-	beam := Beam{position: grids.Position[int]{}, direction: grids.East[int]()}
+	beam := Beam{position: grids.Vector2D[int]{}, direction: grids.East[int]()}
 	shootBeam(beam, grid, visited, cache)
 
 	numberOfEnergizedTiles := countEnergizedTiles(visited)
@@ -37,12 +37,12 @@ func (Solution) Part02(input string) string {
 
 	entryBeams := make([]Beam, 0)
 	for x := 0; x < grid.Width(); x++ {
-		entryBeams = append(entryBeams, Beam{position: grids.Position[int]{X: x, Y: 0}, direction: grids.South[int]()})
-		entryBeams = append(entryBeams, Beam{position: grids.Position[int]{X: x, Y: grid.Height() - 1}, direction: grids.North[int]()})
+		entryBeams = append(entryBeams, Beam{position: grids.Vector2D[int]{X: x, Y: 0}, direction: grids.South[int]()})
+		entryBeams = append(entryBeams, Beam{position: grids.Vector2D[int]{X: x, Y: grid.Height() - 1}, direction: grids.North[int]()})
 	}
 	for y := 0; y < grid.Height(); y++ {
-		entryBeams = append(entryBeams, Beam{position: grids.Position[int]{X: 0, Y: y}, direction: grids.East[int]()})
-		entryBeams = append(entryBeams, Beam{position: grids.Position[int]{X: grid.Width() - 1, Y: y}, direction: grids.West[int]()})
+		entryBeams = append(entryBeams, Beam{position: grids.Vector2D[int]{X: 0, Y: y}, direction: grids.East[int]()})
+		entryBeams = append(entryBeams, Beam{position: grids.Vector2D[int]{X: grid.Width() - 1, Y: y}, direction: grids.West[int]()})
 	}
 
 	for _, beam := range entryBeams {
@@ -59,8 +59,8 @@ func (Solution) Part02(input string) string {
 }
 
 type Beam struct {
-	position  grids.Position[int]
-	direction grids.Direction[int]
+	position  grids.Vector2D[int]
+	direction grids.Vector2D[int]
 }
 
 func initializeVisitedGrid(grid grids.Grid[rune]) grids.Grid[rune] {

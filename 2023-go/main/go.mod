@@ -7,4 +7,7 @@ require (
 	github.com/shadowradiance/advent-of-code/2023-go/util v0.0.0-20231218175822-56bc7a2e78b2
 )
 
-require github.com/davecgh/go-spew v1.1.1 // indirect
+require (
+	github.com/davecgh/go-spew v1.1.1 // indirect
+	gonum.org/v1/gonum v0.14.0 // indirect
+)

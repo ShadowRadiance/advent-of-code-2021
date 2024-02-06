@@ -67,12 +67,12 @@ func spinCycle(grid grids.Grid[rune], times int) {
 	}
 }
 
-func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
+func tilt(grid grids.Grid[rune], direction grids.Vector2D[int]) {
 	switch direction {
 	case grids.North[int]():
 		for y := 0; y < grid.Height(); y++ {
 			for x := 0; x < grid.Width(); x++ {
-				pos := grids.Position[int]{X: x, Y: y}
+				pos := grids.Vector2D[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
@@ -81,7 +81,7 @@ func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
 	case grids.South[int](): // reverse Y
 		for y := grid.Height() - 1; y >= 0; y-- {
 			for x := 0; x < grid.Width(); x++ {
-				pos := grids.Position[int]{X: x, Y: y}
+				pos := grids.Vector2D[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
@@ -90,7 +90,7 @@ func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
 	case grids.West[int]():
 		for x := 0; x < grid.Width(); x++ {
 			for y := 0; y < grid.Height(); y++ {
-				pos := grids.Position[int]{X: x, Y: y}
+				pos := grids.Vector2D[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
@@ -100,7 +100,7 @@ func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
 		// reverse X
 		for x := grid.Width() - 1; x >= 0; x-- {
 			for y := 0; y < grid.Height(); y++ {
-				pos := grids.Position[int]{X: x, Y: y}
+				pos := grids.Vector2D[int]{X: x, Y: y}
 				if grid.AtPos(pos) == 'O' {
 					moveRock(grid, pos, direction)
 				}
@@ -109,8 +109,8 @@ func tilt(grid grids.Grid[rune], direction grids.Direction[int]) {
 	}
 }
 
-func moveRock(grid grids.Grid[rune], position grids.Position[int], direction grids.Direction[int]) {
-	valid := func(pos grids.Position[int]) bool {
+func moveRock(grid grids.Grid[rune], position grids.Vector2D[int], direction grids.Vector2D[int]) {
+	valid := func(pos grids.Vector2D[int]) bool {
 		return pos.InBounds(0, 0, grid.Width()-1, grid.Height()-1) &&
 			grid.AtPos(pos) != '#' &&
 			grid.AtPos(pos) != 'O'

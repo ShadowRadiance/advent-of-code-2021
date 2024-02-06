@@ -2,11 +2,13 @@ package day20
 
 import (
 	"fmt"
-	aq "github.com/emirpasic/gods/queues/arrayqueue"
-	"github.com/shadowradiance/advent-of-code/2023-go/util"
 	"regexp"
 	"strconv"
 	"strings"
+
+	aq "github.com/emirpasic/gods/queues/arrayqueue"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
 type Solution struct{}
@@ -109,7 +111,7 @@ func (Solution) Part02(input string) string {
 
 	// TRUTH: There is only one "rx", we want to know when it gets a lo signal
 	buttonPresses := 0
-	//rxModule := modules["rx"]
+	// rxModule := modules["rx"]
 	// ASSUMPTION 1: There is only one thing that feeds into "rx" and it is a conjunction (&)
 	var feederModules []string
 	for name, module := range modules {
@@ -163,7 +165,7 @@ func (Solution) Part02(input string) string {
 					if util.All(util.MapValues(seenSendHiToFeeder), func(value int) bool { return value > 0 }) {
 						lcm := 1
 						for _, cycleLength := range cycleLengthBySender {
-							lcm = util.LowestCommonMultiple(lcm, cycleLength)
+							lcm = util.LowestCommonMultipleI(lcm, cycleLength)
 						}
 						return strconv.Itoa(lcm)
 					}

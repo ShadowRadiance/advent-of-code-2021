@@ -40,8 +40,8 @@ func solution(digPlan DigPlan) string {
 
 }
 
-type Pos = grids.Position[float64]
-type Dir = grids.Direction[float64]
+type Pos = grids.Vector2D[float64]
+type Dir = grids.Vector2D[float64]
 
 type DigInstruction struct {
 	dir      Dir

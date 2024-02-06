@@ -58,24 +58,24 @@ func solve(input string, expansionMultiplier int) string {
 	return strconv.Itoa(sum)
 }
 
-func readGalaxies(lines []string) []grids.Position[int] {
-	galaxies := make([]grids.Position[int], 0)
+func readGalaxies(lines []string) []grids.Vector2D[int] {
+	galaxies := make([]grids.Vector2D[int], 0)
 	for row := 0; row < len(lines); row++ {
 		if len(lines[row]) == 0 {
 			continue
 		}
 		for col := 0; col < len(lines[0]); col++ {
 			if lines[row][col] == '#' {
-				galaxies = append(galaxies, grids.Position[int]{X: col, Y: row})
+				galaxies = append(galaxies, grids.Vector2D[int]{X: col, Y: row})
 			}
 		}
 	}
 	return galaxies
 }
 
-func determineBounds(galaxies []grids.Position[int]) (minX, maxX, minY, maxY int) {
-	byX := func(a, b grids.Position[int]) int { return a.X - b.X }
-	byY := func(a, b grids.Position[int]) int { return a.Y - b.Y }
+func determineBounds(galaxies []grids.Vector2D[int]) (minX, maxX, minY, maxY int) {
+	byX := func(a, b grids.Vector2D[int]) int { return a.X - b.X }
+	byY := func(a, b grids.Vector2D[int]) int { return a.Y - b.Y }
 
 	minX = slices.MinFunc(galaxies, byX).X
 	maxX = slices.MaxFunc(galaxies, byX).X
@@ -85,21 +85,21 @@ func determineBounds(galaxies []grids.Position[int]) (minX, maxX, minY, maxY int
 	return
 }
 
-func determineEmptySpace(galaxies []grids.Position[int], minX, maxX, minY, maxY int) (rowsToExpand, colsToExpand []int) {
+func determineEmptySpace(galaxies []grids.Vector2D[int], minX, maxX, minY, maxY int) (rowsToExpand, colsToExpand []int) {
 	for row := minY; row <= maxY; row++ {
-		if util.None(galaxies, func(galaxy grids.Position[int]) bool { return galaxy.Y == row }) {
+		if util.None(galaxies, func(galaxy grids.Vector2D[int]) bool { return galaxy.Y == row }) {
 			rowsToExpand = append(rowsToExpand, row)
 		}
 	}
 	for col := minX; col <= maxX; col++ {
-		if util.None(galaxies, func(galaxy grids.Position[int]) bool { return galaxy.X == col }) {
+		if util.None(galaxies, func(galaxy grids.Vector2D[int]) bool { return galaxy.X == col }) {
 			colsToExpand = append(colsToExpand, col)
 		}
 	}
 	return
 }
 
-func expandUniverse(galaxies []grids.Position[int], rows, cols []int, amount int) []grids.Position[int] {
+func expandUniverse(galaxies []grids.Vector2D[int], rows, cols []int, amount int) []grids.Vector2D[int] {
 	// offset positions from the bottom to not mess up rows indexing
 	if last := len(rows) - 1; last >= 0 {
 		for i, rowIndex := last, rows[0]; i >= 0; i-- {
@@ -128,7 +128,7 @@ func expandUniverse(galaxies []grids.Position[int], rows, cols []int, amount int
 	return galaxies
 }
 
-func determinePairLengths(galaxies []grids.Position[int]) []int {
+func determinePairLengths(galaxies []grids.Vector2D[int]) []int {
 	pairLengths := make([]int, 0)
 	for i := 0; i < len(galaxies); i++ {
 		galaxyA := galaxies[i]

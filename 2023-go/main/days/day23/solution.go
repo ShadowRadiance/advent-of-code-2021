@@ -13,8 +13,8 @@ import (
 type Solution struct{}
 
 type gridT = grids.Grid[rune]
-type posT = grids.Position[int]
-type dirT = grids.Direction[int]
+type posT = grids.Vector2D[int]
+type dirT = grids.Vector2D[int]
 type tileT = rune
 
 const (
