@@ -43,6 +43,20 @@ func (Solution) Part01(input string) string {
 
 	lookup := parseLines(lines)
 	fmt.Println(lookup)
+
+	// Bridges of Königsberg puzzle.
+	// Three "bridges" are enough to cut the graph into two.
+	// Select a root node.
+	// For every other node,
+	// 		count the number of paths between that node and root without crossing
+	// 		any edge more than once. If you have at least four paths, then that
+	// 		other node *must* be on the same side of the three bridges (since
+	// 		you can't cross a bridge twice). This cleanly divides the nodes
+	// 		into two distinct groups.
+	// We just need to count the paths once for the root node (any node will do --
+	// there is nothing special about it) to every other node. Counting the paths
+	// may be slow & expensive.
+
 	return strconv.Itoa(0)
 }
 
