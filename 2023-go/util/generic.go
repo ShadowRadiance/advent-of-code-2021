@@ -75,8 +75,21 @@ func Abs[T constraints.Signed](value T) T {
 }
 
 func MapValues[M ~map[K]V, K comparable, V any](m M) (values []V) {
+	values = make([]V, len(m))
+	i := 0
 	for _, v := range m {
-		values = append(values, v)
+		values[i] = v
+		i++
+	}
+	return
+}
+
+func MapKeys[M ~map[K]V, K comparable, V any](m M) (keys []K) {
+	keys = make([]K, len(m))
+	i := 0
+	for k := range m {
+		keys[i] = k
+		i++
 	}
 	return
 }
