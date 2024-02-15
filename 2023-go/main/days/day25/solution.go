@@ -2,35 +2,148 @@ package day25
 
 import (
 	"fmt"
+	"math/rand"
+	"slices"
 	"strconv"
 	"strings"
+
+	"github.com/emirpasic/gods/queues/arrayqueue"
+
+	"github.com/shadowradiance/advent-of-code/2023-go/util"
 )
 
-type Graph = map[string][]string
+type StringSet = map[string]bool
 
-func parseLines(lines []string) (lookup Graph) {
-	lookup = Graph{}
+type StringPair struct {
+	first  string
+	second string
+}
 
+type Node struct {
+	name      string
+	connected StringSet
+}
+
+type Edge struct {
+	lft  string
+	rgt  string
+	oLft string
+	oRgt string
+}
+
+type NodeMap map[string]*Node
+
+func (n NodeMap) Clone() (clone NodeMap) {
+	clone = NodeMap{}
+	for k, node := range n {
+		connected := StringSet{}
+		for s, b := range node.connected {
+			connected[s] = b
+		}
+		clone[k] = &Node{name: node.name, connected: connected}
+	}
+	return
+}
+
+func parseLines(lines []string) (nodes NodeMap, edges []*Edge) {
+	inputData := map[string][]string{}
 	for _, line := range lines {
 		parts := strings.Split(line, ": ")
 		rootName := parts[0]
 		connectedNames := strings.Split(strings.TrimSpace(parts[1]), " ")
+		if _, ok := inputData[rootName]; !ok {
+			inputData[rootName] = make([]string, 0)
+		}
+		inputData[rootName] = append(inputData[rootName], connectedNames...)
+	}
 
-		if _, ok := lookup[rootName]; !ok {
-			lookup[rootName] = connectedNames
-		} else {
-			lookup[rootName] = append(lookup[rootName], connectedNames...)
+	nodes = map[string]*Node{}
+	for key, list := range inputData {
+		nodes[key] = &Node{name: key, connected: StringSet{}}
+		for _, name := range list {
+			nodes[name] = &Node{name: name, connected: StringSet{}}
+		}
+	}
+
+	for key, list := range inputData {
+		left := nodes[key]
+		for _, name := range list {
+			right := nodes[name]
+			left.connected[right.name] = true
+			right.connected[left.name] = true
+			edges = append(edges, &Edge{lft: left.name, rgt: right.name, oLft: left.name, oRgt: right.name})
+		}
+	}
+
+	return
+}
+
+func tryCollapse(nodeMap NodeMap, edges []*Edge, want int) ([]StringPair, bool) {
+	for len(edges) > want {
+		randomIndex := rand.Intn(len(edges))
+		rr := edges[randomIndex]
+
+		edges = slices.Delete(edges, randomIndex, randomIndex+1)
+		firstNode := nodeMap[rr.lft]
+		secondNode := nodeMap[rr.rgt]
+
+		delete(firstNode.connected, secondNode.name)
+		delete(secondNode.connected, firstNode.name)
+
+		indexes := make([]int, 0)
+		for i, p := range edges {
+			if (rr.lft == p.lft || rr.lft == p.rgt) && (rr.rgt == p.lft || rr.rgt == p.rgt) {
+				indexes = append(indexes, i)
+			}
+		}
+		slices.Sort(indexes)
+		slices.Reverse(indexes)
+
+		for _, index := range indexes {
+			edges = slices.Delete(edges, index, index+1)
 		}
 
-		for _, connectedName := range connectedNames {
-			if _, ok := lookup[connectedName]; !ok {
-				lookup[connectedName] = []string{rootName}
-			} else {
-				lookup[connectedName] = append(lookup[connectedName], rootName)
+		for s := range secondNode.connected {
+			otherNode := nodeMap[s]
+			delete(otherNode.connected, secondNode.name)
+			otherNode.connected[firstNode.name] = true
+			firstNode.connected[otherNode.name] = true
+		}
+
+		for _, pair := range edges {
+			if pair.lft == secondNode.name {
+				pair.lft = firstNode.name
+			} else if pair.rgt == secondNode.name {
+				pair.rgt = firstNode.name
 			}
 		}
 	}
-	return
+
+	if len(edges) != 3 {
+		return make([]StringPair, 0), false
+	} else {
+		pp := util.Transform(
+			edges,
+			func(edge *Edge) StringPair { return StringPair{edge.oLft, edge.oRgt} },
+		)
+		return pp, true
+	}
+}
+
+func collapse(nodeMap NodeMap, edges []*Edge, want int, maxTries int) (found []StringPair, ok bool) {
+	for iteration := 0; iteration < maxTries; iteration++ {
+		nodesClone := nodeMap.Clone()
+		edgesClone := make([]*Edge, len(edges))
+		for i, edge := range edges {
+			edgesClone[i] = &Edge{lft: edge.lft, rgt: edge.rgt, oLft: edge.oLft, oRgt: edge.oRgt}
+		}
+
+		if found, ok = tryCollapse(nodesClone, edgesClone, want); ok {
+			fmt.Println("found after:", iteration, "iterations")
+			return
+		}
+	}
+	return make([]StringPair, 0), false
 }
 
 type Solution struct{}
@@ -41,23 +154,49 @@ func (Solution) Part01(input string) string {
 		return "NO DATA"
 	}
 
-	lookup := parseLines(lines)
-	fmt.Println(lookup)
+	nodes, edges := parseLines(lines)
+	found, ok := collapse(nodes, edges, 3, 50_000)
+	if !ok {
+		fmt.Println("Crap")
+		return "FAILED"
+	}
 
-	// Bridges of Königsberg puzzle.
-	// Three "bridges" are enough to cut the graph into two.
-	// Select a root node.
-	// For every other node,
-	// 		count the number of paths between that node and root without crossing
-	// 		any edge more than once. If you have at least four paths, then that
-	// 		other node *must* be on the same side of the three bridges (since
-	// 		you can't cross a bridge twice). This cleanly divides the nodes
-	// 		into two distinct groups.
-	// We just need to count the paths once for the root node (any node will do --
-	// there is nothing special about it) to every other node. Counting the paths
-	// may be slow & expensive.
+	// remove the three nodes
+	for _, pair := range found {
+		left := nodes[pair.first]
+		right := nodes[pair.second]
+		delete(left.connected, right.name)
+		delete(right.connected, left.name)
+	}
 
-	return strconv.Itoa(0)
+	// grab a node on the left-hand side
+	leftSet := StringSet{}
+
+	root := nodes[found[0].first]
+	q := arrayqueue.New()
+	q.Enqueue(root.name)
+	for !q.Empty() {
+		item, _ := q.Dequeue()
+		elem := item.(string)
+		if !leftSet[elem] {
+			leftSet[elem] = true
+			node := nodes[elem]
+			for name := range node.connected {
+				q.Enqueue(name)
+			}
+		}
+	}
+
+	rightSet := StringSet{}
+	for s := range nodes {
+		if !leftSet[s] {
+			rightSet[s] = true
+		}
+	}
+
+	result := len(leftSet) * len(rightSet)
+
+	return strconv.Itoa(result)
 }
 
 func (Solution) Part02(input string) string {

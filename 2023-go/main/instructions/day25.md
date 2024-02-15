@@ -53,3 +53,34 @@ In this example, if you disconnect the wire between `hfx`/`pzl`, the wire betwee
 Multiplying the sizes of these groups together produces `54`.
 
 Find the three wires you need to disconnect in order to divide the components into two separate groups. **What do you get if you multiply the sizes of these two groups together?**
+
+Your puzzle answer was 558376.
+
+The first half of this puzzle is complete! It provides one gold star: *
+
+# --- Part Two ---
+
+You climb over weather machines, under giant springs, and narrowly avoid a pile of pipes as you find and disconnect the three wires.
+
+A moment after you disconnect the last wire, the big red reset button module makes a small ding noise:
+
+```
+System overload resolved!
+Power required is now 50 stars.
+```
+
+Out of the corner of your eye, you notice goggles and a loose-fitting hard hat peeking at you from behind an ultra crucible. You think you see a faint glow, but before you can investigate, you hear another small ding:
+
+```
+Power required is now 49 stars.
+```
+
+Please supply the necessary stars and push the button to restart the system. You have enough stars to [Push the Big Red Button].
+
+You supply **all fifty stars** and restart global snow production!
+
+As you reach the edge of Snow Island, you can already tell from way up here that everyone will have a white Christmas this year after all.
+
+Congratulations! You've finished every puzzle in Advent of Code 2023! I hope you had as much fun solving them as I had making them for you. I'd love to hear about your adventure; you can get in touch with me via contact info on my website or through Twitter or Mastodon.
+
+[![day25 complete image](./day25.gif)](https://adventofcode.com/2023)
