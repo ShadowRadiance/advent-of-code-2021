@@ -15,7 +15,7 @@ namespace AOC2015.Tests
         [InlineData(new string[] { "))(" }, "-1")]
         [InlineData(new string[] { ")))" }, "-3")]
         [InlineData(new string[] { ")())())" }, "-3")]
-        public void Day01_PartA(string[] data, string expectation)
+        public void PartA(string[] data, string expectation)
         {
             Assert.Equal(expectation, new Day01(data).PartA());
         }
@@ -24,7 +24,7 @@ namespace AOC2015.Tests
         [InlineData(new string[] { ")" }, "1")]
         [InlineData(new string[] { "()())" }, "5")]
         [InlineData(new string[] { "(())" }, "X")]
-        public void Day01_PartB(string[] data, string expectation)
+        public void PartB(string[] data, string expectation)
         {
             Assert.Equal(expectation, new Day01(data).PartB());
         }
