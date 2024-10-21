@@ -1,0 +1,91 @@
+#!/usr/bin/env ruby
+
+require 'open-uri'
+
+class DayGenerator
+
+  def initialize(year, args)
+    raise "Invalid year" unless (2015..).cover?(year)
+
+    day = args[0]
+    raise "Missing day number" if day.nil?
+
+    day = day.to_i
+    raise "Day must be between 1 and 25" unless (1..25).cover?(day)
+
+    @year = year
+    @day = day
+    @day_padded = day.to_s.rjust(2, "0")
+  end
+
+  def generate_day
+    raise "Missing template" unless File.exist?(template_path)
+
+    if File.exist?(day_path)
+      puts "Not overwriting existing file #{day_path}"
+      return
+    end
+
+    File.write(
+      day_path,
+      File.read(template_path).gsub('00', @day_padded)
+    )
+  end
+
+  def generate_test
+    raise "Missing template" unless File.exist?(test_template_path)
+
+    if File.exist?(test_day_path)
+      puts "Not overwriting existing file #{test_day_path}"
+      return
+    end
+
+    File.write(
+      test_day_path,
+      File.read(test_template_path).gsub('00', @day_padded)
+    )
+  end
+
+  def generate_data
+    if File.exist?(datum_path)
+      puts "Not overwriting existing file #{datum_path}"
+      return
+    end
+
+    unless File.exist?(cookie_path)
+      puts "Not auto-downloading from AOC. You need to specify your AoC session cookie in #{cookie_path}"
+      return
+    end
+
+    begin
+      session_cookie = File.read(cookie_path)
+      headers = { "Cookie" => "session=#{session_cookie}" }
+      puzzle_input = URI.open(puzzle_input_url, headers) { |f| f.read }
+      File.write(datum_path, puzzle_input)
+    rescue OpenURI::HTTPError => ex
+      puts "Got #{ex.message}. Is your session cookie up to date in #{cookie_path}?"
+    end
+  end
+
+  private
+
+  def app_path = "AOC#{@year}"
+  def cookie_path = "aoc_cookie"
+
+  def days_path = "#{app_path}/Days"
+  def template_path = "#{days_path}/Day00.cs.template"
+  def day_path = "#{days_path}/Day#{@day_padded}.cs"
+
+  def tests_path = "AOC#{@year}.Tests"
+  def test_template_path = "#{tests_path}/Day00.cs.template"
+  def test_day_path = "#{tests_path}/Day#{@day_padded}.cs"
+
+  def data_path = "#{app_path}/Data"
+  def datum_path = "#{data_path}/Day#{@day_padded}.txt"
+  def puzzle_input_url = "https://adventofcode.com/#{@year}/day/#{@day}/input"
+end
+
+generator = DayGenerator.new(2015, ARGV)
+generator.generate_day
+generator.generate_test
+generator.generate_data
