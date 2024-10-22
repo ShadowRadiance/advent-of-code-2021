@@ -1,52 +1,11 @@
 
+using AOC2015.Common;
+
 namespace AOC2015.Days;
 
 public class Day03 : Day
 {
     public Day03(string[] data) : base(data) { }
-
-    public class Direction2D(int x, int y)
-    {
-        public int X { get; } = x;
-        public int Y { get; } = y;
-
-        public static Direction2D North = new(0, -1);
-        public static Direction2D South = new(0, 1);
-        public static Direction2D East = new(-1, 0);
-        public static Direction2D West = new(1, 0);
-
-        public static Direction2D FromChar(char c)
-        {
-            return c switch
-            {
-                '>' => West,
-                '<' => East,
-                '^' => North,
-                'v' => South,
-                _ => throw new NotImplementedException(),
-            };
-        }
-    }
-
-    public class Location2D(int x, int y)
-    {
-        public int X { get; } = x;
-        public int Y { get; } = y;
-
-        public override int GetHashCode()
-        {
-            return $"{X},{Y}".GetHashCode();
-        }
-        public override bool Equals(object? obj)
-        {
-            return obj is Location2D location && location.X == X && location.Y == Y;
-        }
-
-        public static Location2D operator +(Location2D a, Direction2D b)
-        {
-            return new(a.X + b.X, a.Y + b.Y);
-        }
-    }
 
     public class Actor(string name, Location2D initial)
     {
