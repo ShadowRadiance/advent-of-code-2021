@@ -30,7 +30,15 @@ namespace AOC2015.Tests
 
 
         [Theory]
-        [InlineData(new string[] { "" }, "")]
+        [InlineData(
+            new string[] {
+                "123 -> x",
+                "456 -> b",
+                "NOT b -> i",
+                "i -> a"
+            },
+            "456"
+        )]
         public void PartB(string[] data, string expectation)
         {
             Assert.Equal(expectation, new Day07(data).PartB());
